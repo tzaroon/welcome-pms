@@ -88,8 +88,12 @@ class SessionsController extends Controller
     {
         $code = $request->post('code');
         $token = $request->post('token');
-        $user = JWTAuth::setToken($token)->toUser();
-        
+        try{
+            $user = JWTAuth::setToken($token)->toUser();
+        } catch(\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Invalid Token']);
+        }
+                
         $verification = $this->verify->checkVerification($user->phone_number, $code);
 
         if ($verification->isValid()) {
@@ -101,7 +105,8 @@ class SessionsController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
         }
-        return response()->json($verification->getErrors());
+        
+        return response()->json(['success' => false, 'message' => 'Invalid OTP']);
     }
 
     /**

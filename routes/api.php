@@ -20,5 +20,11 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::post('signin', 'SessionsController@signin')->name('signin');
             Route::post('verify', 'SessionsController@verify')->name('verify');
         });
+
+        Route::middleware('auth:api')->group(function () {
+            Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
+                Route::resource('account', 'AccountController', ['except' => ['create']]);
+            });
+        });
     });
 });
