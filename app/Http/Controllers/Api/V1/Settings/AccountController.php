@@ -46,6 +46,11 @@ class AccountController extends Controller
 
         
         $user->fill($postData);
+        if($postData['password']) {
+
+            $user->password = \Hash::make($postData['password']);
+        }
+
         $user->update();
 
         return response()->json($user);
