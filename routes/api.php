@@ -25,6 +25,9 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);
             });
+            Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
+                Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
+            });
         });
     });
 });

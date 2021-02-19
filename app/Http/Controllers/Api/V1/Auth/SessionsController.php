@@ -92,6 +92,8 @@ class SessionsController extends Controller
             $user = JWTAuth::setToken($token)->toUser();
         } catch(\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Invalid Token']);
+        } catch(\Error $e) {
+            return response()->json(['success' => false, 'message' => 'Invalid Token']);
         }
                 
         $verification = $this->verify->checkVerification($user->phone_number, $code);
