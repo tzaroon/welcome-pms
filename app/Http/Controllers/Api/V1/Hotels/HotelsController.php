@@ -72,4 +72,75 @@ class HotelsController extends Controller
 
         return response()->json($hotel);
     }
+
+    /**
+     * Show a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param App\Models\Hotel $hotel
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function edit(Request $request, Hotel $hotel) : JsonResponse
+    {
+        return response()->json($hotel);
+    }
+
+    /**
+     * Update a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Hotel $hotel) : JsonResponse
+    {
+        $user = auth()->user();
+        
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'name' => 'required|string|max:191',
+            'property' => 'required|string|max:191',
+            'address' => 'required|string',
+            'zip' => 'required|string',
+            'state_id' => 'required',
+            'country_id' => 'required',
+            'phone' => 'required',
+            'email' => 'required|email',
+            'currency_id' => 'required'
+        ], [], [
+            'state_id' => 'State',
+            'country_id' => 'Country',
+            'currency_id' => 'Currency'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $hotel->fill($postData);
+        $hotel->company_id = $user->company_id;
+        $hotel->update();
+        return response()->json($hotel);
+    }
+
+    /**
+     * Destroy a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param App\Model\Hotel $hotel
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function destroy(Request $request, Hotel $hotel) : JsonResponse
+    {
+       
+        $hotel->delete();
+
+        return response()->json(array('success' => true));
+    }
 }

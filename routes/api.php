@@ -27,6 +27,10 @@ Route::namespace('Api')->name('api.')->group(function () {
             });
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
+                Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
+                Route::resource('rooms', 'RoomsController', ['except' => ['index', 'create']]);
+                Route::get('room-types/list/{hotel}', 'RoomTypesController@list')->name('room_types_list');
+                Route::get('rooms/list/{hotel}', 'RoomsController@index')->name('rooms_list');
             });
         });
     });
