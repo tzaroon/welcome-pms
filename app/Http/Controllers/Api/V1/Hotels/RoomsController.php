@@ -58,11 +58,13 @@ class RoomsController extends Controller
         $validator = Validator::make($postData, [
             'room_type_id' => 'required',
             'name' => 'required|string',
-            'number_of_rooms' => 'required',
+            'room_number' => 'required',
+            'number_of_rooms' => 'required'
         ], [], [
             'room_type_id' => 'Room Type',
             'name' => 'Name',
-            'number_of_rooms' => 'Number of rooms'
+            'number_of_rooms' => 'Number of rooms',
+            'room_number' => 'Room number'
         ]);
 
         if (!$validator->passes()) {
@@ -70,11 +72,16 @@ class RoomsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $room = new Room();
-        $room->fill($postData);
-        $room->company_id = $user->company_id;
-        $room->save();
+        for($i=0; $i < $postData['number_of_rooms']; $i++) {
 
+            $room = new Room();
+            $room->name = $postData['name'];
+            $room->room_number = $postData['room_number']++;
+            $room->company_id = $user->company_id;
+            $room->room_type_id =  $postData['room_type_id'];
+            $room->save();
+        }
+        
         return response()->json($room);
     }
 
@@ -119,11 +126,11 @@ class RoomsController extends Controller
         $validator = Validator::make($postData, [
             'room_type_id' => 'required',
             'name' => 'required|string',
-            'number_of_rooms' => 'required',
+            'room_number' => 'required',
         ], [], [
             'room_type_id' => 'Room Type',
             'name' => 'Name',
-            'number_of_rooms' => 'Number of rooms'
+            'room_number' => 'Room number'
         ]);
 
         if (!$validator->passes()) {
