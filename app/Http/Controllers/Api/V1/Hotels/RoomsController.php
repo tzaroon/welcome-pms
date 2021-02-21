@@ -21,12 +21,12 @@ class RoomsController extends Controller
 
         $rooms = Room::where('company_id', $user->company_id)->with(
             [
-                'roomType' => function($q) use ($id){
-                    $q->where('hotel_id', $id);
-                },
+                'roomType',
                 'roomType.roomTypeDetail'
             ]
-        )->get();
+        )->whereHas('roomType', function($q) use ($id){
+            $q->where('hotel_id', $id);
+        })->get();
 
         return response()->json($rooms);
     }
