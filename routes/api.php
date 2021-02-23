@@ -20,5 +20,18 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::post('signin', 'SessionsController@signin')->name('signin');
             Route::post('verify', 'SessionsController@verify')->name('verify');
         });
+
+        Route::middleware('auth:api')->group(function () {
+            Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
+                Route::resource('account', 'AccountController', ['except' => ['create']]);
+            });
+            Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
+                Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
+                Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
+                Route::resource('rooms', 'RoomsController', ['except' => ['index', 'create']]);
+                Route::get('{hotel}/room-types', 'RoomTypesController@list')->name('room_types_list');
+                Route::get('{hotel}/rooms', 'RoomsController@index')->name('rooms_list');
+            });
+        });
     });
 });
