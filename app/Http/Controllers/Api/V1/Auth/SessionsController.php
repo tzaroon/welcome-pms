@@ -75,13 +75,13 @@ class SessionsController extends Controller
             $verification = $this->verify->startVerification($phone, $channel);
 
             if (!$verification->isValid()) {
-                return response()->json($verification->getErrors());
+                return response()->json(['errors' => $verification->getErrors()], 401);
             } else {
                 return response()->json(['success' => true, 'token' => $token]);
             }
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['error' => ['Unauthorized']], 401);
     }
 
     public function verify(Request $request)
@@ -91,9 +91,9 @@ class SessionsController extends Controller
         try{
             $user = JWTAuth::setToken($token)->toUser();
         } catch(\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Invalid Token']);
+            return response()->json(['errors' => ['Invalid Token']], 401);
         } catch(\Error $e) {
-            return response()->json(['success' => false, 'message' => 'Invalid Token']);
+            return response()->json(['errors' => ['Invalid Token']], 401);
         }
                 
         $verification = $this->verify->checkVerification($user->phone_number, $code);
@@ -104,11 +104,10 @@ class SessionsController extends Controller
             
                 return $this->respondWithToken($token);
             } else {
-                return response()->json(['error' => 'Unauthorized'], 401);
+                return response()->json(array('errors' => ['Unauthorized']), 401);
             }
         }
-        
-        return response()->json(['success' => false, 'message' => 'Invalid OTP']);
+        return response()->json(array('errors' => ['Invalid OTP']), 401);
     }
 
     /**

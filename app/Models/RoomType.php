@@ -11,21 +11,21 @@ class RoomType extends Model
     public function roomTypeDetail() {
 
         $language = Language::where(['is_default' => 1])->first();
-        return $this->hasOne('App\Models\RoomTypeDetail')->where('language_id', $language->id);
+        return $this->hasOne(RoomTypeDetail::class)->where('language_id', $language->id);
     }
     
     public function roomTypeDetails() {
 
-        return $this->hasMany('App\Models\RoomTypeDetail');
+        return $this->hasMany(RoomTypeDetail::class);
     }
     
     public function hotel() {
 
-        return $this->belongsTo('App\Models\Hotel');
+        return $this->belongsTo(Hotel::class);
     }
     
     public function category() {
 
-        return $this->belongsTo('App\Models\RoomCategory');
+        return $this->belongsTo(RoomCategory::class);
     }
 }
