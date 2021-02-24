@@ -26,6 +26,8 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('taxes', 'TaxesController', ['except' => ['create']]);
                 Route::resource('countries', 'CountriesController', ['only' => ['index']]);
                 Route::get('states/{countryId}', 'StatesController@index', ['except' => ['index']]);
+                Route::resource('currencies', 'CurrenciesController', ['only' => ['index']]);
+                Route::resource('languages', 'LanguagesController', ['only' => ['index']]);
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);
