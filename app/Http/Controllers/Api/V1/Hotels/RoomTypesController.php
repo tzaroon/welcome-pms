@@ -26,7 +26,14 @@ class RoomTypesController extends Controller
     public function list(Request $request, $hotel) : JsonResponse
     {
         $user = auth()->user();
-        $rooms = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $hotel])->with('roomTypeDetail')->get();
+        $rooms = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $hotel])
+            ->with(
+                [
+                    'roomTypeDetail',
+                    'rateTypes',
+                    'rateTypes.detail'
+                ]
+            )->get();
 
         return response()->json($rooms);
     }
