@@ -124,8 +124,8 @@ class HotelsController extends Controller
             'phone' => 'required',
             'email' => 'required|email',
             'currency_id' => 'required',
-            'logo' => 'mimes:jpeg,png|max:4096',
-            'logo_email' => 'mimes:jpeg,png|max:4096'
+            'logo' => 'mimes:jpeg,png,jpg|max:4096',
+            'logo_email' => 'mimes:jpeg,png,jpg|max:4096'
         ], [], [
             'state_id' => 'State',
             'country_id' => 'Country',
