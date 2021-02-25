@@ -23,4 +23,8 @@ class Product extends Model
         }
         return $productPrice;
     }
+
+    public function getPrice() {
+        return ProductPrice::where(['company_id' => $this->company_id, 'product_id' => $this->id, 'is_active' => 1])->first()->price;
+    }
 }

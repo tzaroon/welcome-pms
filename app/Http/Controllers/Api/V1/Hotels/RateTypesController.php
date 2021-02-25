@@ -21,20 +21,6 @@ use DB;
 class RateTypesController extends Controller
 {
     /**
-     * Show a resource.
-     *
-     * @param Illuminate\Http\Request $request
-     * @param App\Models\RoomType $roomType
-     *
-     * @return Illuminate\Http\JsonResponse
-     */
-    public function edit(RoomType $roomType) : JsonResponse
-    {
-        $roomType->roomTypeDetails;
-        return response()->json($roomType);
-    }
-
-    /**
      * Store a new resource.
      *
      * @param Illuminate\Http\Request $request
@@ -121,6 +107,126 @@ class RateTypesController extends Controller
                 $rateTypeDetail->save();
             }
         });
-        return response()->json(['success'=> true, 'message' => 'Rate type saved successfully.']);
+        return response()->json(['message' => 'Rate type saved successfully.']);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(RateType $rateType)
+    {
+        $rateType->details;
+        return response()->json($rateType);
+    }
+
+    /**
+     * Update a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, RateType $rateType) : JsonResponse
+    {
+        $user = auth()->user();
+        
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'room_type_id' => 'required',
+            'number_of_people' => 'required',
+            'price' => 'required',
+            'rate_type_details.0.name' => 'required|string'
+        ], [], [
+            'room_type_id' => 'Room type',
+            'number_of_people' => 'Number of persons',
+            'rate_type_details.0.name' => 'First rate type name'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        DB::transaction(function() use ($user, $rateType, $postData) {
+
+            $rateType->company_id = $user->company_id;
+            $rateType->room_type_id = $postData['room_type_id'];
+            $rateType->rate_type_id = $postData['rate_type_id'];
+            $rateType->number_of_people = $postData['number_of_people'];
+            $rateType->advance = $postData['advance'];
+            $rateType->show_in_booking_engine = $postData['show_in_booking_engine'];
+            $rateType->price = array_key_exists('price', $postData) ? $postData['price'] : 0;
+            $rateType->amount_to_add = array_key_exists('amount_to_add', $postData) ? $postData['amount_to_add'] : 0;
+            $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
+            $rateType->save();
+
+            $start = Carbon::parse($postData['apply_rate_from']);
+            $end =  Carbon::parse($postData['apply_rate_to']);
+
+            $days = $end->diffInDays($start);
+
+            $date = $start;
+            for($i=0; $i <= $days; $i++) {
+
+                $dailyPrice = DailyPrice::firstOrNew([
+                    'company_id' => $user->company_id,
+                    'date' => $date->format('Y-m-d'),
+                    'rate_type_id' => $rateType->id
+                ]);
+
+                if(!$dailyPrice->id) {
+
+                    $product = new Product();
+                    $product->company_id = $user->company_id;
+                    $product->type = Product::TYPE_ROOM;
+                    $product->save();
+
+                    $dailyPrice->product_id = $product->id;
+                } else {
+                    $product = Product::find($dailyPrice->product_id);
+                }
+
+                $product->createPrice($postData['price'], $postData['taxes']);  
+
+                $dailyPrice->company_id = $user->company_id;
+                $dailyPrice->rate_type_id = $rateType->id;
+                $dailyPrice->date = $date->format('Y-m-d');
+                $dailyPrice->checkin_closed = $postData['checkin_closed'];
+                $dailyPrice->exit_closed = $postData['exit_closed'];
+                $dailyPrice->minimum_stay = $postData['minimum_stay'];
+                $dailyPrice->maximum_stay = $postData['maximum_stay'];
+
+                $dailyPrice->save();
+
+                $date = $date->addDay();
+            }
+        });
+
+        $details = $postData['rate_type_details'];
+
+        foreach($details as $detail) {
+
+            $rateTypeDetail = new RateTypeDetail();
+
+            if(array_key_exists('id', $detail)) {
+                $rateTypeDetail = $rateTypeDetail->find($detail['id']);
+            }
+
+            $rateTypeDetail->company_id = $user->company_id;
+            $rateTypeDetail->rate_type_id = $rateType->id;
+            $rateTypeDetail->language_id = $detail['language_id'];
+            $rateTypeDetail->name = $detail['name'];
+            $rateTypeDetail->unique_feature = $detail['unique_feature'];
+
+            $rateTypeDetail->save();
+        }
+
+        return response()->json(['message' => 'Rate type saved successfully.']);
     }
 }

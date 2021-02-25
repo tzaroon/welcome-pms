@@ -10,4 +10,9 @@ class RateType extends Model
         $language = Language::where(['is_default' => 1])->first();
         return $this->hasOne(RateTypeDetail::class)->where('language_id', $language->id);
     }
+    
+    public function details() {
+
+        return $this->hasMany(RateTypeDetail::class);
+    }
 }

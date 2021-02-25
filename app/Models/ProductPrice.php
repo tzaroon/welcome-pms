@@ -21,13 +21,38 @@ class ProductPrice extends Model
                 if(!isset($tax['tax_id']))
                     continue;
 
-                $productPricesHasTax = new ProductPricesHasTax();
-                $productPricesHasTax->tax_id = $tax['tax_id'];
-                $productPricesHasTax->product_price_id = $this->id;
-                $productPricesHasTax->amount = array_key_exists('amount', $tax) ? $tax['amount'] : 0;
-                $productPricesHasTax->percentage = array_key_exists('percentage', $tax) ? $tax['percentage'] : 0;
+                $productPricesHasTax = ProductPricesHasTax::firstOrNew([
+                    'tax_id' => $tax['tax_id'],
+                    'product_price_id' => $this->id,
+                    'is_active' => 1,
+                    'amount' => array_key_exists('amount', $tax) ? $tax['amount'] : 0,
+                    'percentage' => array_key_exists('percentage', $tax) ? $tax['percentage'] : 0,
+                ]);
+
+                if(!$productPricesHasTax->created_at) {
+                   
+                    ProductPricesHasTax::where([
+                        'tax_id' => $tax['tax_id'],
+                        'product_price_id' => $this->id
+                    ])->update(['is_active' => 0]);
+                    
+                    $productPricesHasTax = new ProductPricesHasTax();
+                    $productPricesHasTax->fill([
+                        'tax_id' => $tax['tax_id'],
+                        'product_price_id' => $this->id,
+                        'amount' => array_key_exists('amount', $tax) ? $tax['amount'] : 0,
+                        'percentage' => array_key_exists('percentage', $tax) ? $tax['percentage'] : 0,
+                        'is_active' => 1
+                    ]);
+                }
+
                 $productPricesHasTax->save();
             }
         }
+    }
+
+    public function taxes() {
+        
+        return $this->hasMany(ProductPricesHasTax::class)->where('is_active', 1);
     }
 }
