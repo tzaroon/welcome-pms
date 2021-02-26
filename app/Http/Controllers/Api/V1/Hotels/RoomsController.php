@@ -28,7 +28,7 @@ class RoomsController extends Controller
             $q->where('hotel_id', $id);
         })->get();
 
-        $data = $this->paginate($rooms);
+        $data = $this->paginate($rooms, 10000);
 
         return response()->json($data);
     }

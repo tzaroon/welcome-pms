@@ -11,4 +11,9 @@ class DailyPrice extends Model
         'date',
         'rate_type_id'
     ];
+
+    public function rateType() {
+
+        return $this->belongsTo(RateType::class);
+    }
 }

@@ -15,4 +15,9 @@ class RateType extends Model
 
         return $this->hasMany(RateTypeDetail::class);
     }
+
+    public function roomType() {
+
+        return $this->belongsTo(RoomType::class);
+    }
 }

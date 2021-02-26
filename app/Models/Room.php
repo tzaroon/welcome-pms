@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
@@ -9,7 +10,8 @@ class Room extends Model
     protected $guarded = ['company_id'];
 
     protected $appends = [
-        'ocupancy'
+        'ocupancy',
+        'daily_bookings'
     ];
 
     public function roomType() {
@@ -20,5 +22,15 @@ class Room extends Model
     public function getOcupancyAttribute() {
 
         return '1-6';
+    }
+    
+    public function bookings() {
+
+        return $this->hasMany(Booking::class);
+    }
+
+    public function getDailyBookingsAttribute() : ? Collection
+    {
+        return $this->bookings->keyBy('reservation_from');
     }
 }
