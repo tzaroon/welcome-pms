@@ -72,7 +72,7 @@ class RoomTypesController extends Controller
             'room_type_details.0.name' => 'required|string'
         ], [], [
             'category_id' => 'Category',
-            'name' => 'Name',
+            'room_type_details.0.name' => 'Name',
         ]);
 
         if (!$validator->passes()) {
