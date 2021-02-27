@@ -64,6 +64,8 @@ class RateTypesController extends Controller
             $rateType->price = array_key_exists('price', $postData) ? $postData['price'] : 0;
             $rateType->amount_to_add = array_key_exists('amount_to_add', $postData) ? $postData['amount_to_add'] : 0;
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
+            $rateType->tax_1 = array_key_exists('tax_1', $postData) ? $postData['tax_1'] : 0;
+            $rateType->tax_2 = array_key_exists('tax_2', $postData) ? $postData['tax_2'] : 0;
             $rateType->save();
 
             $start = Carbon::parse($postData['apply_rate_from']);
@@ -203,7 +205,17 @@ class RateTypesController extends Controller
                     $product = Product::find($dailyPrice->product_id);
                 }
 
-                $product->createPrice($postData['price'], $postData['taxes']);  
+                $taxes = [];
+                if($postData['tax_1']) {
+                    $taxes[Tax::CITY_TAX]['tax_id'] = Tax::CITY_TAX;
+                    $taxes[Tax::CITY_TAX]['amount'] = $postData['tax_1'];
+                }
+                if($postData['tax_2']) {
+                    $taxes[Tax::CHILDREN_CITY_TAX]['tax_id'] = Tax::CHILDREN_CITY_TAX;
+                    $taxes[Tax::CHILDREN_CITY_TAX]['amount'] = $postData['tax_2'];
+                }
+
+                $product->createPrice($postData['price'], $taxes);  
 
                 $dailyPrice->company_id = $user->company_id;
                 $dailyPrice->rate_type_id = $rateType->id;
