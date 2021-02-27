@@ -229,4 +229,10 @@ class RateTypesController extends Controller
 
         return response()->json(['message' => 'Rate type saved successfully.']);
     }
+
+    public function rateTypeList($roomType) {
+
+        $rateTypes = RateType::where('room_type_id', $roomType)->whereNull('rate_type_id')->with('detail')->get();
+        return response()->json($rateTypes);
+    }
 }
