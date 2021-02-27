@@ -235,4 +235,20 @@ class RateTypesController extends Controller
         $rateTypes = RateType::where('room_type_id', $roomType)->whereNull('rate_type_id')->with('detail')->get();
         return response()->json($rateTypes);
     }
+
+    /**
+     * Destroy a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param App\Model\Hotel $hotel
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function destroy(Request $request, RateType $rateType) : JsonResponse
+    {
+       
+        $rateType->delete();
+
+        return response()->json(array('message' => 'Rate type deleted successfully'));
+    }
 }

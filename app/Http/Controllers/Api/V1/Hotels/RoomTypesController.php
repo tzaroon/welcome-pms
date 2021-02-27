@@ -167,4 +167,20 @@ class RoomTypesController extends Controller
         }
         return response()->json(['success'=> true]);
     }
+
+    /**
+     * Destroy a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param App\Model\Hotel $hotel
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function destroy(Request $request, RoomType $roomType) : JsonResponse
+    {
+       
+        $roomType->delete();
+
+        return response()->json(array('message' => 'Room type deleted successfully'));
+    }
 }
