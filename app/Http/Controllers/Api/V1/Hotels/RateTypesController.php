@@ -12,6 +12,7 @@ use App\Models\RateType;
 use App\Models\RateTypeDetail;
 use App\Models\RoomType;
 use App\Models\RoomTypeDetail;
+use App\Models\Tax;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -90,7 +91,17 @@ class RateTypesController extends Controller
 
                 $dailyPrice->save();
 
-                $product->createPrice($postData['price'], $postData['taxes']);
+                $taxes = [];
+                if($postData['tax_1']) {
+                    $taxes[Tax::CITY_TAX]['tax_id'] = Tax::CITY_TAX;
+                    $taxes[Tax::CITY_TAX]['amount'] = $postData['tax_1'];
+                }
+                if($postData['tax_2']) {
+                    $taxes[Tax::CHILDREN_CITY_TAX]['tax_id'] = Tax::CHILDREN_CITY_TAX;
+                    $taxes[Tax::CHILDREN_CITY_TAX]['amount'] = $postData['tax_2'];
+                }
+
+                $product->createPrice($postData['price'], $taxes);
                 $date = $date->addDay();
             }
 
