@@ -26,7 +26,7 @@ class Room extends Model
     
     public function bookings() {
 
-        return $this->hasMany(Booking::class);
+        return $this->belongsToMany(Booking::class);
     }
 
     public function getDailyBookingsAttribute() : ? Collection
