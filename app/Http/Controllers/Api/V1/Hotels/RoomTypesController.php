@@ -69,7 +69,7 @@ class RoomTypesController extends Controller
 
         $validator = Validator::make($postData, [
             'category_id' => 'required',
-            'room_type_details.*.name' => 'required|string'
+            'room_type_details.0.name' => 'required|string'
         ], [], [
             'category_id' => 'Category',
             'name' => 'Name',
@@ -89,6 +89,9 @@ class RoomTypesController extends Controller
         $details = $postData['room_type_details'];
 
         foreach($details as $detail) {
+            
+            if(!$detail['name'])
+                continue;
             $roomTypeDetail = new RoomTypeDetail();
             $roomTypeDetail->company_id = $user->company_id;
             $roomTypeDetail->room_type_id = $roomType->id;
