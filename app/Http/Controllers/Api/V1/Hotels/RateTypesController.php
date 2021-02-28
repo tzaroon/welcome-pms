@@ -90,10 +90,10 @@ class RateTypesController extends Controller
                 $dailyPrice->rate_type_id = $rateType->id;
                 $dailyPrice->product_id = $product->id;
                 $dailyPrice->date = $date->format('Y-m-d');
-                $dailyPrice->checkin_closed = $postData['checkin_closed'];
-                $dailyPrice->exit_closed = $postData['exit_closed'];
-                $dailyPrice->minimum_stay = $postData['minimum_stay'];
-                $dailyPrice->maximum_stay = $postData['maximum_stay'];
+                $dailyPrice->checkin_closed = array_key_exists('checkin_closed', $postData) ? $postData['checkin_closed'] : null;
+                $dailyPrice->exit_closed = array_key_exists('exit_closed', $postData) ? $postData['exit_closed'] : null;
+                $dailyPrice->minimum_stay = array_key_exists('minimum_stay', $postData) ? $postData['minimum_stay'] : null;
+                $dailyPrice->maximum_stay = array_key_exists('maximum_stay', $postData) ? $postData['maximum_stay'] : null;
 
                 $dailyPrice->save();
 
@@ -228,10 +228,10 @@ class RateTypesController extends Controller
                 $dailyPrice->company_id = $user->company_id;
                 $dailyPrice->rate_type_id = $rateType->id;
                 $dailyPrice->date = $date->format('Y-m-d');
-                $dailyPrice->checkin_closed = $postData['checkin_closed'];
-                $dailyPrice->exit_closed = $postData['exit_closed'];
-                $dailyPrice->minimum_stay = $postData['minimum_stay'];
-                $dailyPrice->maximum_stay = $postData['maximum_stay'];
+                $dailyPrice->checkin_closed = array_key_exists('checkin_closed', $postData) ? $postData['checkin_closed'] : null;
+                $dailyPrice->exit_closed = array_key_exists('exit_closed', $postData) ? $postData['exit_closed'] : null;
+                $dailyPrice->minimum_stay = array_key_exists('minimum_stay', $postData) ? $postData['minimum_stay'] : null;
+                $dailyPrice->maximum_stay = array_key_exists('maximum_stay', $postData) ? $postData['maximum_stay'] : null;
 
                 $dailyPrice->save();
 
