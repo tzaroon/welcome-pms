@@ -90,8 +90,6 @@ class RoomTypesController extends Controller
 
         foreach($details as $detail) {
             
-            if(!$detail['name'])
-                continue;
             $roomTypeDetail = new RoomTypeDetail();
             $roomTypeDetail->company_id = $user->company_id;
             $roomTypeDetail->room_type_id = $roomType->id;
@@ -148,11 +146,6 @@ class RoomTypesController extends Controller
             
             if(array_key_exists('id', $detail)) {
                 $roomTypeDetail = $roomTypeDetail->firstOrNew(['id' => $detail['id']]);
-            }
-
-            if($roomTypeDetail && !$detail['name']) {
-                $roomTypeDetail->delete();
-                continue;
             }
 
             $roomTypeDetail->company_id = $user->company_id;
