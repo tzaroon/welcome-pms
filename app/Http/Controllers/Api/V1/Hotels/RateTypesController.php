@@ -68,6 +68,8 @@ class RateTypesController extends Controller
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
             $rateType->tax_1 = array_key_exists('tax_1', $postData) ? $postData['tax_1'] : 0;
             $rateType->tax_2 = array_key_exists('tax_2', $postData) ? $postData['tax_2'] : 0;
+            $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
+            $rateType->apply_rate_to = array_key_exists('apply_rate_to', $postData) ? $postData['apply_rate_to'] : null;
             $rateType->save();
 
             $start = Carbon::parse($postData['apply_rate_from']);
