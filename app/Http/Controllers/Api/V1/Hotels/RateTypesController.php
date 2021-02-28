@@ -154,6 +154,8 @@ class RateTypesController extends Controller
             'room_type_id' => 'required',
             'number_of_people' => 'required',
             'price' => 'required',
+            'apply_rate_from' => 'required',
+            'apply_rate_to' => 'required',
             'rate_type_details.0.name' => 'required|string'
         ], [], [
             'room_type_id' => 'Room type',
@@ -169,14 +171,16 @@ class RateTypesController extends Controller
         DB::transaction(function() use ($user, $rateType, $postData) {
 
             $rateType->company_id = $user->company_id;
-            $rateType->room_type_id = $postData['room_type_id'];
-            $rateType->rate_type_id = $postData['rate_type_id'];
-            $rateType->number_of_people = $postData['number_of_people'];
-            $rateType->advance = $postData['advance'];
-            $rateType->show_in_booking_engine = $postData['show_in_booking_engine'];
+            $rateType->room_type_id = array_key_exists('room_type_id', $postData) ? $postData['room_type_id'] : null;
+            $rateType->rate_type_id = array_key_exists('rate_type_id', $postData) ? $postData['rate_type_id'] : null;
+            $rateType->number_of_people = array_key_exists('number_of_people', $postData) ? $postData['number_of_people'] : null;
+            $rateType->advance = array_key_exists('advance', $postData) ? $postData['advance'] : null;
+            $rateType->show_in_booking_engine = array_key_exists('show_in_booking_engine', $postData) ? $postData['show_in_booking_engine'] : 0;;
             $rateType->price = array_key_exists('price', $postData) ? $postData['price'] : 0;
             $rateType->amount_to_add = array_key_exists('amount_to_add', $postData) ? $postData['amount_to_add'] : 0;
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
+            $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
+            $rateType->apply_rate_to = array_key_exists('apply_rate_to', $postData) ? $postData['apply_rate_to'] : null;
             $rateType->save();
 
             $start = Carbon::parse($postData['apply_rate_from']);
