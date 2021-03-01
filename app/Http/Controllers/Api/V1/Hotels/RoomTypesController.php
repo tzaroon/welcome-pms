@@ -69,9 +69,11 @@ class RoomTypesController extends Controller
 
         $validator = Validator::make($postData, [
             'category_id' => 'required',
+            'max_people' => 'required',
             'room_type_details.0.name' => 'required|string'
         ], [], [
             'category_id' => 'Category',
+            'max_people' => 'Max people',
             'room_type_details.0.name' => 'Name',
         ]);
 
@@ -84,6 +86,7 @@ class RoomTypesController extends Controller
         $roomType->category_id = $postData['category_id'];
         $roomType->company_id = $user->company_id;
         $roomType->hotel_id = $postData['hotel_id'];
+        $roomType->max_people = $postData['max_people'];
         $roomType->save();
 
         $details = $postData['room_type_details'];
@@ -124,9 +127,11 @@ class RoomTypesController extends Controller
         $validator = Validator::make($postData, [
             'id' => 'required',
             'category_id' => 'required',
+            'max_people' => 'required',
             'room_type_details.0.name' => 'required|string'
         ], [], [
             'category_id' => 'Category',
+            'max_people' => 'Max people',
             'room_type_details.0.name' => 'Name'
         ]);
 

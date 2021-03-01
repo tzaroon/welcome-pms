@@ -21,7 +21,7 @@ class Room extends Model
     
     public function getOcupancyAttribute() {
 
-        return '1-6';
+        return $this->roomType->max_people;
     }
     
     public function bookings() {

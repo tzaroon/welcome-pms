@@ -39,12 +39,13 @@ class RateTypesController extends Controller
         $validator = Validator::make($postData, [
             'room_type_id' => 'required',
             'number_of_people' => 'required',
-            'price' => 'required',
+            'price' => 'required_without:rate_type_id',
             'apply_rate_from' => 'required',
             'apply_rate_to' => 'required',
             'rate_type_details.0.name' => 'required|string'
         ], [], [
             'room_type_id' => 'Room type',
+            'rate_type_id' => 'Rate type',
             'number_of_people' => 'Number of persons',
             'rate_type_details.0.name' => 'First rate type name'
         ]);
@@ -63,9 +64,11 @@ class RateTypesController extends Controller
             $rateType->number_of_people = $postData['number_of_people'];
             $rateType->advance = $postData['advance'];
             $rateType->show_in_booking_engine = $postData['show_in_booking_engine'];
-            $rateType->price = array_key_exists('price', $postData) ? $postData['price'] : 0;
             $rateType->amount_to_add = array_key_exists('amount_to_add', $postData) ? $postData['amount_to_add'] : 0;
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
+
+            $rateType->price = (array_key_exists('price', $postData) && $postData['price'] > 0) ? $postData['price'] : $rateType->rate_type_price;
+
             $rateType->tax_1 = array_key_exists('tax_1', $postData) ? $postData['tax_1'] : 0;
             $rateType->tax_2 = array_key_exists('tax_2', $postData) ? $postData['tax_2'] : 0;
             $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
@@ -80,6 +83,12 @@ class RateTypesController extends Controller
             $date = $start;
             for($i=0; $i <= $days; $i++) {
 
+                $dayofweek = date('w', strtotime($date));
+                if(sizeof($postData['apply_rates_days']) > 0 && !in_array($dayofweek, $postData['apply_rates_days'])) {
+                    $date = $date->addDay();
+                    continue;
+                }
+                
                 $product = new Product();
                 $product->company_id = $user->company_id;
                 $product->type = Product::TYPE_ROOM;
@@ -97,6 +106,12 @@ class RateTypesController extends Controller
 
                 $dailyPrice->save();
 
+                if($postData['rate_type_id']) {
+
+                    $masterRateType = new RateType();
+                    $masterRateType = $masterRateType->find($postData['rate_type_id']);
+                }
+
                 $taxes = [];
                 if($postData['tax_1']) {
                     $taxes[Tax::CITY_TAX]['tax_id'] = Tax::CITY_TAX;
@@ -107,7 +122,7 @@ class RateTypesController extends Controller
                     $taxes[Tax::CHILDREN_CITY_TAX]['amount'] = $postData['tax_2'];
                 }
 
-                $product->createPrice($postData['price'], $taxes);
+                $product->createPrice($rateType->rate_type_price, $taxes);
                 $date = $date->addDay();
             }
 

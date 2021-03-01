@@ -9,6 +9,10 @@ class RateType extends Model
 {
     use SoftDeletes;
 
+    protected $appandes = [
+        'rate_type_price'
+    ];
+
     public function detail() {
         $language = Language::where(['is_default' => 1])->first();
         return $this->hasOne(RateTypeDetail::class)->where('language_id', $language->id);
@@ -22,5 +26,20 @@ class RateType extends Model
     public function roomType() {
 
         return $this->belongsTo(RoomType::class);
+    }
+
+    public function getRateTypePriceAttribute() {
+
+        if($this->rate_type_id) {
+            $masterRateType = $this->find($this->rate_type_id);
+            if(!is_null($this->percent_to_add)) {
+                return $masterRateType->price + ($masterRateType->price*$this->percent_to_add)/100;
+            }
+            
+            if(!is_null($this->amount_to_add)) {
+                return $masterRateType->price + $this->amount_to_add;
+            }
+        }
+        return $this->price;
     }
 }
