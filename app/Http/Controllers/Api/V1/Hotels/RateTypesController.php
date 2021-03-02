@@ -74,10 +74,10 @@ class RateTypesController extends Controller
             $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
             $rateType->apply_rate_to = array_key_exists('apply_rate_to', $postData) ? $postData['apply_rate_to'] : null;
             $rateType->apply_rates_days = array_key_exists('apply_rates_days', $postData) ? json_encode($postData['apply_rates_days']) : null;
-            $rateType->checkin_closed = array_key_exists('checkin_closed', $postData) ? json_encode($postData['checkin_closed']) : 0;
-            $rateType->exit_closed = array_key_exists('exit_closed', $postData) ? json_encode($postData['exit_closed']) : 0;
-            $rateType->minimum_stay = array_key_exists('minimum_stay', $postData) ? json_encode($postData['minimum_stay']) : null;
-            $rateType->maximum_stay = array_key_exists('maximum_stay', $postData) ? json_encode($postData['maximum_stay']) : null;
+            $rateType->checkin_closed = array_key_exists('checkin_closed', $postData) ? ($postData['checkin_closed']) : 0;
+            $rateType->exit_closed = array_key_exists('exit_closed', $postData) ? $postData['exit_closed'] : 0;
+            $rateType->minimum_stay = array_key_exists('minimum_stay', $postData) ? $postData['minimum_stay'] : null;
+            $rateType->maximum_stay = array_key_exists('maximum_stay', $postData) ? $postData['maximum_stay'] : null;
             $rateType->save();
 
             $start = Carbon::parse($postData['apply_rate_from']);
@@ -216,6 +216,12 @@ class RateTypesController extends Controller
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
             $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
             $rateType->apply_rate_to = array_key_exists('apply_rate_to', $postData) ? $postData['apply_rate_to'] : null;
+
+            $rateType->apply_rates_days = array_key_exists('apply_rates_days', $postData) ? json_encode($postData['apply_rates_days']) : null;
+            $rateType->checkin_closed = array_key_exists('checkin_closed', $postData) ? $postData['checkin_closed'] : 0;
+            $rateType->exit_closed = array_key_exists('exit_closed', $postData) ? $postData['exit_closed'] : 0;
+            $rateType->minimum_stay = array_key_exists('minimum_stay', $postData) ? $postData['minimum_stay'] : null;
+            $rateType->maximum_stay = array_key_exists('maximum_stay', $postData) ? $postData['maximum_stay'] : null;
             $rateType->save();
 
             $start = Carbon::parse($postData['apply_rate_from']);
