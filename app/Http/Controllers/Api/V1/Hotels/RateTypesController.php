@@ -81,10 +81,21 @@ class RateTypesController extends Controller
             $days = $end->diffInDays($start);
 
             $date = $start;
+            
+            $applyRateDays = [];
+            if(isset($postData['apply_rates_days'])) {
+
+                foreach($postData['apply_rates_days'] as $rateDay) {
+                    if(true == $rateDay['value']) {
+                        $applyRateDays[] = $rateDay['day'];
+                    }
+                }
+            }
+
             for($i=0; $i <= $days; $i++) {
 
                 $dayofweek = date('w', strtotime($date));
-                if(array_key_exists('apply_rates_days', $postData) && sizeof($postData['apply_rates_days']) > 0 && !in_array($dayofweek, $postData['apply_rates_days'])) {
+                if(sizeof($applyRateDays) > 0 && !in_array($dayofweek, $applyRateDays)) {
                     $date = $date->addDay();
                     continue;
                 }
