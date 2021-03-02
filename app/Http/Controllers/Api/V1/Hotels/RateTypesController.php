@@ -40,8 +40,8 @@ class RateTypesController extends Controller
             'room_type_id' => 'required',
             'number_of_people' => 'required',
             'price' => 'required_without:rate_type_id',
-            'apply_rate_from' => 'required',
-            'apply_rate_to' => 'required',
+            'apply_rate_from' => 'required|date',
+            'apply_rate_to' => 'required|date',
             'rate_type_details.0.name' => 'required|string'
         ], [], [
             'room_type_id' => 'Room type',
