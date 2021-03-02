@@ -84,7 +84,7 @@ class RateTypesController extends Controller
             for($i=0; $i <= $days; $i++) {
 
                 $dayofweek = date('w', strtotime($date));
-                if(sizeof($postData['apply_rates_days']) > 0 && !in_array($dayofweek, $postData['apply_rates_days'])) {
+                if(array_key_exists('apply_rates_days', $postData) && sizeof($postData['apply_rates_days']) > 0 && !in_array($dayofweek, $postData['apply_rates_days'])) {
                     $date = $date->addDay();
                     continue;
                 }
