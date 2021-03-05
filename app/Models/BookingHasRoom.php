@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Language extends Model
+class BookingHasRoom extends Model
 {
-    public $incrementing = false;
+    protected $table = 'booking_room';
 }

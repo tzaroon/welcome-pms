@@ -40,9 +40,7 @@ class HotelsController extends Controller
     {
         $user = auth()->user();
         
-        $postData = $request->getContent();
-        
-        $postData = json_decode($postData, true);
+        $postData = $request->all();
 
         $validator = Validator::make($postData, [
             'name' => 'required|string|max:191',
@@ -53,7 +51,9 @@ class HotelsController extends Controller
             'country_id' => 'required',
             'phone' => 'required',
             'email' => 'required|email',
-            'currency_id' => 'required'
+            'currency_id' => 'required',
+            'logo' => 'mimes:jpeg,png|max:4096',
+            'logo_email' => 'mimes:jpeg,png|max:4096'
         ], [], [
             'state_id' => 'State',
             'country_id' => 'Country',
@@ -68,6 +68,21 @@ class HotelsController extends Controller
         $hotel = new Hotel();
         $hotel->fill($postData);
         $hotel->company_id = $user->company_id;
+
+        if ($request->hasFile('logo')) {
+            
+            $logoPath = $request->file('logo')->hashName();
+            $request->file('logo')->store('public');
+            $hotel->logo = $logoPath;
+        }
+        
+        if ($request->hasFile('logo_email')) {
+            
+            $emailLogoPath = $request->file('logo_email')->hashName();
+            $request->file('logo_email')->store('public');
+            $hotel->logo_email = $emailLogoPath;
+        }
+
         $hotel->save();
 
         return response()->json($hotel);
@@ -97,9 +112,7 @@ class HotelsController extends Controller
     {
         $user = auth()->user();
         
-        $postData = $request->getContent();
-        
-        $postData = json_decode($postData, true);
+        $postData = $request->all();
 
         $validator = Validator::make($postData, [
             'name' => 'required|string|max:191',
@@ -110,7 +123,9 @@ class HotelsController extends Controller
             'country_id' => 'required',
             'phone' => 'required',
             'email' => 'required|email',
-            'currency_id' => 'required'
+            'currency_id' => 'required',
+            'logo' => 'mimes:jpeg,png,jpg|max:4096',
+            'logo_email' => 'mimes:jpeg,png,jpg|max:4096'
         ], [], [
             'state_id' => 'State',
             'country_id' => 'Country',
@@ -124,6 +139,20 @@ class HotelsController extends Controller
 
         $hotel->fill($postData);
         $hotel->company_id = $user->company_id;
+        if ($request->hasFile('logo')) {
+            
+            $logoPath = $request->file('logo')->hashName();
+            $request->file('logo')->store('public');
+            $hotel->logo = $logoPath;
+        }
+        
+        if ($request->hasFile('logo_email')) {
+            
+            $emailLogoPath = $request->file('logo_email')->hashName();
+            $request->file('logo_email')->store('public');
+            $hotel->logo_email = $emailLogoPath;
+        }
+
         $hotel->update();
         return response()->json($hotel);
     }
@@ -141,6 +170,6 @@ class HotelsController extends Controller
        
         $hotel->delete();
 
-        return response()->json(array('success' => true));
+        return response()->json(array('message' => 'Hotel deleted successfully'));
     }
 }

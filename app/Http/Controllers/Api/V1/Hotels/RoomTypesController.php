@@ -26,7 +26,14 @@ class RoomTypesController extends Controller
     public function list(Request $request, $hotel) : JsonResponse
     {
         $user = auth()->user();
-        $rooms = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $hotel])->with('roomTypeDetail')->get();
+        $rooms = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $hotel])
+            ->with(
+                [
+                    'roomTypeDetail',
+                    'rateTypes',
+                    'rateTypes.detail'
+                ]
+            )->get();
 
         return response()->json($rooms);
     }
@@ -62,10 +69,12 @@ class RoomTypesController extends Controller
 
         $validator = Validator::make($postData, [
             'category_id' => 'required',
-            'room_type_details.*.name' => 'required|string'
+            'max_people' => 'required',
+            'room_type_details.0.name' => 'required|string'
         ], [], [
             'category_id' => 'Category',
-            'name' => 'Name',
+            'max_people' => 'Max people',
+            'room_type_details.0.name' => 'Name',
         ]);
 
         if (!$validator->passes()) {
@@ -77,11 +86,13 @@ class RoomTypesController extends Controller
         $roomType->category_id = $postData['category_id'];
         $roomType->company_id = $user->company_id;
         $roomType->hotel_id = $postData['hotel_id'];
+        $roomType->max_people = $postData['max_people'];
         $roomType->save();
 
         $details = $postData['room_type_details'];
 
         foreach($details as $detail) {
+            
             $roomTypeDetail = new RoomTypeDetail();
             $roomTypeDetail->company_id = $user->company_id;
             $roomTypeDetail->room_type_id = $roomType->id;
@@ -116,9 +127,11 @@ class RoomTypesController extends Controller
         $validator = Validator::make($postData, [
             'id' => 'required',
             'category_id' => 'required',
+            'max_people' => 'required',
             'room_type_details.0.name' => 'required|string'
         ], [], [
             'category_id' => 'Category',
+            'max_people' => 'Max people',
             'room_type_details.0.name' => 'Name'
         ]);
 
@@ -140,11 +153,6 @@ class RoomTypesController extends Controller
                 $roomTypeDetail = $roomTypeDetail->firstOrNew(['id' => $detail['id']]);
             }
 
-            if($roomTypeDetail && !$detail['name']) {
-                $roomTypeDetail->delete();
-                continue;
-            }
-
             $roomTypeDetail->company_id = $user->company_id;
             $roomTypeDetail->room_type_id = $roomType->id;
             $roomTypeDetail->language_id = $detail['language_id'];
@@ -156,5 +164,21 @@ class RoomTypesController extends Controller
             $roomTypeDetail->save();
         }
         return response()->json(['success'=> true]);
+    }
+
+    /**
+     * Destroy a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param App\Model\Hotel $hotel
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function destroy(Request $request, RoomType $roomType) : JsonResponse
+    {
+       
+        $roomType->delete();
+
+        return response()->json(array('message' => 'Room type deleted successfully'));
     }
 }
