@@ -47,6 +47,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('{hotel}/rooms', 'RoomsController@index')->name('rooms_list');
                 Route::resource('{hotel}/bookings', 'BookingsController');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
+                Route::get('room-rate-types/{hotel}', 'HotelsController@loadRoomTypeRateType')->name('load-room-type-rate-type');
             });
         });
     });

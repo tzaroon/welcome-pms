@@ -73,11 +73,11 @@ class SessionsController extends Controller
             $phone = $user->phone_number;
             $channel = $request->post('channel', 'sms');
             //$verification = $this->verify->startVerification($phone, $channel);
-            return response()->json(['success' => true, 'token' => $token]);
+            return response()->json(['token' => $token]);
             if (!$verification->isValid()) {
                 return response()->json(['errors' => $verification->getErrors()], 401);
             } else {
-                return response()->json(['success' => true, 'token' => $token]);
+                return response()->json(['token' => $token]);
             }
         }
 

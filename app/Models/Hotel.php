@@ -11,4 +11,9 @@ class Hotel extends Model
     protected $dates = ['deleted_at'];
 
     protected $guarded = [];
+
+    public function roomTypes() {
+
+        return $this->hasMany(RoomType::class);
+    }
 }

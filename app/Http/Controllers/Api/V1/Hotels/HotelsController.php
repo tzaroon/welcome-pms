@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Hotels;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
+use App\Models\RoomType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
@@ -171,5 +172,26 @@ class HotelsController extends Controller
         $hotel->delete();
 
         return response()->json(array('message' => 'Hotel deleted successfully'));
+    }
+
+    public function loadRoomTypeRateType(Request $request, $hotel) {
+
+       $roomTypes = RoomType::where('hotel_id', $hotel)->get();
+
+       $keyedRoomTypes = [];
+       if($roomTypes) {
+           foreach($roomTypes as $roomType) {
+
+                $rateTypes = $roomType->rateTypes;
+                if($rateTypes) {
+                    foreach($rateTypes as $rateType) {
+                        $keyedRoomTypes[$rateType->id]['id'] = $rateType->id;
+                        $keyedRoomTypes[$rateType->id]['name'] = $roomType->roomTypeDetail->name . ' ' . $rateType->detail->name;
+                    }
+                }
+           }
+       }
+       
+       return response()->json($keyedRoomTypes);
     }
 }
