@@ -239,6 +239,7 @@ class RateTypesController extends Controller
             $rateType->exit_closed = array_key_exists('exit_closed', $postData) ? $postData['exit_closed'] : 0;
             $rateType->minimum_stay = array_key_exists('minimum_stay', $postData) ? $postData['minimum_stay'] : null;
             $rateType->maximum_stay = array_key_exists('maximum_stay', $postData) ? $postData['maximum_stay'] : null;
+            $rateType->max_booking_hour = array_key_exists('max_booking_hour', $postData) ? $postData['max_booking_hour'] : null;
             $rateType->save();
 
             $start = Carbon::parse($postData['apply_rate_from']);
