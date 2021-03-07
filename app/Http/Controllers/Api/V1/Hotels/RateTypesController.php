@@ -223,6 +223,10 @@ class RateTypesController extends Controller
             $rateType->advance = array_key_exists('advance', $postData) ? $postData['advance'] : null;
             $rateType->show_in_booking_engine = array_key_exists('show_in_booking_engine', $postData) ? $postData['show_in_booking_engine'] : 0;;
             $rateType->price = array_key_exists('price', $postData) ? $postData['price'] : 0;
+            $rateType->tax_1_amount = array_key_exists('tax_1_amount', $postData) ? $postData['tax_1_amount'] : 0;
+            $rateType->tax_2_amount = array_key_exists('tax_2_amount', $postData) ? $postData['tax_2_amount'] : 0;
+            $rateType->tax_1_percentage = array_key_exists('tax_1_percentage', $postData) ? $postData['tax_1_percentage'] : 0;
+            $rateType->tax_2_percentage = array_key_exists('tax_2_percentage', $postData) ? $postData['tax_2_percentage'] : 0;
             $rateType->amount_to_add = array_key_exists('amount_to_add', $postData) ? $postData['amount_to_add'] : 0;
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
             $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
@@ -262,13 +266,21 @@ class RateTypesController extends Controller
                 }
 
                 $taxes = [];
-                if($postData['tax_1']) {
+                if($postData['tax_1_amount']) {
                     $taxes[Tax::CITY_TAX]['tax_id'] = Tax::CITY_TAX;
-                    $taxes[Tax::CITY_TAX]['amount'] = $postData['tax_1'];
+                    $taxes[Tax::CITY_TAX]['amount'] = $postData['tax_1_amount'];                   
                 }
-                if($postData['tax_2']) {
+                else if($postData['tax_1_percentage']) {
+                    $taxes[Tax::CITY_TAX]['tax_id'] = Tax::CITY_TAX;
+                    $taxes[Tax::CITY_TAX]['percentage'] = $postData['tax_1_percentage'];                   
+                }
+                if($postData['tax_2_amount']) {
                     $taxes[Tax::CHILDREN_CITY_TAX]['tax_id'] = Tax::CHILDREN_CITY_TAX;
-                    $taxes[Tax::CHILDREN_CITY_TAX]['amount'] = $postData['tax_2'];
+                    $taxes[Tax::CHILDREN_CITY_TAX]['amount'] = $postData['tax_2_amount'];                    
+                }
+                else if($postData['tax_2_percentage']) {
+                    $taxes[Tax::CHILDREN_CITY_TAX]['tax_id'] = Tax::CHILDREN_CITY_TAX;
+                    $taxes[Tax::CHILDREN_CITY_TAX]['percentage'] = $postData['tax_2_percentage'];                    
                 }
 
                 $product->createPrice($postData['price'], $taxes);  
