@@ -180,11 +180,12 @@ class HotelsController extends Controller
 
        $keyedRoomTypes = [];
        if($roomTypes) {
+            $count = 0;
            foreach($roomTypes as $roomType) {
 
                 $rateTypes = $roomType->rateTypes;
                 if($rateTypes) {
-                    $count = 0;
+                    
                     foreach($rateTypes as $rateType) {
                         $keyedRoomTypes[$count]['id'] = $rateType->id;
                         $keyedRoomTypes[$count]['name'] = $roomType->roomTypeDetail->name . ' ' . $rateType->detail->name;
