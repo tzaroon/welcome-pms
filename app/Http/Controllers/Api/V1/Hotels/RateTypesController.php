@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
 use DB;
+use App\Rules\ValidationRule;
 
 class RateTypesController extends Controller
 {
@@ -30,19 +31,27 @@ class RateTypesController extends Controller
      */
     public function store(Request $request) : JsonResponse
     {
-        $user = auth()->user();
-        
+        $user = auth()->user();       
+       
         $postData = $request->getContent();
         
         $postData = json_decode($postData, true);
-
+        $details = $postData['rate_type_details'];       
+        $name = $details[0]['name'];
+        $roomTypeId = $postData['room_type_id']; 
+        
         $validator = Validator::make($postData, [
             'room_type_id' => 'required',
             'number_of_people' => 'required',
             'price' => 'required_without:rate_type_id',
             'apply_rate_from' => 'required|date',
             'apply_rate_to' => 'required|date',
-            'rate_type_details.0.name' => 'required|string'
+            // 'rate_type_details.0.name' => 'required|string'
+            'rate_type_details.0.name' => [
+                'required',
+                'string',
+                New ValidationRule($roomTypeId, $name)              
+            ],
         ], [], [
             'room_type_id' => 'Room type',
             'rate_type_id' => 'Rate type',
@@ -196,7 +205,11 @@ class RateTypesController extends Controller
         
         $postData = $request->getContent();
         
-        $postData = json_decode($postData, true);
+        $postData = json_decode($postData, true);       
+
+        $details = $postData['rate_type_details'];       
+        $name = $details[0]['name'];
+        $roomTypeId = $postData['room_type_id']; 
 
         $validator = Validator::make($postData, [
             'room_type_id' => 'required',
@@ -204,7 +217,12 @@ class RateTypesController extends Controller
             'price' => 'required',
             'apply_rate_from' => 'required',
             'apply_rate_to' => 'required',
-            'rate_type_details.0.name' => 'required|string'
+            // 'rate_type_details.0.name' => 'required|string'
+            'rate_type_details.0.name' => [
+                'required',
+                'string',
+                New ValidationRule($roomTypeId, $name)         
+            ],
         ], [], [
             'room_type_id' => 'Room type',
             'number_of_people' => 'Number of persons',
