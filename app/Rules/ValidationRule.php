@@ -18,8 +18,8 @@ class ValidationRule implements Rule
 
     public function __construct($roomTypeId , $name)
     {        
-        $this->$roomTypeId = $roomTypeId;
-        $this->$name = $name;
+        $this->roomTypeId = $roomTypeId;
+        $this->name = $name;
     }
 
     /**
