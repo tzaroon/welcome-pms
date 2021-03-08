@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use DB;
 
-class ValidationRule implements Rule
+class DuplicateRateTypeValidationRule implements Rule
 {
     /**
      * Create a new rule instance.
@@ -14,12 +14,12 @@ class ValidationRule implements Rule
      * 
      */
     protected $roomTypeId;
-    protected $name;
+    protected $id;
 
-    public function __construct($roomTypeId , $name)
+    public function __construct($roomTypeId , $id=null)
     {        
         $this->roomTypeId = $roomTypeId;
-        $this->name = $name;
+        $this->id = $id;
     }
 
     /**
@@ -30,21 +30,24 @@ class ValidationRule implements Rule
      * @return bool
      */
     public function passes($attribute, $value)
-        {          
-
+    {
         $query = DB::table('room_types')        
-        ->join('rate_types','room_types.id','=','rate_types.room_type_id')
-        ->join('rate_type_details','rate_type_details.rate_type_id','=','rate_types.id')
-        ->where(['name' => $this->name , 'room_types.id' =>  $this->roomTypeId])
-        ->get(); 
+            ->join('rate_types','room_types.id','=','rate_types.room_type_id')
+            ->join('rate_type_details','rate_type_details.rate_type_id','=','rate_types.id')
+            ->where('name', $value)
+            ->where('room_types.id', $this->roomTypeId);
+        
+        if($this->id) {
 
-        if($query)
+            $query->where('rate_types.id', '!=', $this->id);
+        }
+
+        if($query->count())
         {
             return false;            
         }
 
         return true;
-        
     }
 
     /**
@@ -54,6 +57,6 @@ class ValidationRule implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return 'Duplicate rate type.';
     }
 }

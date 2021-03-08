@@ -18,7 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
 use DB;
-use App\Rules\ValidationRule;
+use App\Rules\DuplicateRateTypeValidationRule;
 
 class RateTypesController extends Controller
 {
@@ -46,17 +46,16 @@ class RateTypesController extends Controller
             'price' => 'required_without:rate_type_id',
             'apply_rate_from' => 'required|date',
             'apply_rate_to' => 'required|date',
-            // 'rate_type_details.0.name' => 'required|string'
             'rate_type_details.0.name' => [
                 'required',
                 'string',
-                New ValidationRule($roomTypeId, $name)              
+                new DuplicateRateTypeValidationRule($roomTypeId)              
             ],
         ], [], [
             'room_type_id' => 'Room type',
             'rate_type_id' => 'Rate type',
             'number_of_people' => 'Number of persons',
-            'rate_type_details.0.name' => 'First rate type name'
+            'rate_type_details.0.name' => 'Rate type name'
         ]);
 
         if (!$validator->passes()) {
@@ -217,11 +216,10 @@ class RateTypesController extends Controller
             'price' => 'required',
             'apply_rate_from' => 'required',
             'apply_rate_to' => 'required',
-            // 'rate_type_details.0.name' => 'required|string'
             'rate_type_details.0.name' => [
                 'required',
                 'string',
-                New ValidationRule($roomTypeId, $name)         
+                new DuplicateRateTypeValidationRule($roomTypeId, $rateType->id)        
             ],
         ], [], [
             'room_type_id' => 'Room type',
