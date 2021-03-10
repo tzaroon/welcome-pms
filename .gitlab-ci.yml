@@ -1,0 +1,27 @@
+#variables:
+#  GIT_STRATEGY: clone
+#  user: cloud_use
+#default:
+#  before_script:
+#    - rm /root/.ssh/known_hosts
+#    - touch /root/.ssh/known_hosts
+#    - apk add sshpass 
+.only-develop:
+  only:
+   - develop
+stages:
+ - deploy
+running-main-pipeline-script-to-deploy-everything:
+ extends: .only-develop
+ stage: deploy
+ script: 
+  - pwd
+  - ls -la
+  - npm install
+  - npm run prod
+  - sudo rm -rf ~/chicstays-frontend/dist
+  - sudo cp -r dist/ ~/chicstays-frontend/dist
+ artifacts:
+   paths:
+     - results.log
+   expire_in: 2 week  
