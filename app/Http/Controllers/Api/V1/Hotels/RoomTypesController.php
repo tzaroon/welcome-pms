@@ -31,7 +31,10 @@ class RoomTypesController extends Controller
                 [
                     'roomTypeDetail',
                     'rateTypes',
-                    'rateTypes.detail'
+                    'rateTypes.detail',
+                    'rateTypes.rateType',
+                    'rateTypes.rateType.detail',
+                    'rateTypes.rateType.roomType.roomTypeDetail'
                 ]
             )->get();
 
