@@ -20,7 +20,7 @@ running-main-pipeline-script-to-deploy-everything:
   - cd ../
   - pwd
   - sudo rm -rf /var/www/html/chicstays-backend
-  - ls -la /var/www/html/chicstays-backend
+  - ls -la /var/www/html
   - sudo cp -r chicstays-backend/ /var/www/html/chicstays-backend
   - ls -la /var/www/html/chicstays-backend
   - cd /var/www/html/chicstays-backend
