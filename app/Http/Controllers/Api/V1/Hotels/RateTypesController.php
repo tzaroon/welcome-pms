@@ -67,11 +67,11 @@ class RateTypesController extends Controller
 
             $rateType = new RateType();
             $rateType->company_id = $user->company_id;
-            $rateType->room_type_id = $postData['room_type_id'];
-            $rateType->rate_type_id = $postData['rate_type_id'];
-            $rateType->number_of_people = $postData['number_of_people'];
-            $rateType->advance = $postData['advance'];
-            $rateType->show_in_booking_engine = $postData['show_in_booking_engine'];
+            $rateType->room_type_id = array_key_exists('room_type_id', $postData) ? $postData['room_type_id'] : null;
+            $rateType->rate_type_id = array_key_exists('rate_type_id', $postData) ? $postData['rate_type_id'] : null;
+            $rateType->number_of_people = array_key_exists('number_of_people', $postData) ? $postData['number_of_people'] : null;
+            $rateType->advance = array_key_exists('advance', $postData) ? $postData['advance'] : null;
+            $rateType->show_in_booking_engine = array_key_exists('show_in_booking_engine', $postData) ? $postData['show_in_booking_engine'] : 0;
             $rateType->amount_to_add = array_key_exists('amount_to_add', $postData) ? $postData['amount_to_add'] : 0;
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
 
