@@ -22,6 +22,7 @@ running-main-pipeline-script-to-deploy-everything:
   - sudo cp -r chicstays-backend/ /var/www/html/chicstays-backend
   - cd /var/www/html/chicstays-backend
   - composer install
+  - cp ~/.env .env
  artifacts:
    paths:
      - results.log
