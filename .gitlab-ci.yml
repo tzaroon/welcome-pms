@@ -17,10 +17,11 @@ running-main-pipeline-script-to-deploy-everything:
  script: 
   - pwd
   - ls -la
-  - npm install
-  - npm run prod
-  - sudo rm -rf ~/chicstays-frontend/dist
-  - sudo cp -r dist/ ~/chicstays-frontend/dist
+  - cd ../
+  - sudo rm -rf /var/www/html/chicstays-backend
+  - sudo cp -r chicstays-backend/ /var/www/html/chicstays-backend
+  - cd /var/www/html/chicstays-backend
+  - composer install
  artifacts:
    paths:
      - results.log
