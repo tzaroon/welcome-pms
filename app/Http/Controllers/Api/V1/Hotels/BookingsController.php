@@ -9,6 +9,7 @@ use App\Models\BookingHasRoomHasGuest;
 use App\Models\Guest;
 use App\Models\Room;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Validator;
@@ -21,13 +22,24 @@ class BookingsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id)
+    public function index(Request $request, $id)
     {
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
         $user = auth()->user();
+
+        $date = $postData && array_key_exists('date', $postData) ? $postData['date'] : date('Y-m-d');
+        $carbonDate = new Carbon($date);
 
         $rooms = Room::where('company_id', $user->company_id)->with(
             [
-                'roomType'
+                'roomType',
+                'bookings' => function($q) use ($date, $carbonDate) {
+                    $q->where('reservation_to', '>=', $date)
+                        ->where('reservation_to', '<=', $carbonDate->addMonths(1)->format('Y-m-d'));
+                }
             ]
         )->whereHas('roomType', function($q) use ($id){
             $q->where('hotel_id', $id);
