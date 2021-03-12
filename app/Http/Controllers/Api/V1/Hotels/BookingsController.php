@@ -24,13 +24,10 @@ class BookingsController extends Controller
      */
     public function index(Request $request, $id)
     {
-        $postData = $request->getContent();
-        
-        $postData = json_decode($postData, true);
+        $date = $request->input('date') ? : date('Y-m-d');
 
         $user = auth()->user();
 
-        $date = $postData && array_key_exists('date', $postData) ? $postData['date'] : date('Y-m-d');
         $carbonDate = new Carbon($date);
 
         $rooms = Room::where('company_id', $user->company_id)->with(
