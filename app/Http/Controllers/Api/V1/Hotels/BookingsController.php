@@ -58,7 +58,7 @@ class BookingsController extends Controller
                         
                         if($guests && !$bookingGuest) {
                             foreach($guests as $guest) {
-                                if($guest->pivot->booking_id == $booking->id) {
+                                if($guest->pivot->room_id == $room->id) {
                                     $bookingGuest = $guest->user->first_name . ' ' . $guest->user->last_name;
                                 }
                             }
