@@ -69,7 +69,12 @@ class BookingsController extends Controller
                             'roomCount' => $booking->roomCount,
                             'guest' => $bookingGuest,
                             'rateType' => 'Refundable',
-                            'numberOfDays' => $booking->numberOfDays
+                            'numberOfDays' => $booking->numberOfDays,
+                            'booker' => 'Abrar Ul Haq',
+                            'rooms' => [
+                                '40 6 bedroom : Guest'
+                            ],
+                            'total_price' => 140
                         ];
                     }
                 }
