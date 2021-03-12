@@ -47,7 +47,8 @@ class BookingsController extends Controller
         $count = 0;
         if($rooms) {
             foreach($rooms as $room) {
-                $processedData[$count]['room_name'] = $room->room_number . ' ' . $room->name;
+                $processedData[$count]['room_number'] = $room->room_number;
+                $processedData[$count]['room_name'] = $room->name;
                 if($room->bookings) {
                     $bookingGuest = null;
                     foreach($room->bookings as $booking) {
@@ -67,7 +68,8 @@ class BookingsController extends Controller
                             'status' => $booking->status,
                             'roomCount' => $booking->roomCount,
                             'guest' => $bookingGuest,
-                            'rateType' => 'Refundable'
+                            'rateType' => 'Refundable',
+                            'numberOfDays' => $booking->numberOfDays
                         ];
                     }
                 }
@@ -75,7 +77,7 @@ class BookingsController extends Controller
             }
         }
         return response()->json($processedData);
-        return response()->json($rooms);
+        //return response()->json($rooms);
     }
 
     /**
