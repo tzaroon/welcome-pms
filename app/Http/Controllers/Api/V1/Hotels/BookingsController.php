@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Hotels;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingHasRoom;
-use App\Models\BookingHasRoomHasGuest;
+use App\Models\BookingRoomGuest;
 use App\Models\Guest;
 use App\Models\Room;
 use App\User;
@@ -39,12 +39,45 @@ class BookingsController extends Controller
                 'bookings' => function($q) use ($date, $carbonDate) {
                     $q->where('reservation_to', '>=', $date)
                         ->where('reservation_to', '<=', $carbonDate->addMonths(1)->format('Y-m-d'));
-                }
+                },
+                'bookings.guests'
             ]
         )->whereHas('roomType', function($q) use ($id){
             $q->where('hotel_id', $id);
         })->get();
 
+        $processedData = [];
+        $count = 0;
+        if($rooms) {
+            foreach($rooms as $room) {
+                $processedData[$count]['room_name'] = $room->room_number . ' ' . $room->name;
+                if($room->bookings) {
+                    $bookingGuest = null;
+                    foreach($room->bookings as $booking) {
+                        $guests = $booking->guests;
+                        
+                        if($guests && !$bookingGuest) {
+                            foreach($guests as $guest) {
+                                if($guest->pivot->booking_id == $booking->id) {
+                                    $bookingGuest = $guest->user->first_name . ' ' . $guest->user->last_name;
+                                }
+                            }
+                        }
+                        $processedData[$count]['bookings'][] = [
+                            'reservation_from' => $booking->reservation_from,
+                            'reservation_to' => $booking->reservation_to,
+                            'time_start' => $booking->time_start,
+                            'status' => $booking->status,
+                            'roomCount' => $booking->roomCount,
+                            'guest' => $bookingGuest,
+                            'rateType' => 'Refundable'
+                        ];
+                    }
+                }
+                $count++;
+            }
+        }
+        return response()->json($processedData);
         return response()->json($rooms);
     }
 
@@ -124,10 +157,11 @@ class BookingsController extends Controller
                                 'id_expiry_date' => $guest['id_expiry_date'],
                             ]);
 
-                            $bookingHasRoomHasGuest = new BookingHasRoomHasGuest();
-                            $bookingHasRoomHasGuest->bookings_has_rooms_id = $bookingHasRoom->id;
-                            $bookingHasRoomHasGuest->guest_id = $guest->id;
-                            $bookingHasRoomHasGuest->save();
+                            $bookingRoomGuest = new BookingRoomGuest();
+                            $bookingRoomGuest->room_id = $bookingHasRoom->room_id;
+                            $bookingRoomGuest->booking_id = $booking->id;
+                            $bookingRoomGuest->guest_id = $guest->id;
+                            $bookingRoomGuest->save();
                         }
                     }
                 }

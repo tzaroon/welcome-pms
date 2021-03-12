@@ -67,4 +67,14 @@ class Booking extends Model
 
         return Carbon::parse($this->reservation_from)->diffInDays($this->reservation_to);
     }
+
+    public function booker() {
+
+        return $this->belongsTo(Booker::class);
+    }
+
+    public function guests() {
+
+        return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->withPivot('room_id');
+    }
 }
