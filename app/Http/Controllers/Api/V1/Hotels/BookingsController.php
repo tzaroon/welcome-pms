@@ -54,7 +54,7 @@ class BookingsController extends Controller
                 if($room->bookings) {
                     $bookingGuest = null;
                     foreach($room->bookings as $booking) {
-                        $guests = $booking->guests;
+                        $guests = $booking->guests->reverse();
                         
                         if($guests && !$bookingGuest) {
                             foreach($guests as $guest) {
