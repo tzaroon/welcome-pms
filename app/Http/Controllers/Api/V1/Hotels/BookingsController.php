@@ -36,8 +36,7 @@ class BookingsController extends Controller
                 'bookings' => function($q) use ($date, $carbonDate) {
                     $q->where('reservation_to', '>=', $date)
                         ->where('reservation_to', '<=', $carbonDate->addMonths(1)->format('Y-m-d'));
-                },
-                'bookings.guests'
+                }
             ]
         )->whereHas('roomType', function($q) use ($id){
             $q->where('hotel_id', $id);
@@ -47,28 +46,26 @@ class BookingsController extends Controller
         $count = 0;
         if($rooms) {
             foreach($rooms as $room) {
+                $processedData[$count]['room_id'] = $room->id;
                 $processedData[$count]['room_number'] = $room->room_number;
                 $processedData[$count]['room_name'] = $room->name;
                 if($room->bookings) {
                     $bookingGuest = null;
                     foreach($room->bookings as $booking) {
-                        $guests = $booking->guests->reverse();
                         
-                        if($guests && !$bookingGuest) {
-                            foreach($guests as $guest) {
-                                if($guest->pivot->room_id == $room->id) {
-                                    $bookingGuest = $guest->user->first_name . ' ' . $guest->user->last_name;
-                                }
-                            }
-                        }
+                        $bookingHasRoom = BookingHasRoom::where('booking_id', $booking->id)->where('room_id', $room->id)
+                            ->with('rateType')
+                            ->first();
+
                         $processedData[$count]['bookings'][] = [
+                            'id' => $booking->id,
                             'reservation_from' => $booking->reservation_from,
                             'reservation_to' => $booking->reservation_to,
                             'time_start' => $booking->time_start,
                             'status' => $booking->status,
                             'roomCount' => $booking->roomCount,
-                            'guest' => $bookingGuest,
-                            'rateType' => 'Refundable',
+                            'guest' => $bookingHasRoom->first_guest_name,
+                            'rateType' => $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => 'Abrar Ul Haq',
                             'rooms' => [
@@ -136,12 +133,19 @@ class BookingsController extends Controller
                     $bookingHasRoom = new BookingHasRoom();
                     $bookingHasRoom->booking_id = $booking->id;
                     $bookingHasRoom->room_id = $room['room_id'];
+                    $bookingHasRoom->rate_type_id = $room['rate_type_id'];
                     $bookingHasRoom->save();
                    
                     $guests = array_key_exists('guests', $room) ? $room['guests'] : [];
                     if($guests) {
                         foreach($guests as $guest) {
+                            
+                            if(!$bookingHasRoom->first_guest_name) {
 
+                                $bookingHasRoom->first_guest_name = $guest['first_name'] . ' ' . $guest['last_name'];
+                                $bookingHasRoom->save();
+                            }
+                            
                             $guestUser = User::create([
                                 'company_id' => $user->company_id,
                                 'first_name' => $guest['first_name'],
