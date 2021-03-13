@@ -74,7 +74,11 @@ class BookingsController extends Controller
                             'rooms' => [
                                 '40 6 bedroom : Guest'
                             ],
-                            'total_price' => 140
+                            'total_price' => 140,
+                            'addons' => [
+                                'Bottella da Sharab',
+                                'Minibar Cola'
+                            ]
                         ];
                     }
                 }
