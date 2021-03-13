@@ -67,7 +67,7 @@ class BookingsController extends Controller
                             'guest' => $bookingHasRoom->first_guest_name,
                             'rateType' => $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                             'numberOfDays' => $booking->numberOfDays,
-                            'booker' => 'Abrar Ul Haq',
+                            'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                             'rooms' => [
                                 '40 6 bedroom : Guest'
                             ],
