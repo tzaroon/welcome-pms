@@ -10,8 +10,7 @@ class Room extends Model
     protected $guarded = ['company_id'];
 
     protected $appends = [
-        'ocupancy',
-        'daily_bookings'
+        'ocupancy'
     ];
 
     public function roomType() {
@@ -27,10 +26,5 @@ class Room extends Model
     public function bookings() {
 
         return $this->belongsToMany(Booking::class);
-    }
-
-    public function getDailyBookingsAttribute() : ? Collection
-    {
-        return $this->bookings->keyBy('reservation_from');
     }
 }

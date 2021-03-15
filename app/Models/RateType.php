@@ -28,6 +28,11 @@ class RateType extends Model
         return $this->belongsTo(RoomType::class);
     }
 
+    public function rateType() {
+
+        return $this->belongsTo(RateType::class);
+    }
+
     public function getRateTypePriceAttribute() {
 
         if($this->rate_type_id) {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Guest extends Model
@@ -24,4 +25,8 @@ class Guest extends Model
         self::GUEST_TYPE_CHILD => 'Child',
         self::GUEST_TYPE_CORPORATE => 'Corporate'
     ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

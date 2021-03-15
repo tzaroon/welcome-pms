@@ -19,7 +19,8 @@ class Booking extends Model
     ];
     
     protected $appends = [
-        'numberOfDays'
+        'numberOfDays',
+        'roomCount'
     ];
 
     const SOURCE_BUSINESS = 'business';
@@ -54,11 +55,26 @@ class Booking extends Model
 
     public function room() {
         
-        return $this->hasMany(Room::class);
+        return $this->belongsToMany(Room::class);
+    }
+    
+    public function getRoomCountAttribute() {
+        
+        return $this->belongsToMany(Room::class)->count();
     }
     
     public function getNumberOfDaysAttribute() {
 
         return Carbon::parse($this->reservation_from)->diffInDays($this->reservation_to);
+    }
+
+    public function booker() {
+
+        return $this->belongsTo(Booker::class);
+    }
+
+    public function guests() {
+
+        return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->withPivot('room_id');
     }
 }
