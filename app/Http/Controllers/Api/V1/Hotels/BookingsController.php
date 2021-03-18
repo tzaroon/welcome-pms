@@ -25,6 +25,7 @@ class BookingsController extends Controller
     public function index(Request $request, $id)
     {
         $date = $request->input('date') ? : date('Y-m-d');
+        $roomType = $request->input('room-type') ? : null;
 
         $user = auth()->user();
 
@@ -38,8 +39,11 @@ class BookingsController extends Controller
                         ->where('reservation_to', '<=', $carbonDate->addMonths(1)->format('Y-m-d'));
                 }
             ]
-        )->whereHas('roomType', function($q) use ($id){
+        )->whereHas('roomType', function($q) use ($id, $roomType){
             $q->where('hotel_id', $id);
+            if($roomType) {
+                $q->where('id', $roomType);
+            }
         })->get();
 
         $processedData = [];
