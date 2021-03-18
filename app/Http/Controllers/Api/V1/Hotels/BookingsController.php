@@ -78,7 +78,7 @@ class BookingsController extends Controller
                             'status' => $booking->status,
                             'roomCount' => $booking->roomCount,
                             'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
-                            'rateType' => $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
+                            'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                             'rooms' => [
