@@ -64,15 +64,20 @@ class BookingsController extends Controller
                                 $associatedRooms[] = $room->room_number . ' ' . $room->name;
                             }
                         }
+
+                        $paymentStatus = [
+                            'not-paid', 'partially-paid', 'payed'
+                        ];
+                        shuffle($paymentStatus);
                         $processedData[$count]['bookings'][] = [
                             'id' => $booking->id,
-                            'booking_room_id' => $bookingHasRoom->id,
+                            'booking_room_id' => $bookingHasRoom ? $bookingHasRoom->id : null,
                             'reservation_from' => $booking->reservation_from,
                             'reservation_to' => $booking->reservation_to,
                             'time_start' => $booking->time_start,
                             'status' => $booking->status,
                             'roomCount' => $booking->roomCount,
-                            'guest' => $bookingHasRoom->first_guest_name,
+                            'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
                             'rateType' => $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
@@ -80,6 +85,7 @@ class BookingsController extends Controller
                                 $associatedRooms
                             ],
                             'total_price' => 140,
+                            'payment_atatus' => $paymentStatus[0],
                             'addons' => [
                                 'Bottella da Sharab',
                                 'Minibar Cola'
