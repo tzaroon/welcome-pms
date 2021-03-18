@@ -49,6 +49,7 @@ class BookingsController extends Controller
                 $processedData[$count]['room_id'] = $room->id;
                 $processedData[$count]['room_number'] = $room->room_number;
                 $processedData[$count]['room_name'] = $room->name;
+                $processedData[$count]['bookings'] = [];
                 if($room->bookings) {
                     $bookingGuest = null;
                     foreach($room->bookings as $booking) {
@@ -57,8 +58,15 @@ class BookingsController extends Controller
                             ->with('rateType')
                             ->first();
 
+                        $associatedRooms = [];
+                        if($booking->rooms) {
+                            foreach($booking->rooms as $room) {
+                                $associatedRooms[] = $room->room_number . ' ' . $room->name;
+                            }
+                        }
                         $processedData[$count]['bookings'][] = [
                             'id' => $booking->id,
+                            'booking_room_id' => $bookingHasRoom->id,
                             'reservation_from' => $booking->reservation_from,
                             'reservation_to' => $booking->reservation_to,
                             'time_start' => $booking->time_start,
@@ -69,7 +77,7 @@ class BookingsController extends Controller
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                             'rooms' => [
-                                '40 6 bedroom : Guest'
+                                $associatedRooms
                             ],
                             'total_price' => 140,
                             'addons' => [

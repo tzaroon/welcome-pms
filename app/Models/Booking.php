@@ -53,7 +53,7 @@ class Booking extends Model
         self::PAYMENT_STATUS_PAID => 'Paid'
     ];
 
-    public function room() {
+    public function rooms() {
         
         return $this->belongsToMany(Room::class);
     }
