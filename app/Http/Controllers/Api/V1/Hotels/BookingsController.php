@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\BookingHasRoom;
 use App\Models\BookingRoomGuest;
 use App\Models\Guest;
+use App\Models\RateType;
 use App\Models\Room;
 use App\User;
 use Carbon\Carbon;
@@ -64,8 +65,12 @@ class BookingsController extends Controller
 
                         $associatedRooms = [];
                         if($booking->rooms) {
-                            foreach($booking->rooms as $room) {
-                                $associatedRooms[] = $room->room_number . ' ' . $room->name;
+                            foreach($booking->rooms as $otherRoom) {
+                                
+                                if($room->id == $otherRoom->id)
+                                    continue;
+
+                                $associatedRooms[] = $otherRoom->room_number . ' ' . $otherRoom->name;
                             }
                         }
 
@@ -198,5 +203,68 @@ class BookingsController extends Controller
             }
         });
         return response()->json(['message' => 'Reservation successfully done.']);
+    }
+
+    public function changeRoom(Request $request, BookingHasRoom $bookingRoom) {
+
+        $user = auth()->user();
+        
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'room_id' => 'required'
+        ], [], [
+            'room_id' => 'Room'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $room = Room::find($bookingRoom->room_id);
+        $newRoom = Room::find($postData['room_id']);
+        if($room->room_type_id != $newRoom->room_type_id) {
+
+            $rateTypes = RateType::where('room_type_id', $newRoom->room_type_id)->with(['detail'])->get();
+            
+            return response()->json(array('rate_types' => $rateTypes));
+        } else {
+
+            $bookingRoom->room_id = $newRoom->id;
+            $bookingRoom->save();
+        }
+
+        return response()->json(array('message' => 'Room changed successfully.'));
+    }
+    
+    public function changeRoomAndRate(Request $request, BookingHasRoom $bookingRoom) {
+
+        $user = auth()->user();
+        
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'room_id' => 'required',
+            'rate_type_id' => 'required'
+        ], [], [
+            'room_id' => 'Room',
+            'rate_type_id' => 'Rate type'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $bookingRoom->room_id = $postData['room_id'];
+        $bookingRoom->rate_type_id = $postData['rate_type_id'];
+        $bookingRoom->save();
+        
+        return response()->json(array('message' => 'Room changed successfully.'));
     }
 }
