@@ -90,9 +90,7 @@ class BookingsController extends Controller
                             'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
-                            'rooms' => [
-                                $associatedRooms
-                            ],
+                            'rooms' => $associatedRooms,
                             'total_price' => 140,
                             'payment_atatus' => $paymentStatus[0],
                             'addons' => [
