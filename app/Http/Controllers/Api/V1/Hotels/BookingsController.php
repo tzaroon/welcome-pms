@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingHasRoom;
 use App\Models\BookingRoomGuest;
+use App\Models\BookingsHasProductPrice;
+use App\Models\DailyPrice;
 use App\Models\Guest;
 use App\Models\RateType;
 use App\Models\Room;
@@ -157,6 +159,31 @@ class BookingsController extends Controller
                     $bookingHasRoom->rate_type_id = $room['rate_type_id'];
                     $bookingHasRoom->save();
                    
+                    $start = Carbon::parse($postData['reservation_from']);
+                    $end =  Carbon::parse($postData['reservation_to']);
+
+                    $days = $end->diffInDays($start);
+                    
+                    $date = $start;
+
+                    $priceIds = [];
+                    for($i=0; $i < $days; $i++) {
+
+                        $rateDate = $date->format('Y-m-d');
+                        $dailyPrice = new DailyPrice();
+                        $dailyPrice = $dailyPrice->where('date', $rateDate)
+                            ->where('company_id', $user->company_id)
+                            ->where('rate_type_id', $bookingHasRoom->rate_type_id)
+                            ->first();
+                            
+                        $priceIds[$dailyPrice->product->price->id]['product_price_id'] = $dailyPrice->product->price->id;
+                        $priceIds[$dailyPrice->product->price->id]['booking_room_id'] =  $bookingHasRoom->id;
+
+                        $date = $date->addDay();
+                    }
+                    
+                    $booking->productPrice()->sync($priceIds);
+
                     $guests = array_key_exists('guests', $room) ? $room['guests'] : [];
                     if($guests) {
                         foreach($guests as $guest) {
@@ -224,7 +251,7 @@ class BookingsController extends Controller
 
         $room = Room::find($bookingRoom->room_id);
         $newRoom = Room::find($postData['room_id']);
-        if($room->room_type_id != $newRoom->room_type_id) {
+        if($room->room_type_id != $newRoom->room_type_id && (!array_key_exists('force', $postData) || !$postData['force'])) {
 
             $rateTypes = RateType::where('room_type_id', $newRoom->room_type_id)->with(['detail'])->get();
             

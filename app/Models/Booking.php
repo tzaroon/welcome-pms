@@ -77,4 +77,8 @@ class Booking extends Model
 
         return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->withPivot('room_id');
     }
+
+    public function productPrice() {
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_room_id']);
+    }
 }
