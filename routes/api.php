@@ -48,8 +48,8 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('{hotel}/bookings', 'BookingsController');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
                 Route::get('room-rate-types/{hotel}', 'HotelsController@loadRoomTypeRateType')->name('load-room-type-rate-type');
-                Route::get('change-room/{bookingRoom}', 'BookingsController@changeRoom')->name('change_room');
-                Route::get('change-room-and-rate/{bookingRoom}', 'BookingsController@changeRoomAndRate')->name('change_room_and_rate');
+                Route::post('change-room/{bookingRoom}', 'BookingsController@changeRoom')->name('change_room');
+                Route::post('change-room-and-rate/{bookingRoom}', 'BookingsController@changeRoomAndRate')->name('change_room_and_rate');
             });
         });
     });
