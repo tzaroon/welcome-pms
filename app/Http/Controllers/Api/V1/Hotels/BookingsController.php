@@ -177,8 +177,8 @@ class BookingsController extends Controller
                             ->where('rate_type_id', $bookingHasRoom->rate_type_id)
                             ->first();
                             
-                        $priceIds[$dailyPrice->product->price->id]['product_price_id'] = $dailyPrice->product->price->id;
-                        $priceIds[$dailyPrice->product->price->id]['booking_room_id'] =  $bookingHasRoom->id;
+                        $priceIds[$room['room_id'].$i]['product_price_id'] = $dailyPrice->product->price->id;
+                        $priceIds[$room['room_id'].$i]['booking_room_id'] =  $bookingHasRoom->id;
 
                         $date = $date->addDay();
                     }

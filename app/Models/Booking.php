@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Booking extends Model
 {
@@ -89,17 +90,53 @@ class Booking extends Model
 
     public function getPriceAttribute() {
 
-        $totalPrice = 0;
-        if($this->productPrice) {
-            foreach($this->productPrice as $productPrice) {
-                $totalPrice += $productPrice->price;
-                if($productPrice->taxes) {
-                    foreach($productPrice->taxes as $tax) {
-                        $totalPrice += $tax->amount;
-                    }
-                }
+        $guestsCount = DB::table('booking_room_guests')
+            ->join('guests', 'booking_room_guests.guest_id', '=', 'guests.id')
+            ->select('booking_room_guests.room_id', 'guests.guest_type', DB::raw('count(*) as guest_count'))
+            ->where('booking_room_guests.booking_id', $this->id)
+            ->groupBy('guests.guest_type')
+            ->groupBy('booking_room_guests.room_id')
+            ->get();
+
+        $guestreport = [];
+        if($guestsCount) {
+            foreach($guestsCount as $count) {
+                $guestreport[$count->room_id][$count->guest_type] = $count->guest_count;
             }
         }
+
+        $totalPrice = 0;
+        $taxes = [];
+        if($this->productPrice) {
+           
+            foreach($this->productPrice as $productPrice) {
+
+                $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_room_id);
+
+                $totalPrice += $productPrice->price;
+                if($productPrice->taxes) {
+                    
+                    foreach($productPrice->taxes as $tax) {
+                        $guestCount = 0;
+                        if(array_key_exists($bookingRoom->room_id, $guestreport)) {
+                            
+                            switch($tax->tax_id) {
+                                case 1:
+                                    $guestCount = array_key_exists(Guest::GUEST_TYPE_ADULT, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_ADULT] : 0;
+                                    $guestCount += array_key_exists(Guest::GUEST_TYPE_CORPORATE, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CORPORATE] : 0;
+                                break;
+                                case 2:
+                                    $guestCount += array_key_exists(Guest::GUEST_TYPE_CHILD, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CHILD] : 0;
+                                break;
+                            }
+                            $totalPrice += ($tax->amount*$guestCount);
+                        }
+                    }
+                }
+                
+            }
+        }
+        
         return $totalPrice;
     }
 }
