@@ -80,6 +80,7 @@ class BookingsController extends Controller
                             'not-paid', 'partially-paid', 'payed'
                         ];
                         shuffle($paymentStatus);
+                        
                         $processedData[$count]['bookings'][] = [
                             'id' => $booking->id,
                             'booking_room_id' => $bookingHasRoom ? $bookingHasRoom->id : null,
@@ -93,7 +94,7 @@ class BookingsController extends Controller
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                             'rooms' => $associatedRooms,
-                            'total_price' => 140,
+                            'total_price' => $booking->price,
                             'payment_atatus' => $paymentStatus[0],
                             'addons' => [
                                 'Bottella da Sharab',
@@ -152,6 +153,7 @@ class BookingsController extends Controller
             $rooms = array_key_exists('rooms', $postData) ? $postData['rooms'] : [];
 
             if($rooms)  {
+                $priceIds = [];
                 foreach($rooms as $room) {
                     $bookingHasRoom = new BookingHasRoom();
                     $bookingHasRoom->booking_id = $booking->id;
@@ -166,7 +168,6 @@ class BookingsController extends Controller
                     
                     $date = $start;
 
-                    $priceIds = [];
                     for($i=0; $i < $days; $i++) {
 
                         $rateDate = $date->format('Y-m-d');
@@ -182,8 +183,6 @@ class BookingsController extends Controller
                         $date = $date->addDay();
                     }
                     
-                    $booking->productPrice()->sync($priceIds);
-
                     $guests = array_key_exists('guests', $room) ? $room['guests'] : [];
                     if($guests) {
                         foreach($guests as $guest) {
@@ -225,6 +224,7 @@ class BookingsController extends Controller
                         }
                     }
                 }
+                $booking->productPrice()->sync($priceIds);
             }
         });
         return response()->json(['message' => 'Reservation successfully done.']);

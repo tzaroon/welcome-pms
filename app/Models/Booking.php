@@ -20,7 +20,8 @@ class Booking extends Model
     
     protected $appends = [
         'numberOfDays',
-        'roomCount'
+        'roomCount',
+        'price'
     ];
 
     const SOURCE_BUSINESS = 'business';
@@ -80,5 +81,20 @@ class Booking extends Model
 
     public function productPrice() {
         return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_room_id']);
+    }
+
+    public function bookingRooms() {
+        return $this->hasMany(BookingHasRoom::class);
+    }
+
+    public function getPriceAttribute() {
+
+        $totalPrice = 0;
+        if($this->productPrice) {
+            foreach($this->productPrice as $productPrice) {
+                $totalPrice += $productPrice->price;
+            }
+        }
+        return $totalPrice;
     }
 }
