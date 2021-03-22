@@ -93,6 +93,11 @@ class Booking extends Model
         if($this->productPrice) {
             foreach($this->productPrice as $productPrice) {
                 $totalPrice += $productPrice->price;
+                if($productPrice->taxes) {
+                    foreach($productPrice->taxes as $tax) {
+                        $totalPrice += $tax->amount;
+                    }
+                }
             }
         }
         return $totalPrice;
