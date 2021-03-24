@@ -117,7 +117,7 @@ class Booking extends Model
 
                 $totalPrice = $totalPrice+$productPrice->price;
                 $onlyPrice = $onlyPrice+$productPrice->price;
-                //$prices[$productPrice->pivot->booking_has_room_id]['price'][] = $onlyPrice . '+' . $productPrice->price;
+                $prices['price'] = $totalPrice;
 
                 if($productPrice->taxes) {
                     //$allTaxes = [];
@@ -137,18 +137,24 @@ class Booking extends Model
                             if($tax->percentage) {
                                 $taxAmount = $productPrice->price*$tax->percentage/100;
                                 $totalPrice += ($taxAmount*$guestCount);
-                                //$prices[$productPrice->pivot->booking_has_room_id]['taxes'][] = $taxAmount . '*' . $guestCount;
+                                $prices['tax'] = $taxAmount*$guestCount;
                             } else {
                                 $totalPrice += ($tax->amount*$guestCount);
-                                //$prices[$productPrice->pivot->booking_has_room_id]['taxes'][] = $tax->amount . '*' . $guestCount;
+                                $prices['tax'] = $tax->amount*$guestCount;
                             }
                         }
                     }
                 }
-                //$prices[$productPrice->pivot->booking_has_room_id]['total'] = $totalPrice;
+                $prices['total'] = $totalPrice;
             }
         }
-        
-        return $totalPrice;
+        $acuualPrice = $prices['price'];
+        $acuualTax = $prices['tax'];
+
+        $prices['price'] = $acuualPrice*90/100;
+        $prices['tax'] = $acuualTax*90/100;
+        $prices['price_vat'] = $acuualPrice*10/100;
+        $prices['tax_vat'] = $acuualTax*10/100;
+        return $prices;
     }
 }
