@@ -113,11 +113,11 @@ class Booking extends Model
            
             foreach($this->productPrice as $productPrice) {
 
-                $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_room_id);
+                $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_has_room_id);
 
                 $totalPrice = $totalPrice+$productPrice->price;
                 $onlyPrice = $onlyPrice+$productPrice->price;
-                //$prices[$productPrice->pivot->booking_room_id]['price'][] = $onlyPrice . '+' . $productPrice->price;
+                //$prices[$productPrice->pivot->booking_has_room_id]['price'][] = $onlyPrice . '+' . $productPrice->price;
 
                 if($productPrice->taxes) {
                     //$allTaxes = [];
@@ -137,15 +137,15 @@ class Booking extends Model
                             if($tax->percentage) {
                                 $taxAmount = $productPrice->price*$tax->percentage/100;
                                 $totalPrice += ($taxAmount*$guestCount);
-                                //$prices[$productPrice->pivot->booking_room_id]['taxes'][] = $taxAmount . '*' . $guestCount;
+                                //$prices[$productPrice->pivot->booking_has_room_id]['taxes'][] = $taxAmount . '*' . $guestCount;
                             } else {
                                 $totalPrice += ($tax->amount*$guestCount);
-                                //$prices[$productPrice->pivot->booking_room_id]['taxes'][] = $tax->amount . '*' . $guestCount;
+                                //$prices[$productPrice->pivot->booking_has_room_id]['taxes'][] = $tax->amount . '*' . $guestCount;
                             }
                         }
                     }
                 }
-                //$prices[$productPrice->pivot->booking_room_id]['total'] = $totalPrice;
+                //$prices[$productPrice->pivot->booking_has_room_id]['total'] = $totalPrice;
             }
         }
         
