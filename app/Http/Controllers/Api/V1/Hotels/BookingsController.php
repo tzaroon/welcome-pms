@@ -258,8 +258,8 @@ class BookingsController extends Controller
             return response()->json(array('rate_types' => $rateTypes));
         } else {
 
-            $bookingRoom->room_id = $newRoom->id;
-            $bookingRoom->save();
+            $bookingRoom->updateRoom($newRoom->id);
+            $bookingRoom->updatePrices();
         }
 
         return response()->json(array('message' => 'Room changed successfully.'));
@@ -286,10 +286,12 @@ class BookingsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $bookingRoom->room_id = $postData['room_id'];
+        $bookingRoom->updateRoom($postData['room_id']);
         $bookingRoom->rate_type_id = $postData['rate_type_id'];
         $bookingRoom->save();
         
+        $bookingRoom->updatePrices();
+
         return response()->json(array('message' => 'Room changed successfully.'));
     }
 }
