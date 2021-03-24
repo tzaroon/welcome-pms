@@ -106,14 +106,19 @@ class Booking extends Model
         }
 
         $totalPrice = 0;
+        $onlyPrice = 0;
         $taxes = [];
+        $prices = [];
         if($this->productPrice) {
            
             foreach($this->productPrice as $productPrice) {
 
                 $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_room_id);
 
-                $totalPrice += $productPrice->price;
+                $totalPrice = $totalPrice+$productPrice->price;
+                $onlyPrice = $onlyPrice+$productPrice->price;
+                //$prices[$productPrice->pivot->booking_room_id]['price'][] = $onlyPrice . '+' . $productPrice->price;
+
                 if($productPrice->taxes) {
                     
                     foreach($productPrice->taxes as $tax) {
@@ -129,11 +134,18 @@ class Booking extends Model
                                     $guestCount += array_key_exists(Guest::GUEST_TYPE_CHILD, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CHILD] : 0;
                                 break;
                             }
-                            $totalPrice += ($tax->amount*$guestCount);
+                            if($tax->percentage) {
+                                $taxAmount = $productPrice->price*$tax->percentage/100;
+                                $totalPrice += ($taxAmount*$guestCount);
+                                //$prices[$productPrice->pivot->booking_room_id]['taxes'][] = $taxAmount . '*' . $guestCount;
+                            } else {
+                                $totalPrice += ($tax->amount*$guestCount);
+                                //$prices[$productPrice->pivot->booking_room_id]['taxes'][] = $tax->amount . '*' . $guestCount;
+                            }
                         }
                     }
                 }
-                
+                //$prices[$productPrice->pivot->booking_room_id]['total'] = $totalPrice;
             }
         }
         
