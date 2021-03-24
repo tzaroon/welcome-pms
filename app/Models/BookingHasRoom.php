@@ -10,6 +10,9 @@ class BookingHasRoom extends Model
 {
     protected $table = 'booking_room';
 
+    protected $appends = [
+        'price'
+    ];
     public function rateType() {
 
         return $this->belongsTo(RateType::class);
@@ -47,11 +50,27 @@ class BookingHasRoom extends Model
                 ->first();
              
             $priceIds[$this->room_id.$i]['product_price_id'] = $dailyPrice->product->price->id;
-            $priceIds[$this->room_id.$i]['booking_room_id'] =  $this->id;
+            $priceIds[$this->room_id.$i]['booking_has_room_id'] =  $this->id;
 
             $date = $date->addDay();
         }
         $booking->productPrice()->sync($priceIds);
         return;
+    }
+
+    public function productPrice() {
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_id']);
+    }
+
+    public function getPriceAttribute() {
+
+        $totalPrice = 0;
+        if($this->productPrice) {
+            foreach($this->productPrice as $productPrice) {
+                $totalPrice += $productPrice->price;
+            }
+        }
+
+        return $totalPrice;
     }
 }

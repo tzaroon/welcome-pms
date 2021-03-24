@@ -178,7 +178,7 @@ class BookingsController extends Controller
                             ->first();
                             
                         $priceIds[$room['room_id'].$i]['product_price_id'] = $dailyPrice->product->price->id;
-                        $priceIds[$room['room_id'].$i]['booking_room_id'] =  $bookingHasRoom->id;
+                        $priceIds[$room['room_id'].$i]['booking_has_room_id'] =  $bookingHasRoom->id;
 
                         $date = $date->addDay();
                     }
@@ -233,7 +233,7 @@ class BookingsController extends Controller
     public function changeRoom(Request $request, BookingHasRoom $bookingRoom) {
 
         $user = auth()->user();
-        
+
         $postData = $request->getContent();
         
         $postData = json_decode($postData, true);
@@ -255,7 +255,7 @@ class BookingsController extends Controller
 
             $rateTypes = RateType::where('room_type_id', $newRoom->room_type_id)->with(['detail'])->get();
             
-            return response()->json(array('rate_types' => $rateTypes));
+            return response()->json(array('rate_types' => $rateTypes, 'existing_price' => $bookingRoom->price));
         } else {
 
             $bookingRoom->updateRoom($newRoom->id);

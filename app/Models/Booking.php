@@ -81,7 +81,7 @@ class Booking extends Model
     }
 
     public function productPrice() {
-        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_room_id']);
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_has_room_id']);
     }
 
     public function bookingRooms() {
@@ -120,11 +120,11 @@ class Booking extends Model
                 //$prices[$productPrice->pivot->booking_room_id]['price'][] = $onlyPrice . '+' . $productPrice->price;
 
                 if($productPrice->taxes) {
-                    
+                    //$allTaxes = [];
                     foreach($productPrice->taxes as $tax) {
                         $guestCount = 0;
                         if(array_key_exists($bookingRoom->room_id, $guestreport)) {
-                            
+                            //$allTaxes[] = $tax;
                             switch($tax->tax_id) {
                                 case 1:
                                     $guestCount = array_key_exists(Guest::GUEST_TYPE_ADULT, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_ADULT] : 0;
