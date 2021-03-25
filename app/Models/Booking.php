@@ -151,10 +151,10 @@ class Booking extends Model
         $acuualPrice = array_key_exists('price', $prices) ? $prices['price'] : 0;
         $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
 
-        $prices['price'] = $acuualPrice*90/100;
-        $prices['tax'] = $acuualTax*90/100;
-        $prices['price_vat'] = $acuualPrice*10/100;
-        $prices['tax_vat'] = $acuualTax*10/100;
+        $prices['price'] = round($acuualPrice*90/100, 2);
+        $prices['tax'] =  round($acuualTax*90/100, 2);
+        $prices['price_vat'] = round($acuualPrice*10/100, 2);
+        $prices['tax_vat'] = round($acuualTax*10/100, 2);
         return $prices;
     }
 }
