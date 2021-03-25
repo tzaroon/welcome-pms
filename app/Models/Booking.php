@@ -148,8 +148,8 @@ class Booking extends Model
                 $prices['total'] = $totalPrice;
             }
         }
-        $acuualPrice = $prices['price'];
-        $acuualTax = $prices['tax'];
+        $acuualPrice = array_key_exists('price', $prices) ? $prices['price'] : 0;
+        $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
 
         $prices['price'] = $acuualPrice*90/100;
         $prices['tax'] = $acuualTax*90/100;
