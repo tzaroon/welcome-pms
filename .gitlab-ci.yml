@@ -55,7 +55,7 @@ to-stag:
   - cp ~/.env .env
   - ls -la /var/www/html/chicstays-backend
  tags:
-  - stag
+  - staging
  artifacts:
    paths:
      - results.log
