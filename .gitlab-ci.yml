@@ -9,11 +9,15 @@
 .only-develop:
   only:
    - develop
+.only-milestone:
+  only:
+   - milestone*
 stages:
- - deploy
-running-main-pipeline-script-to-deploy-everything:
+ - deploy-to-prod
+ - deploy-to-stag
+running-main-pipeline-script-to-deploy-everything-to-prod:
  extends: .only-develop
- stage: deploy
+ stage: deploy-to-prod
  script: 
   - pwd
   - ls -la
@@ -28,6 +32,38 @@ running-main-pipeline-script-to-deploy-everything:
   - composer install
   - cp ~/.env .env
   - ls -la /var/www/html/chicstays-backend
+ tags:
+  - prod
+ rules:
+  - if: '$CI_COMMIT_BRANCH == "develop"'
+ artifacts:
+   paths:
+     - results.log
+   expire_in: 2 week
+
+# 
+
+running-main-pipeline-script-to-deploy-everything-to-stag:
+ extends: .only-milestone
+ stage: deploy-to-stag
+ script: 
+  - pwd
+  - ls -la
+  - cd ../
+  - pwd
+  - sudo rm -rf /var/www/html/chicstays-backend
+  - ls -la /var/www/html
+  - sudo cp -r chicstays-backend/ /var/www/html/chicstays-backend
+  - ls -la /var/www/html/chicstays-backend
+  - cd /var/www/html/chicstays-backend
+  - pwd
+  - composer install
+  - cp ~/.env .env
+  - ls -la /var/www/html/chicstays-backend
+ tags:
+  - stag
+ rules:
+  - if: '$CI_COMMIT_BRANCH =~ develop*'
  artifacts:
    paths:
      - results.log
