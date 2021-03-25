@@ -8,12 +8,15 @@
 #    - apk add sshpass 
 .only-develop:
   only:
-   - develop
+   - milestone*
 stages:
  - deploy
 running-main-pipeline-script-to-deploy-everything:
  extends: .only-develop
  stage: deploy
+ tags:
+  - ooo
+  - abc 
  script: 
   - pwd
   - ls -la
