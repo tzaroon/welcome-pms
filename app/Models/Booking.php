@@ -153,8 +153,7 @@ class Booking extends Model
 
         $prices['price'] = round($acuualPrice*90/100, 2);
         $prices['tax'] =  round($acuualTax*90/100, 2);
-        $prices['price_vat'] = round($acuualPrice*10/100, 2);
-        $prices['tax_vat'] = round($acuualTax*10/100, 2);
+        $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
         return $prices;
     }
 }
