@@ -34,8 +34,6 @@ to-prod:
   - ls -la /var/www/html/chicstays-backend
  tags:
   - prod
- rules:
-  - if: '$CI_COMMIT_BRANCH == "develop"'
  artifacts:
    paths:
      - results.log
@@ -62,8 +60,6 @@ to-stag:
   - ls -la /var/www/html/chicstays-backend
  tags:
   - stag
- rules:
-  - if: '$CI_COMMIT_BRANCH =~ "milestone*"'
  artifacts:
    paths:
      - results.log
