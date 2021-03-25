@@ -15,7 +15,7 @@
 stages:
  - deploy-to-prod
  - deploy-to-stag
-running-main-pipeline-script-to-deploy-everything-to-prod:
+to-prod:
  extends: .only-develop
  stage: deploy-to-prod
  script: 
@@ -43,7 +43,7 @@ running-main-pipeline-script-to-deploy-everything-to-prod:
 
 # 
 
-running-main-pipeline-script-to-deploy-everything-to-stag:
+to-stag:
  extends: .only-milestone
  stage: deploy-to-stag
  script: 
@@ -63,7 +63,7 @@ running-main-pipeline-script-to-deploy-everything-to-stag:
  tags:
   - stag
  rules:
-  - if: '$CI_COMMIT_BRANCH =~ develop*'
+  - if: '$CI_COMMIT_BRANCH =~ "milestone*"'
  artifacts:
    paths:
      - results.log
