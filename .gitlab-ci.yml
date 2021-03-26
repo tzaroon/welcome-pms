@@ -6,14 +6,13 @@
 #    - rm /root/.ssh/known_hosts
 #    - touch /root/.ssh/known_hosts
 #    - apk add sshpass 
-.only-develop:
-  only:
-   - develop
 stages:
- - deploy
-running-main-pipeline-script-to-deploy-everything:
- extends: .only-develop
- stage: deploy
+ - deploy-to-prod
+ - deploy-to-stag
+to-prod:
+ stage: deploy-to-prod
+ rules:
+  - if: '$CI_COMMIT_BRANCH == "develop"'
  script: 
   - pwd
   - ls -la
@@ -28,6 +27,35 @@ running-main-pipeline-script-to-deploy-everything:
   - composer install
   - cp ~/.env .env
   - ls -la /var/www/html/chicstays-backend
+ tags:
+  - prod
+ artifacts:
+   paths:
+     - results.log
+   expire_in: 2 week
+
+# 
+
+to-stag:
+ stage: deploy-to-stag
+ rules:
+  - if: '$CI_COMMIT_BRANCH == "milestone1" || $CI_COMMIT_BRANCH == "milestone2" || $CI_COMMIT_BRANCH == "milestone3" || $CI_COMMIT_BRANCH == "milestone4" || $CI_COMMIT_BRANCH == "milestone5" || $CI_COMMIT_BRANCH == "milestone6" || $CI_COMMIT_BRANCH == "milestone8" || $CI_COMMIT_BRANCH == "milestone9" || $CI_COMMIT_BRANCH == "milestone10" || $CI_COMMIT_BRANCH == "milestone11" || $CI_COMMIT_BRANCH == "milestone12"'
+ script: 
+  - pwd
+  - ls -la
+  - cd ../
+  - pwd
+  - sudo rm -rf /var/www/html/chicstays-backend
+  - ls -la /var/www/html
+  - sudo cp -r chicstays-backend/ /var/www/html/chicstays-backend
+  - ls -la /var/www/html/chicstays-backend
+  - cd /var/www/html/chicstays-backend
+  - pwd
+  - composer install
+  - cp ~/.env .env
+  - ls -la /var/www/html/chicstays-backend
+ tags:
+  - staging
  artifacts:
    paths:
      - results.log
