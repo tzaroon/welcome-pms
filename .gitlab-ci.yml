@@ -39,7 +39,7 @@ to-prod:
 to-stag:
  stage: deploy-to-stag
  rules:
-  - if: '$CI_COMMIT_BRANCH == "milestone1" || $CI_COMMIT_BRANCH == "milestone2" || $CI_COMMIT_BRANCH == "milestone3" || $CI_COMMIT_BRANCH == "milestone4" || $CI_COMMIT_BRANCH == "milestone5" || $CI_COMMIT_BRANCH == "milestone6" || $CI_COMMIT_BRANCH == "milestone8" || $CI_COMMIT_BRANCH == "milestone9" || $CI_COMMIT_BRANCH == "milestone10" || $CI_COMMIT_BRANCH == "milestone11" || $CI_COMMIT_BRANCH == "milestone12"'
+  - if: '$CI_COMMIT_BRANCH =~ /^milestone[0-9]+\.[0-9]+$/'
  script: 
   - pwd
   - ls -la
@@ -55,7 +55,7 @@ to-stag:
   - cp ~/.env .env
   - ls -la /var/www/html/chicstays-backend
  tags:
-  - staging
+  - stag
  artifacts:
    paths:
      - results.log
