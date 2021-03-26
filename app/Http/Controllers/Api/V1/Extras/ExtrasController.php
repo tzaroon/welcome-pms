@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Extras;
 
 use App\Http\Controllers\Controller;
 use App\Models\Extra;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -39,16 +40,8 @@ class ExtrasController extends Controller
         $postData = $request->all();
 
         $validator = Validator::make($postData, [
-            'first_name' => 'required|string|max:191',
-            'last_name' => 'required|string|max:191',
-            'gender' => 'required|string',
-            'email' => 'required|string',
-            'doc' => 'mimes:jpeg,png,pdf|max:4096',
-        ], [], [
-            'first_name' => 'First Name',
-            'last_name' => 'Last Name',
-            'gender' => 'Gender',
-            'email' => 'Email',
+            'name' => 'required|string|max:191',
+            'price' => 'required'
         ]);
 
         if (!$validator->passes()) {
@@ -56,26 +49,24 @@ class ExtrasController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-       
-        $user = new User();
-        $user->fill($postData);
-        $user->company_id = $authUser->company_id;
-        $user->save();
-        
-        $booker = new Booker();
-        $booker->fill($postData);
-        $booker->company_id = $authUser->company_id;
-        $booker->user_id = $user->id;
-        $booker->save();
+       $product = Product::create([
+           'company_id' => $authUser->company_id,
+           'type' => 'addon',
+       ]);
 
-        if ($request->hasFile('doc')) {
+        $extra = new Extra();
+        $extra->fill($postData);
+        $extra->product_id = $product->id;
+        $extra->save();
+        
+        if ($request->hasFile('image')) {
             
-            $docPath = $request->file('doc')->hashName();
-            $request->file('doc')->store('booker_docs');
-            $booker->doc = $docPath;
-            $booker->save();
+            $docPath = $request->file('image')->hashName();
+            $request->file('image')->store('extras_images');
+            $extra->image = $docPath;
+            $extra->save();
         }
 
-        return response()->json(['message' => 'Booker added successfully']);
+        return response()->json(['message' => 'Accessory added successfully']);
     }
 }
