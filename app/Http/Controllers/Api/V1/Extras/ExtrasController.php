@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api\V1\Extras;
 use App\Http\Controllers\Controller;
 use App\Models\Extra;
 use App\Models\Product;
+use App\Models\Tax;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Validator;
+use DB;
 
 class ExtrasController extends Controller
 {
@@ -49,24 +52,130 @@ class ExtrasController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-       $product = Product::create([
-           'company_id' => $authUser->company_id,
-           'type' => 'addon',
-       ]);
-
-        $extra = new Extra();
-        $extra->fill($postData);
-        $extra->product_id = $product->id;
-        $extra->save();
-        
-        if ($request->hasFile('image')) {
+        DB::transaction(function() use ($authUser, $postData, $request) {
+            $settings = $postData['settings'];
+            $product = new Product();
+            $product->company_id = $authUser->company_id;
+            $product->type = 'addon';
+            $product->save();
             
-            $docPath = $request->file('image')->hashName();
-            $request->file('image')->store('extras_images');
-            $extra->image = $docPath;
+            $extra = new Extra();
+            $extra->fill($postData);
+            $extra->product_id = $product->id;
+            $extra->company_id = $authUser->company_id;
             $extra->save();
-        }
+            
+            $taxes[Tax::VAT]['tax_id'] = Tax::VAT;
+            $taxes[Tax::VAT]['amount'] = $postData['tax']; 
+
+            $product->createPrice($postData['price'], $taxes);
+
+            if ($request->hasFile('image')) {
+                
+                $docPath = $request->file('image')->hashName();
+                $request->file('image')->store('extras_images');
+                $extra->image = $docPath;
+                $extra->save();
+            }
+
+            $keyedSettings = [];
+            if($settings) {
+                foreach($settings as $settingId => $setting) {
+                    $keyedSettings[$settingId]['extra_setting_id'] = $settingId;
+                    $keyedSettings[$settingId]['value'] = $setting;
+                }
+            }
+
+            $extra->settings()->sync($keyedSettings);
+        });
 
         return response()->json(['message' => 'Accessory added successfully']);
+    }
+    
+    /**
+     * Show a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param App\Models\Extra $extra
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function edit(Request $request, Extra $extra) : JsonResponse
+    {
+        $extra->settings;
+        $extra->product->price->taxes;
+        return response()->json($extra);
+    }
+
+    /**
+     * Update a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Extra $extra) : JsonResponse
+    {
+        $postData = $request->all();
+
+        $validator = Validator::make($postData, [
+            'name' => 'required|string|max:191',
+            'price' => 'required'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        DB::transaction(function() use ($postData, $request, $extra) {
+
+            $settings = $postData['settings'];
+
+            $extra->fill($postData);
+            $extra->update();
+            
+            $taxes[Tax::VAT]['tax_id'] = Tax::VAT;
+            $taxes[Tax::VAT]['amount'] = $postData['tax']; 
+
+            $extra->product->createPrice($postData['price'], $taxes);
+
+            if ($request->hasFile('image')) {
+                
+                $docPath = $request->file('image')->hashName();
+                $request->file('image')->store('extras_images');
+                $extra->image = $docPath;
+                $extra->save();
+            }
+
+            $keyedSettings = [];
+            if($settings) {
+                foreach($settings as $settingId => $setting) {
+                    $keyedSettings[$settingId]['extra_setting_id'] = $settingId;
+                    $keyedSettings[$settingId]['value'] = $setting;
+                }
+            }
+
+            $extra->settings()->sync($keyedSettings);
+        });
+
+        return response()->json(['message' => 'Accessory updated successfully']);
+    }
+
+    
+    /**
+     * Destroy a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param App\Model\Extra $extra
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function destroy(Request $request, Extra $extra) : JsonResponse
+    {
+       
+        $extra->delete();
+
+        return response()->json(array('message' => 'Accessory deleted successfully'));
     }
 }

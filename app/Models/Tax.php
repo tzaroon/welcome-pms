@@ -8,4 +8,5 @@ class Tax extends Model
 {
     const CITY_TAX = 1;
     const CHILDREN_CITY_TAX = 2;
+    const VAT = 3;
 }
