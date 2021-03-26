@@ -9,6 +9,12 @@ class RateType extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'room_type_id',
+        'company_id',
+        'price'
+    ];
+    
     protected $appandes = [
         'rate_type_price'
     ];

@@ -34,9 +34,17 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('booking-status', 'EnumsController@bookingStatus')->name('booking_status');
                 Route::get('booking-payment-status', 'EnumsController@bookingPaymentStatus')->name('booking_payment_status');
                 Route::get('guest-types', 'EnumsController@guestTypes')->name('guest-types');
+                Route::get('extra-settings', 'ExtraSettingsController@index')->name('extra-settings');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);
+            });
+            Route::namespace('Users')->name('users.')->prefix('users')->group(function () {
+                Route::resource('bookers', 'BookersController', ['except' => ['create']]);
+                Route::get('bookers/autocomplete/{keyword}', 'BookersController@autocomplete')->name('bookers_list');
+            });
+            Route::namespace('Extras')->name('extras.')->prefix('extras')->group(function () {
+                Route::resource('extras', 'ExtrasController', ['except' => ['create']]);
             });
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
@@ -48,6 +56,9 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('{hotel}/bookings', 'BookingsController');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
                 Route::get('room-rate-types/{hotel}', 'HotelsController@loadRoomTypeRateType')->name('load-room-type-rate-type');
+                Route::post('change-room/{bookingRoom}', 'BookingsController@changeRoom')->name('change_room');
+                Route::post('change-room-and-rate/{bookingRoom}', 'BookingsController@changeRoomAndRate')->name('change_room_and_rate');
+                Route::get('change-room-and-rate/{bookingRoom}', 'BookingsController@changeRoomAndRate')->name('change_room_and_rate');
             });
         });
     });

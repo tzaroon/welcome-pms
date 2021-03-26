@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Models\Booker;
+use App\Models\Guest;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -37,7 +39,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * The attributes that should be hidden for arrays.
      *
-     * @var array
+     * @var array ok
      */
     protected $hidden = [
         'password', 'remember_token', 'api_token', 'verified',
@@ -51,4 +53,12 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function booker() {
+        return $this->hasOne(Booker::class);
+    }
+   
+    public function guest() {
+        return $this->hasOne(Guest::class);
+    }
 }

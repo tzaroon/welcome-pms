@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Booking extends Model
 {
@@ -20,7 +21,8 @@ class Booking extends Model
     
     protected $appends = [
         'numberOfDays',
-        'roomCount'
+        'roomCount',
+        'price'
     ];
 
     const SOURCE_BUSINESS = 'business';
@@ -53,7 +55,7 @@ class Booking extends Model
         self::PAYMENT_STATUS_PAID => 'Paid'
     ];
 
-    public function room() {
+    public function rooms() {
         
         return $this->belongsToMany(Room::class);
     }
@@ -76,5 +78,82 @@ class Booking extends Model
     public function guests() {
 
         return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->withPivot('room_id');
+    }
+
+    public function productPrice() {
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_has_room_id']);
+    }
+
+    public function bookingRooms() {
+        return $this->hasMany(BookingHasRoom::class);
+    }
+
+    public function getPriceAttribute() {
+
+        $guestsCount = DB::table('booking_room_guests')
+            ->join('guests', 'booking_room_guests.guest_id', '=', 'guests.id')
+            ->select('booking_room_guests.room_id', 'guests.guest_type', DB::raw('count(*) as guest_count'))
+            ->where('booking_room_guests.booking_id', $this->id)
+            ->groupBy('guests.guest_type')
+            ->groupBy('booking_room_guests.room_id')
+            ->get();
+
+        $guestreport = [];
+        if($guestsCount) {
+            foreach($guestsCount as $count) {
+                $guestreport[$count->room_id][$count->guest_type] = $count->guest_count;
+            }
+        }
+
+        $totalPrice = 0;
+        $onlyPrice = 0;
+        $taxes = [];
+        $prices = [];
+        if($this->productPrice) {
+           
+            foreach($this->productPrice as $productPrice) {
+
+                $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_has_room_id);
+
+                $totalPrice = $totalPrice+$productPrice->price;
+                $onlyPrice = $onlyPrice+$productPrice->price;
+                $prices['price'] = $totalPrice;
+
+                if($productPrice->taxes) {
+                    //$allTaxes = [];
+                    foreach($productPrice->taxes as $tax) {
+                        $guestCount = 0;
+                        if(array_key_exists($bookingRoom->room_id, $guestreport)) {
+                            //$allTaxes[] = $tax;
+                            switch($tax->tax_id) {
+                                case 1:
+                                    $guestCount = array_key_exists(Guest::GUEST_TYPE_ADULT, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_ADULT] : 0;
+                                    $guestCount += array_key_exists(Guest::GUEST_TYPE_CORPORATE, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CORPORATE] : 0;
+                                break;
+                                case 2:
+                                    $guestCount += array_key_exists(Guest::GUEST_TYPE_CHILD, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CHILD] : 0;
+                                break;
+                            }
+                            if($tax->percentage) {
+                                $taxAmount = $productPrice->price*$tax->percentage/100;
+                                $totalPrice += ($taxAmount*$guestCount);
+                                $prices['tax'] = $taxAmount*$guestCount;
+                            } else {
+                                $totalPrice += ($tax->amount*$guestCount);
+                                $prices['tax'] = $tax->amount*$guestCount;
+                            }
+                        }
+                    }
+                }
+                $prices['total'] = $totalPrice;
+            }
+        }
+        $acuualPrice = array_key_exists('price', $prices) ? $prices['price'] : 0;
+        $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
+
+        $prices['price'] = round($acuualPrice*90/100, 2);
+        $prices['tax'] =  round($acuualTax*90/100, 2);
+        $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
+        return $prices;
     }
 }

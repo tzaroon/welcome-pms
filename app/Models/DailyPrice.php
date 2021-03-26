@@ -16,4 +16,9 @@ class DailyPrice extends Model
 
         return $this->belongsTo(RateType::class);
     }
+    
+    public function product() {
+
+        return $this->belongsTo(Product::class);
+    }
 }

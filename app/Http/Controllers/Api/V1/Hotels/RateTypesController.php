@@ -135,10 +135,20 @@ class RateTypesController extends Controller
 
                 $dailyPrice->save();
 
+                $rateTypePrice = $rateType->rate_type_price;
+
                 if($postData['rate_type_id']) {
 
                     $masterRateType = new RateType();
                     $masterRateType = $masterRateType->find($postData['rate_type_id']);
+                   
+                    $amountToAdd = $rateType->amount_to_add;
+                    
+                    if($rateType->percent_to_add) {
+                        $amountToAdd = $masterRateType->rate_type_price*$rateType->percent_to_add/100;
+                    }
+
+                    $rateTypePrice = $masterRateType->rate_type_price + $amountToAdd;
                 }
 
                 $taxes = [];
@@ -159,7 +169,7 @@ class RateTypesController extends Controller
                     $taxes[Tax::CHILDREN_CITY_TAX]['percentage'] = $postData['tax_2_percentage'];                    
                 }
 
-                $product->createPrice($rateType->rate_type_price, $taxes);
+                $product->createPrice($rateTypePrice, $taxes);
                 $date = $date->addDay();
             }
 
@@ -284,6 +294,22 @@ class RateTypesController extends Controller
                     $product = Product::find($dailyPrice->product_id);
                 }
 
+                $rateTypePrice = $rateType->rate_type_price;
+
+                if($postData['rate_type_id']) {
+
+                    $masterRateType = new RateType();
+                    $masterRateType = $masterRateType->find($postData['rate_type_id']);
+                   
+                    $amountToAdd = $rateType->amount_to_add;
+                    
+                    if($rateType->percent_to_add) {
+                        $amountToAdd = $masterRateType->rate_type_price*$rateType->percent_to_add/100;
+                    }
+                    
+                    $rateTypePrice = $masterRateType->rate_type_price + $amountToAdd;
+                }
+
                 $taxes = [];
                 if($postData['tax_1_amount']) {
                     $taxes[Tax::CITY_TAX]['tax_id'] = Tax::CITY_TAX;
@@ -301,8 +327,8 @@ class RateTypesController extends Controller
                     $taxes[Tax::CHILDREN_CITY_TAX]['tax_id'] = Tax::CHILDREN_CITY_TAX;
                     $taxes[Tax::CHILDREN_CITY_TAX]['percentage'] = $postData['tax_2_percentage'];                    
                 }
-
-                $product->createPrice($postData['price'], $taxes);  
+                
+                $product->createPrice($rateTypePrice, $taxes);
 
                 $dailyPrice->company_id = $user->company_id;
                 $dailyPrice->rate_type_id = $rateType->id;
