@@ -68,7 +68,7 @@ class ExtrasController extends Controller
             $extra->save();
             
             $taxes[Tax::VAT]['tax_id'] = Tax::VAT;
-            $taxes[Tax::VAT]['amount'] = $postData['tax']; 
+            $taxes[Tax::VAT]['percentage'] = $postData['tax'] ? : 0; 
 
             $product->createPrice($postData['price'], $taxes);
 
@@ -138,7 +138,7 @@ class ExtrasController extends Controller
             $extra->update();
             
             $taxes[Tax::VAT]['tax_id'] = Tax::VAT;
-            $taxes[Tax::VAT]['percentage'] = $postData['tax']; 
+            $taxes[Tax::VAT]['percentage'] = $postData['tax'] ? : 0; 
 
             $extra->product->createPrice($postData['price'], $taxes);
 
