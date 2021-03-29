@@ -138,7 +138,7 @@ class ExtrasController extends Controller
             $extra->update();
             
             $taxes[Tax::VAT]['tax_id'] = Tax::VAT;
-            $taxes[Tax::VAT]['amount'] = $postData['tax']; 
+            $taxes[Tax::VAT]['percentage'] = $postData['tax']; 
 
             $extra->product->createPrice($postData['price'], $taxes);
 
