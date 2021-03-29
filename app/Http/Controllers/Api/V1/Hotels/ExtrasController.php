@@ -105,7 +105,7 @@ class ExtrasController extends Controller
     public function edit(Request $request, Extra $extra) : JsonResponse
     {
         $extra->settings;
-        $extra->product->price ? $extra->product->price->taxes : null;
+        $extra->product->price ? $extra->product->price->vat : null;
         return response()->json($extra);
     }
 
