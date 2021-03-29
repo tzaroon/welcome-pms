@@ -75,7 +75,7 @@ class ExtrasController extends Controller
             if ($request->hasFile('image')) {
                 
                 $docPath = $request->file('image')->hashName();
-                $request->file('image')->store('extras_images');
+                $request->file('image')->store('public/extras_images');
                 $extra->image = $docPath;
                 $extra->save();
             }
@@ -145,7 +145,7 @@ class ExtrasController extends Controller
             if ($request->hasFile('image')) {
                 
                 $docPath = $request->file('image')->hashName();
-                $request->file('image')->store('extras_images');
+                $request->file('image')->store('public/extras_images');
                 $extra->image = $docPath;
                 $extra->save();
             }
