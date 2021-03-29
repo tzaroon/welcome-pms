@@ -22,7 +22,9 @@ class ExtrasController extends Controller
     public function index(Request $request, $id) {
 
         $user = auth()->user();
-        $extras = Extra::where(['company_id' => $user->company_id])->where('hotel_id', $id)->get();
+        $extras = Extra::where(['company_id' => $user->company_id])->where('hotel_id', $id)
+            ->with('product.price.vat')
+            ->get();
 
         $data = $this->paginate($extras);
 

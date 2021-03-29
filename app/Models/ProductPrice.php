@@ -55,4 +55,9 @@ class ProductPrice extends Model
         
         return $this->hasMany(ProductPricesHasTax::class)->where('is_active', 1);
     }
+    
+    public function vat() {
+        
+        return $this->hasOne(ProductPricesHasTax::class)->where('is_active', 1)->where('tax_id', 3);
+    }
 }
