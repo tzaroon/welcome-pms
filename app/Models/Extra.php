@@ -11,7 +11,8 @@ class Extra extends Model
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-        'name', 
+        'hotel_id',
+        'name',
         'description'
     ];
 

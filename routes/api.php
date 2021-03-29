@@ -43,9 +43,6 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('bookers', 'BookersController', ['except' => ['create']]);
                 Route::get('bookers/autocomplete/{keyword}', 'BookersController@autocomplete')->name('bookers_list');
             });
-            Route::namespace('Extras')->name('extras.')->prefix('extras')->group(function () {
-                Route::resource('extras', 'ExtrasController', ['except' => ['create']]);
-            });
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
                 Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
@@ -59,6 +56,8 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('change-room/{bookingRoom}', 'BookingsController@changeRoom')->name('change_room');
                 Route::post('change-room-and-rate/{bookingRoom}', 'BookingsController@changeRoomAndRate')->name('change_room_and_rate');
                 Route::get('change-room-and-rate/{bookingRoom}', 'BookingsController@changeRoomAndRate')->name('change_room_and_rate');
+                Route::get('{hotel}/extras', 'ExtrasController@index', ['except' => ['create']]);
+                Route::resource('extras', 'ExtrasController', ['except' => ['create', 'index']]);
             });
         });
     });
