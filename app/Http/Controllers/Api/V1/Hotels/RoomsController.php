@@ -158,4 +158,25 @@ class RoomsController extends Controller
         $room->delete();
         return response()->json(['success' => true, 'message' => 'Room deleted successfully.']);
     }
+
+    public function listRoomsByIds(Request $request) {
+
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'room_ids.0' => 'required',
+        ], [], [
+            'room_ids.0' => 'Room'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+        $rooms = Room::whereIn('id', $postData['room_ids'])->with('roomType.rateTypes.detail')->get();
+        
+        return response()->json($rooms);
+    }
 }

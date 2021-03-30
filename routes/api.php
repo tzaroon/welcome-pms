@@ -35,6 +35,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('booking-payment-status', 'EnumsController@bookingPaymentStatus')->name('booking_payment_status');
                 Route::get('guest-types', 'EnumsController@guestTypes')->name('guest-types');
                 Route::get('extra-settings', 'ExtraSettingsController@index')->name('extra-settings');
+                Route::get('document-types', 'EnumsController@documentTypes')->name('document-types');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);
@@ -48,9 +49,11 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
                 Route::resource('rate-types', 'RateTypesController', ['except' => ['create']]);
                 Route::resource('rooms', 'RoomsController', ['except' => ['index', 'create']]);
+                Route::post('room-list-by-ids', 'RoomsController@listRoomsByIds')->name('room_list_by_ids');
                 Route::get('{hotel}/room-types', 'RoomTypesController@list')->name('room_types_list');
                 Route::get('{hotel}/rooms', 'RoomsController@index')->name('rooms_list');
                 Route::resource('{hotel}/bookings', 'BookingsController');
+                Route::resource('bookings', 'BookingsController');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
                 Route::get('room-rate-types/{hotel}', 'HotelsController@loadRoomTypeRateType')->name('load-room-type-rate-type');
                 Route::post('change-room/{bookingRoom}', 'BookingsController@changeRoom')->name('change_room');

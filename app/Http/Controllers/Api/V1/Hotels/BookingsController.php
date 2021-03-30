@@ -96,10 +96,7 @@ class BookingsController extends Controller
                             'rooms' => $associatedRooms,
                             'total_price' => $booking->price,
                             'payment_atatus' => $paymentStatus[0],
-                            'addons' => [
-                                'Bottella da Sharab',
-                                'Minibar Cola'
-                            ]
+                            'addons' => $booking->accessories
                         ];
                     }
                 }
@@ -226,8 +223,24 @@ class BookingsController extends Controller
                 }
                 $booking->productPrice()->sync($priceIds);
             }
+
+            $accessories = array_key_exists('accessories', $postData) ? $postData['accessories'] : [];
+            $priceIds = [];
+            if($accessories) {
+                foreach($accessories as $accessory) {
+                    $priceIds[$accessory['product_price_id']]['product_price_id'] = $accessory['product_price_id'];
+                    $priceIds[$accessory['product_price_id']]['extras_count'] = $accessory['count'];
+                }
+            }
+            $booking->productPrice()->sync($priceIds);
         });
         return response()->json(['message' => 'Reservation successfully done.']);
+    }
+
+    public function edit(Request $request, Booking $booking) {
+
+        
+        return response()->json($booking);
     }
 
     public function changeRoom(Request $request, BookingHasRoom $bookingRoom) {

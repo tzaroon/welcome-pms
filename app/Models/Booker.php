@@ -19,6 +19,17 @@ class Booker extends Model
         'discount_amount',
         'discount_percentage'
     ];
+
+    const DOCUMENT_PASSPORT = 'passport';
+    const DOCUMENT_ID = 'id';
+    const DOCUMENT_OTHERS = 'others';
+
+    static $__document_types = [
+        self::DOCUMENT_PASSPORT => 'Passport',
+        self::DOCUMENT_ID => 'ID',
+        self::DOCUMENT_OTHERS => 'Others'
+    ];
+
     public function user() {
 
         return $this->belongsTo(User::class);

@@ -22,7 +22,8 @@ class Booking extends Model
     protected $appends = [
         'numberOfDays',
         'roomCount',
-        'price'
+        'price',
+        'accessories'
     ];
 
     const SOURCE_BUSINESS = 'business';
@@ -39,10 +40,12 @@ class Booking extends Model
 
     const STATUS_CONFIRMED = 'confirmed';
     const STATUS_CHICKIN = 'check-in';
+    const STATUS_CHICKOUT = 'check-out';
 
     static $__status = [
         self::STATUS_CONFIRMED => 'Confirmed',
-        self::STATUS_CHICKIN => 'Check In'
+        self::STATUS_CHICKIN => 'Check In',
+        self::STATUS_CHICKOUT => 'Check Out'
     ];
 
     const PAYMENT_STATUS_NOT_PAID = 'not-paid';
@@ -81,11 +84,25 @@ class Booking extends Model
     }
 
     public function productPrice() {
-        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_has_room_id']);
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_has_room_id', 'extras_count']);
     }
 
     public function bookingRooms() {
         return $this->hasMany(BookingHasRoom::class);
+    }
+    
+    public function getAccessoriesAttribute() {
+
+        $productPrices = [];
+        if($this->productPrice) {
+            foreach($this->productPrice as $productPrice) {
+                
+                if($productPrice->product->extra) {
+                    $productPrices[] = $productPrice->product->extra->name;
+                }
+            }
+        }
+        return $productPrices;
     }
 
     public function getPriceAttribute() {
@@ -123,7 +140,7 @@ class Booking extends Model
                     //$allTaxes = [];
                     foreach($productPrice->taxes as $tax) {
                         $guestCount = 0;
-                        if(array_key_exists($bookingRoom->room_id, $guestreport)) {
+                        if($bookingRoom && array_key_exists($bookingRoom->room_id, $guestreport)) {
                             //$allTaxes[] = $tax;
                             switch($tax->tax_id) {
                                 case 1:

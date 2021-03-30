@@ -82,6 +82,8 @@ class BookersController extends Controller
             $booker->save();
         }
 
-        return response()->json(['message' => 'Booker added successfully']);
+        $booker->user;
+
+        return response()->json($booker);
     }
 }

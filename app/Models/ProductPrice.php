@@ -60,4 +60,8 @@ class ProductPrice extends Model
         
         return $this->hasOne(ProductPricesHasTax::class)->where('is_active', 1)->where('tax_id', 3);
     }
+
+    public function product() {
+        return $this->belongsTo(Product::class);
+    }
 }

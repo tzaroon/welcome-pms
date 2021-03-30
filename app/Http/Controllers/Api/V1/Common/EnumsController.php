@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Common;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booker;
 use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Guest;
@@ -44,5 +45,10 @@ class EnumsController extends Controller
     public function guestTypes(Request $request) : JsonResponse
     {
         return response()->json(Guest::$__guest_types);
+    }
+    
+    public function documentTypes(Request $request) : JsonResponse
+    {
+        return response()->json(Booker::$__document_types);
     }
 }

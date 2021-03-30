@@ -31,4 +31,8 @@ class Product extends Model
     public function price() {
         return $this->hasOne(ProductPrice::class)->where('is_active', 1);
     }
+
+    public function extra() {
+        return $this->hasOne(Extra::class);
+    }
 }
