@@ -29,6 +29,21 @@ class Booker extends Model
         self::DOCUMENT_ID => 'ID',
         self::DOCUMENT_OTHERS => 'Others'
     ];
+    
+    static $__document_types_array = [
+        [
+            'value' => self::DOCUMENT_PASSPORT,
+            'name' => 'Passport'
+        ],
+        [
+            'value' => self::DOCUMENT_ID,
+            'name' => 'ID'
+        ],
+        [
+            'value' => self::DOCUMENT_OTHERS,
+            'name' => 'Others'
+        ]
+    ];
 
     public function user() {
 

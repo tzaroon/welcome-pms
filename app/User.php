@@ -36,6 +36,25 @@ class User extends Authenticatable implements JWTSubject
         'birth_date'
     ];
 
+    const GENDER_MALE = 'male';
+    const GENDER_FEMALE = 'female';
+    const GENDER_NONE = 'none';
+
+    static $__gender_array = [
+        [
+            'value' => self::GENDER_MALE,
+            'name' => 'Male'
+        ],
+        [
+            'value' => self::GENDER_FEMALE,
+            'name' => 'Female'
+        ],
+        [
+            'value' => self::GENDER_NONE,
+            'name' => 'Not Spacified'
+        ]
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *

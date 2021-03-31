@@ -26,6 +26,21 @@ class Guest extends Model
         self::GUEST_TYPE_CORPORATE => 'Corporate'
     ];
 
+    static $__guest_types_array = [
+        [
+            'value' => self::GUEST_TYPE_ADULT,
+            'name' => 'Adult'
+        ],
+        [
+            'value' => self::GUEST_TYPE_CHILD,
+            'name' => 'Child'
+        ],
+        [
+            'value' => self::GUEST_TYPE_CORPORATE,
+            'name' => 'Corporate'
+        ]
+    ];
+
     public function user() {
         return $this->belongsTo(User::class);
     }

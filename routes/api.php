@@ -36,6 +36,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('guest-types', 'EnumsController@guestTypes')->name('guest-types');
                 Route::get('extra-settings', 'ExtraSettingsController@index')->name('extra-settings');
                 Route::get('document-types', 'EnumsController@documentTypes')->name('document-types');
+                Route::get('genders', 'EnumsController@genders')->name('genders');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);

@@ -47,6 +47,21 @@ class Booking extends Model
         self::STATUS_CHICKIN => 'Check In',
         self::STATUS_CHICKOUT => 'Check Out'
     ];
+    
+    static $__status_array = [
+        [
+            'name' => 'Confirmed',
+            'value' => self::STATUS_CONFIRMED
+        ],
+        [
+            'name' => 'Check In',
+            'value' => self::STATUS_CHICKIN
+        ],
+        [
+            'name' => 'Check Out',
+            'value' => self::STATUS_CHICKOUT
+        ]
+    ];
 
     const PAYMENT_STATUS_NOT_PAID = 'not-paid';
     const PAYMENT_STATUS_PARTIALLY_PAID = 'partially-paid';
@@ -56,6 +71,20 @@ class Booking extends Model
         self::PAYMENT_STATUS_NOT_PAID => 'Not Paid',
         self::PAYMENT_STATUS_PARTIALLY_PAID => 'Partially paid',
         self::PAYMENT_STATUS_PAID => 'Paid'
+    ];
+    static $__payment_status_array = [
+        [
+            'value' => self::PAYMENT_STATUS_NOT_PAID,
+            'name' => 'Not Paid'
+        ],
+        [
+            'value' => self::PAYMENT_STATUS_PARTIALLY_PAID,
+            'name' => 'Partially paid'
+        ],
+        [
+            'value' => self::PAYMENT_STATUS_PAID,
+            'name' => 'Paid'
+        ]
     ];
 
     public function rooms() {

@@ -7,6 +7,7 @@ use App\Models\Booker;
 use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Guest;
+use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -34,21 +35,26 @@ class EnumsController extends Controller
 
     public function bookingStatus(Request $request) : JsonResponse
     {
-        return response()->json(Booking::$__status);
+        return response()->json(Booking::$__status_array);
     }
     
     public function bookingPaymentStatus(Request $request) : JsonResponse
     {
-        return response()->json(Booking::$__payment_status);
+        return response()->json(Booking::$__payment_status_array);
     }
     
     public function guestTypes(Request $request) : JsonResponse
     {
-        return response()->json(Guest::$__guest_types);
+        return response()->json(Guest::$__guest_types_array);
     }
     
     public function documentTypes(Request $request) : JsonResponse
     {
         return response()->json(Booker::$__document_types);
+    }
+    
+    public function genders(Request $request) : JsonResponse
+    {
+        return response()->json(User::$__gender_array);
     }
 }
