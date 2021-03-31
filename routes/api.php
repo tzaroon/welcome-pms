@@ -37,7 +37,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('extra-settings', 'ExtraSettingsController@index')->name('extra-settings');
                 Route::get('document-types', 'EnumsController@documentTypes')->name('document-types');
                 Route::get('genders', 'EnumsController@genders')->name('genders');
-                Route::get('assets-pricing', 'EnumsController@assetsPricing')->name('assets-pricing');
+                Route::get('extras-pricing', 'EnumsController@extrasPricing')->name('extras-pricing');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);

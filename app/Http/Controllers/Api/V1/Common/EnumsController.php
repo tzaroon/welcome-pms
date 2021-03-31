@@ -60,7 +60,7 @@ class EnumsController extends Controller
         return response()->json(User::$__gender_array);
     }
    
-    public function assetsPricing(Request $request) : JsonResponse
+    public function extrasPricing(Request $request) : JsonResponse
     {
         return response()->json(Extra::$__pricing_array);
     }
