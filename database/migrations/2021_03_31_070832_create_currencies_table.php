@@ -13,8 +13,7 @@ class CreateCurrenciesTable extends Migration
      */
     public function up()
     {
-        Schema::create('currencies', function(Blueprint $table) {
-
+        Schema::create('currencies', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('priority');
             $table->string('iso_code');

@@ -230,6 +230,8 @@ class BookingsController extends Controller
                 foreach($accessories as $accessory) {
                     $priceIds[$accessory['product_price_id']]['product_price_id'] = $accessory['product_price_id'];
                     $priceIds[$accessory['product_price_id']]['extras_count'] = $accessory['count'];
+                    $priceIds[$accessory['product_price_id']]['extras_pricing'] = $accessory['pricing'];
+                    $priceIds[$accessory['product_price_id']]['extras_date'] = $accessory['date'];
                 }
             }
             $booking->productPrice()->sync($priceIds);

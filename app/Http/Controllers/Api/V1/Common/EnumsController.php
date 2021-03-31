@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Booker;
 use App\Models\Booking;
 use App\Models\Category;
+use App\Models\Extra;
 use App\Models\Guest;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Testing\Assert;
 
 class EnumsController extends Controller
 {
@@ -56,5 +58,10 @@ class EnumsController extends Controller
     public function genders(Request $request) : JsonResponse
     {
         return response()->json(User::$__gender_array);
+    }
+   
+    public function assetsPricing(Request $request) : JsonResponse
+    {
+        return response()->json(Extra::$__pricing_array);
     }
 }
