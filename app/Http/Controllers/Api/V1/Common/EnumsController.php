@@ -50,7 +50,7 @@ class EnumsController extends Controller
     
     public function documentTypes(Request $request) : JsonResponse
     {
-        return response()->json(Booker::$__document_types);
+        return response()->json(Booker::$__document_types_array);
     }
     
     public function genders(Request $request) : JsonResponse
