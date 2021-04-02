@@ -265,11 +265,10 @@ class BookingsController extends Controller
                 $accessories[$i]['product_price_id'] = $accessory->id;
                 $accessories[$i]['price'] = $accessory->product->price->price;
                 $accessories[$i]['vat'] = $accessory->product->price->vat->percentage;
-                $accessories[$i]['count'] = $accessory->pivot->count;
-                $accessories[$i]['date'] = $accessory->extras_date;
-                $accessories[$i]['pricing'] = $accessory->extras_pricing;
+                $accessories[$i]['count'] = $accessory->pivot->extras_count;
+                $accessories[$i]['date'] = $accessory->pivot->extras_date;
+                $accessories[$i]['pricing'] = $accessory->pivot->extras_pricing;
                 $accessories[$i]['accessory'] = $accessory->product->extra;
-
                 $i++;
             }
         }
@@ -328,7 +327,7 @@ class BookingsController extends Controller
      *
      * @return Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Booking $booking) : JsonResponse
+    public function update(Request $request, $hotel, Booking $booking) : JsonResponse
     {
         $user = auth()->user();
         
@@ -351,6 +350,7 @@ class BookingsController extends Controller
 
         DB::transaction(function() use ($booking, $user, $postData) {
             $booking->fill($postData);
+            $booking->save();
 
             $rooms = array_key_exists('rooms', $postData) ? $postData['rooms'] : [];
 
@@ -424,10 +424,7 @@ class BookingsController extends Controller
                             }
                             
 
-                            $bookingRoomGuest = new BookingRoomGuest();
-                            $bookingRoomGuest->room_id = $bookingHasRoom->room_id;
-                            $bookingRoomGuest->booking_id = $booking->id;
-                            $bookingRoomGuest->guest_id = $guest->id;
+                            $bookingRoomGuest = BookingRoomGuest::firstOrNew(['room_id' => $bookingHasRoom->room_id, 'booking_id' => $booking->id, 'guest_id' => $guest->id]);
                             $bookingRoomGuest->save();
                         }
                     }
@@ -444,10 +441,11 @@ class BookingsController extends Controller
                     $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;
                 }
             }
+
             $booking->productPrice()->sync($priceIds);
         });
 
-        return response()->json(['message' => 'Reservation successfully done.']);
+        return response()->json(['message' => 'Reservation successfully updated.']);
     }
 
     public function changeRoom(Request $request, BookingHasRoom $bookingRoom) {

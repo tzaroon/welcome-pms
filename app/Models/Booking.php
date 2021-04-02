@@ -16,7 +16,9 @@ class Booking extends Model
         'time_start',
         'status',
         'source',
-        'comment'
+        'comment',
+        'tourist_tax',
+        'discount'
     ];
     
     protected $appends = [
