@@ -268,6 +268,7 @@ class BookingsController extends Controller
                 $accessories[$i]['count'] = $accessory->pivot->count;
                 $accessories[$i]['date'] = $accessory->extras_date;
                 $accessories[$i]['pricing'] = $accessory->extras_pricing;
+                $accessories[$i]['accessory'] = $accessory->product->extra;
 
                 $i++;
             }
