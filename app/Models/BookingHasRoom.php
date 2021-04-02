@@ -17,6 +17,11 @@ class BookingHasRoom extends Model
 
         return $this->belongsTo(RateType::class);
     }
+   
+    public function room() {
+
+        return $this->belongsTo(Room::class);
+    }
 
     public function updateRoom($roomId) {
         

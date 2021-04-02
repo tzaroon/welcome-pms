@@ -189,9 +189,16 @@ class ExtrasController extends Controller
     public function autocomplete(Request $request, $hotelId, $keyword)
     {
         $user = auth()->user();
-        $extras = Extra::where(['company_id' => $user->company_id])
+        $extras = Extra::where(['extras.company_id' => $user->company_id])
+            ->join('products', 'products.id', '=', 'extras.product_id')
+            ->leftJoin('product_prices', 'product_prices.product_id', '=', 'products.id')
+            ->leftJoin('product_prices_has_taxes', 'product_prices_has_taxes.product_price_id', '=', 'product_prices.id')
+            ->where('product_prices_has_taxes.tax_id', Tax::VAT)
+            ->where('product_prices_has_taxes.is_active', 1)
+            ->where('product_prices.is_active', 1)
             ->where('hotel_id', $hotelId)
             ->where('name', 'LIKE', "%{$keyword}%")
+            ->select('extras.*','product_prices.id as product_price_id', 'product_prices.*', 'product_prices_has_taxes.percentage as vat')
             ->get();
 
         return response()->json($extras);

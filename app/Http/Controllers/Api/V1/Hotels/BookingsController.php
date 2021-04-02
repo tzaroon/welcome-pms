@@ -138,13 +138,15 @@ class BookingsController extends Controller
         DB::transaction(function() use ($user, $postData) {
             $booking = Booking::create([
                 'company_id' => $user->company_id,
-                'booker_id' => $postData['booker_id'],
-                'reservation_from' => $postData['reservation_from'],
-                'reservation_to' => $postData['reservation_to'],
-                'time_start' => $postData['time_start'],
-                'status' => $postData['status'],
-                'source' => $postData['source'],
-                'comment' => $postData['comment']
+                'booker_id' => array_key_exists('booker_id', $postData) ? $postData['booker_id'] : null,
+                'reservation_from' => array_key_exists('reservation_from', $postData) ? $postData['reservation_from'] : null,
+                'reservation_to' => array_key_exists('reservation_to', $postData) ? $postData['reservation_to'] : null,
+                'time_start' => array_key_exists('time_start', $postData) ? $postData['time_start'] : null,
+                'status' => array_key_exists('status', $postData) ? $postData['status'] : null,
+                'source' => array_key_exists('source', $postData) ? $postData['source'] : null,
+                'comment' => array_key_exists('comment', $postData) ? $postData['comment'] : null,
+                'tourist_tax' => array_key_exists('tourist_tax', $postData) ? $postData['tourist_tax'] : null,
+                'discount' => array_key_exists('discount', $postData) ? $postData['discount'] : null
             ]);
 
             $rooms = array_key_exists('rooms', $postData) ? $postData['rooms'] : [];
@@ -154,8 +156,8 @@ class BookingsController extends Controller
                 foreach($rooms as $room) {
                     $bookingHasRoom = new BookingHasRoom();
                     $bookingHasRoom->booking_id = $booking->id;
-                    $bookingHasRoom->room_id = $room['room_id'];
-                    $bookingHasRoom->rate_type_id = $room['rate_type_id'];
+                    $bookingHasRoom->room_id = array_key_exists('room_id', $room) ? $room['room_id'] : null;
+                    $bookingHasRoom->rate_type_id = array_key_exists('rate_type_id', $room) ? $room['rate_type_id'] : null;
                     $bookingHasRoom->save();
                    
                     $start = Carbon::parse($postData['reservation_from']);
@@ -186,31 +188,31 @@ class BookingsController extends Controller
                             
                             if(!$bookingHasRoom->first_guest_name) {
 
-                                $bookingHasRoom->first_guest_name = $guest['first_name'] . ' ' . $guest['last_name'];
+                                $bookingHasRoom->first_guest_name = (array_key_exists('first_name', $guest) ? $guest['first_name'] : '') . ' ' . (array_key_exists('last_name', $guest) ? $guest['last_name'] : '');
                                 $bookingHasRoom->save();
                             }
                             
                             $guestUser = User::create([
                                 'company_id' => $user->company_id,
-                                'first_name' => $guest['first_name'],
-                                'last_name' => $guest['last_name'],
-                                'email' => $guest['email'],
-                                'phone_number' => $guest['phone_number'],
-                                'street' => $guest['street'],
-                                'postal_code' => $guest['postal_code'],
-                                'city' => $guest['city'],
-                                'country_id' => $guest['country_id'],
-                                'gender' => $guest['gender'],
-                                'birth_date' => $guest['birth_date']
+                                'first_name' => array_key_exists('first_name', $guest) ? $guest['first_name'] : null,
+                                'last_name' => array_key_exists('last_name', $guest) ? $guest['last_name'] : null,
+                                'email' => array_key_exists('email', $guest) ? $guest['email'] : null,
+                                'phone_number' => array_key_exists('phone_number', $guest) ? $guest['phone_number'] : null,
+                                'street' => array_key_exists('street', $guest) ? $guest['street'] : null,
+                                'postal_code' => array_key_exists('postal_code', $guest) ? $guest['postal_code'] : null,
+                                'city' => array_key_exists('city', $guest) ? $guest['city'] : null,
+                                'country_id' => array_key_exists('country_id', $guest) ? $guest['country_id'] : null,
+                                'gender' => array_key_exists('gender', $guest) ? $guest['gender'] : null,
+                                'birth_date' => array_key_exists('birth_date', $guest) ? $guest['birth_date'] : null
                             ]);
 
                             $guest = Guest::create([
                                 'user_id' => $guestUser->id,
-                                'guest_type' => $guest['guest_type'],
-                                'identification_number' => $guest['identification_number'],
-                                'identification' => $guest['identification'],
-                                'id_issue_date' => $guest['id_issue_date'],
-                                'id_expiry_date' => $guest['id_expiry_date'],
+                                'guest_type' => array_key_exists('guest_type', $guest) ? $guest['guest_type'] : null,
+                                'identification_number' => array_key_exists('identification_number', $guest) ? $guest['identification_number'] : null,
+                                'identification' => array_key_exists('identification', $guest) ? $guest['identification'] : null,
+                                'id_issue_date' => array_key_exists('id_issue_date', $guest) ? $guest['id_issue_date'] : null,
+                                'id_expiry_date' => array_key_exists('id_expiry_date', $guest) ? $guest['id_expiry_date'] : null,
                             ]);
 
                             $bookingRoomGuest = new BookingRoomGuest();
@@ -227,20 +229,22 @@ class BookingsController extends Controller
             
             if($accessories) {
                 foreach($accessories as $accessory) {
-                    $priceIds[$accessory['product_price_id']]['product_price_id'] = $accessory['product_price_id'];
-                    $priceIds[$accessory['product_price_id']]['extras_count'] = $accessory['count'];
-                    $priceIds[$accessory['product_price_id']]['extras_pricing'] = $accessory['pricing'];
-                    $priceIds[$accessory['product_price_id']]['extras_date'] = $accessory['date'];
+                    $priceIds[$accessory['product_price_id']]['product_price_id'] = array_key_exists('product_price_id', $accessory) ? $accessory['product_price_id'] : null;
+                    $priceIds[$accessory['product_price_id']]['extras_count'] = array_key_exists('count', $accessory) ? $accessory['count'] : null;
+                    $priceIds[$accessory['product_price_id']]['extras_pricing'] = array_key_exists('pricing', $accessory) ? $accessory['pricing'] : null;
+                    $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;
                 }
             }
             $booking->productPrice()->sync($priceIds);
         });
+
         return response()->json(['message' => 'Reservation successfully done.']);
     }
 
     public function edit(Request $request, Booking $booking) {
 
         $responseArray['id'] = $booking->id;
+        $responseArray['booker_id'] = $booking->booker->id;
         $responseArray['reservation_from'] = $booking->reservation_from;
         $responseArray['reservation_to'] = $booking->reservation_to;
         $responseArray['status'] = $booking->status;
@@ -250,6 +254,10 @@ class BookingsController extends Controller
         $responseArray['tourist_tax'] = $booking->tourist_tax;
         $responseArray['discount'] = $booking->discount;
         
+        $booking->booker->user;
+        
+        $responseArray['booker'] = $booking->booker;
+
         $accessories = [];
         if($booking->accessoriesObjects) {
             $i = 0;
@@ -299,13 +307,138 @@ class BookingsController extends Controller
                 $rooms[$i]['room_id'] = $room->room_id;
                 $rooms[$i]['rate_type_id'] = $room->rate_type_id;
                 $rooms[$i]['price'] = $room->price;
+                $rooms[$i]['rate_types'] = $room->room->roomType->rateTypes;
                 $rooms[$i]['guests'] = $keyedGuests;
                 $i++;
             }
         }
         $responseArray['rooms'] = $rooms;
+        $responseArray['total_price'] = 500;
 
         return response()->json($responseArray);
+    }
+
+    /**
+     * Updates a resource.
+     *
+     * @param Illuminate\Http\Request $request
+     *
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Booking $booking) : JsonResponse
+    {
+        $user = auth()->user();
+        
+        $postData = $request->getContent();
+
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'reservation_from' => 'required',
+            'reservation_to' => 'required'
+        ], [], [
+            'reservation_from' => 'Reservation from',
+            'reservation_to' => 'Reservation to'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        DB::transaction(function() use ($booking, $user, $postData) {
+            $booking->fill($postData);
+
+            $rooms = array_key_exists('rooms', $postData) ? $postData['rooms'] : [];
+
+            if($rooms)  {
+                $priceIds = [];
+                foreach($rooms as $room) {
+                    $bookingHasRoom = new BookingHasRoom();
+                    $bookingHasRoom->booking_id = $booking->id;
+                    $bookingHasRoom->room_id = array_key_exists('room_id', $room) ? $room['room_id'] : null;
+                    $bookingHasRoom->rate_type_id = array_key_exists('rate_type_id', $room) ? $room['rate_type_id'] : null;
+                    $bookingHasRoom->save();
+                   
+                    $start = Carbon::parse($postData['reservation_from']);
+                    $end =  Carbon::parse($postData['reservation_to']);
+
+                    $days = $end->diffInDays($start);
+                    
+                    $date = $start;
+
+                    for($i=0; $i < $days; $i++) {
+
+                        $rateDate = $date->format('Y-m-d');
+                        $dailyPrice = new DailyPrice();
+                        $dailyPrice = $dailyPrice->where('date', $rateDate)
+                            ->where('company_id', $user->company_id)
+                            ->where('rate_type_id', $bookingHasRoom->rate_type_id)
+                            ->first();
+                            
+                        $priceIds[$room['room_id'].$i]['product_price_id'] = $dailyPrice->product->price->id;
+                        $priceIds[$room['room_id'].$i]['booking_has_room_id'] =  $bookingHasRoom->id;
+
+                        $date = $date->addDay();
+                    }
+                    
+                    $guests = array_key_exists('guests', $room) ? $room['guests'] : [];
+                    if($guests) {
+                        foreach($guests as $guest) {
+                            
+                            if(!$bookingHasRoom->first_guest_name) {
+
+                                $bookingHasRoom->first_guest_name = (array_key_exists('first_name', $guest) ? $guest['first_name'] : '') . ' ' . (array_key_exists('last_name', $guest) ? $guest['last_name'] : '');
+                                $bookingHasRoom->save();
+                            }
+                            
+                            $guestUser = User::create([
+                                'company_id' => $user->company_id,
+                                'first_name' => array_key_exists('first_name', $guest) ? $guest['first_name'] : null,
+                                'last_name' => array_key_exists('last_name', $guest) ? $guest['last_name'] : null,
+                                'email' => array_key_exists('email', $guest) ? $guest['email'] : null,
+                                'phone_number' => array_key_exists('phone_number', $guest) ? $guest['phone_number'] : null,
+                                'street' => array_key_exists('street', $guest) ? $guest['street'] : null,
+                                'postal_code' => array_key_exists('postal_code', $guest) ? $guest['postal_code'] : null,
+                                'city' => array_key_exists('city', $guest) ? $guest['city'] : null,
+                                'country_id' => array_key_exists('country_id', $guest) ? $guest['country_id'] : null,
+                                'gender' => array_key_exists('gender', $guest) ? $guest['gender'] : null,
+                                'birth_date' => array_key_exists('birth_date', $guest) ? $guest['birth_date'] : null
+                            ]);
+
+                            $guest = Guest::create([
+                                'user_id' => $guestUser->id,
+                                'guest_type' => array_key_exists('guest_type', $guest) ? $guest['guest_type'] : null,
+                                'identification_number' => array_key_exists('identification_number', $guest) ? $guest['identification_number'] : null,
+                                'identification' => array_key_exists('identification', $guest) ? $guest['identification'] : null,
+                                'id_issue_date' => array_key_exists('id_issue_date', $guest) ? $guest['id_issue_date'] : null,
+                                'id_expiry_date' => array_key_exists('id_expiry_date', $guest) ? $guest['id_expiry_date'] : null,
+                            ]);
+
+                            $bookingRoomGuest = new BookingRoomGuest();
+                            $bookingRoomGuest->room_id = $bookingHasRoom->room_id;
+                            $bookingRoomGuest->booking_id = $booking->id;
+                            $bookingRoomGuest->guest_id = $guest->id;
+                            $bookingRoomGuest->save();
+                        }
+                    }
+                }
+            }
+
+            $accessories = array_key_exists('accessories', $postData) ? $postData['accessories'] : [];
+            
+            if($accessories) {
+                foreach($accessories as $accessory) {
+                    $priceIds[$accessory['product_price_id']]['product_price_id'] = array_key_exists('product_price_id', $accessory) ? $accessory['product_price_id'] : null;
+                    $priceIds[$accessory['product_price_id']]['extras_count'] = array_key_exists('count', $accessory) ? $accessory['count'] : null;
+                    $priceIds[$accessory['product_price_id']]['extras_pricing'] = array_key_exists('pricing', $accessory) ? $accessory['pricing'] : null;
+                    $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;
+                }
+            }
+            $booking->productPrice()->sync($priceIds);
+        });
+
+        return response()->json(['message' => 'Reservation successfully done.']);
     }
 
     public function changeRoom(Request $request, BookingHasRoom $bookingRoom) {

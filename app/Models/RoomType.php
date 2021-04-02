@@ -35,6 +35,6 @@ class RoomType extends Model
     
     public function rateTypes() {
 
-        return $this->hasMany(RateType::class);
+        return $this->hasMany(RateType::class)->with('detail');
     }
 }
