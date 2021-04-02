@@ -63,6 +63,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('change-room-and-rate/{bookingRoom}', 'BookingsController@changeRoomAndRate')->name('change_room_and_rate');
                 Route::get('{hotel}/extras', 'ExtrasController@index', ['except' => ['create']]);
                 Route::resource('extras', 'ExtrasController', ['except' => ['create', 'index']]);
+                Route::get('{hotel}/extras/autocomplete/{keyword}', 'ExtrasController@autocomplete', ['except' => ['create', 'index']]);
             });
         });
     });

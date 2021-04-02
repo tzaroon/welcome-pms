@@ -180,4 +180,20 @@ class ExtrasController extends Controller
 
         return response()->json(array('message' => 'Accessory deleted successfully'));
     }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function autocomplete(Request $request, $hotelId, $keyword)
+    {
+        $user = auth()->user();
+        $extras = Extra::where(['company_id' => $user->company_id])
+            ->where('hotel_id', $hotelId)
+            ->where('name', 'LIKE', "%{$keyword}%")
+            ->get();
+
+        return response()->json($extras);
+    }
 }
