@@ -23,7 +23,8 @@ class Booking extends Model
         'numberOfDays',
         'roomCount',
         'price',
-        'accessories'
+        'accessories',
+        'accessoriesObjects'
     ];
 
     const SOURCE_BUSINESS = 'business';
@@ -113,7 +114,7 @@ class Booking extends Model
     }
 
     public function productPrice() {
-        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_has_room_id', 'extras_count']);
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_has_room_id', 'extras_count', 'extras_pricing', 'extras_date']);
     }
 
     public function bookingRooms() {
@@ -128,6 +129,20 @@ class Booking extends Model
                 
                 if($productPrice->product->extra) {
                     $productPrices[] = $productPrice->product->extra->name;
+                }
+            }
+        }
+        return $productPrices;
+    }
+    
+    public function getAccessoriesObjectsAttribute() {
+
+        $productPrices = [];
+        if($this->productPrice) {
+            foreach($this->productPrice as $productPrice) {
+                
+                if($productPrice->product->extra) {
+                    $productPrices[] = $productPrice;
                 }
             }
         }

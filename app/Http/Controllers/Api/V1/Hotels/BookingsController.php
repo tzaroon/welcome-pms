@@ -119,7 +119,7 @@ class BookingsController extends Controller
         $user = auth()->user();
         
         $postData = $request->getContent();
-        
+
         $postData = json_decode($postData, true);
 
         $validator = Validator::make($postData, [
@@ -221,11 +221,10 @@ class BookingsController extends Controller
                         }
                     }
                 }
-                $booking->productPrice()->sync($priceIds);
             }
 
             $accessories = array_key_exists('accessories', $postData) ? $postData['accessories'] : [];
-            $priceIds = [];
+            
             if($accessories) {
                 foreach($accessories as $accessory) {
                     $priceIds[$accessory['product_price_id']]['product_price_id'] = $accessory['product_price_id'];
@@ -241,8 +240,72 @@ class BookingsController extends Controller
 
     public function edit(Request $request, Booking $booking) {
 
+        $responseArray['id'] = $booking->id;
+        $responseArray['reservation_from'] = $booking->reservation_from;
+        $responseArray['reservation_to'] = $booking->reservation_to;
+        $responseArray['status'] = $booking->status;
+        $responseArray['time_start'] = $booking->time_start;
+        $responseArray['source'] = $booking->source;
+        $responseArray['comment'] = $booking->comment;
+        $responseArray['tourist_tax'] = $booking->tourist_tax;
+        $responseArray['discount'] = $booking->discount;
         
-        return response()->json($booking);
+        $accessories = [];
+        if($booking->accessoriesObjects) {
+            $i = 0;
+            foreach($booking->accessoriesObjects as $accessory) {
+                $accessories[$i]['product_price_id'] = $accessory->id;
+                $accessories[$i]['price'] = $accessory->product->price->price;
+                $accessories[$i]['vat'] = $accessory->product->price->vat->percentage;
+                $accessories[$i]['count'] = $accessory->pivot->count;
+                $accessories[$i]['date'] = $accessory->extras_date;
+                $accessories[$i]['pricing'] = $accessory->extras_pricing;
+
+                $i++;
+            }
+        }
+        $responseArray['accessories'] = $accessories;
+
+        $rooms = [];
+
+        if($booking->bookingRooms) {
+            $i = 0;
+            foreach($booking->bookingRooms as $room) {
+
+                $guests = $room->guests();
+
+                $keyedGuests = [];
+                $j = 0;
+                if($guests) {
+                    foreach($guests as $guest) {
+                        $keyedGuests[$j]['guest_type'] = $guest->guest_type;
+                        $keyedGuests[$j]['first_name'] = $guest->first_name;
+                        $keyedGuests[$j]['last_name'] = $guest->last_name;
+                        $keyedGuests[$j]['email'] = $guest->email;
+                        $keyedGuests[$j]['phone_number'] = $guest->phone_number;
+                        $keyedGuests[$j]['street'] = $guest->street;
+                        $keyedGuests[$j]['postal_code'] = $guest->postal_code;
+                        $keyedGuests[$j]['city'] = $guest->city;
+                        $keyedGuests[$j]['country_id'] = $guest->country_id;
+                        $keyedGuests[$j]['gender'] = $guest->gender;
+                        $keyedGuests[$j]['birth_date'] = $guest->birth_date;
+                        $keyedGuests[$j]['identification_number'] = $guest->identification_number;
+                        $keyedGuests[$j]['identification'] = $guest->identification;
+                        $keyedGuests[$j]['id_issue_date'] = $guest->id_issue_date;
+                        $keyedGuests[$j]['id_expiry_date'] = $guest->id_expiry_date;
+                        $j++;
+                    }
+                }
+                $rooms[$i]['room_id'] = $room->room_id;
+                $rooms[$i]['rate_type_id'] = $room->rate_type_id;
+                $rooms[$i]['price'] = $room->price;
+                $rooms[$i]['guests'] = $keyedGuests;
+                $i++;
+            }
+        }
+        $responseArray['rooms'] = $rooms;
+
+        return response()->json($responseArray);
     }
 
     public function changeRoom(Request $request, BookingHasRoom $bookingRoom) {
