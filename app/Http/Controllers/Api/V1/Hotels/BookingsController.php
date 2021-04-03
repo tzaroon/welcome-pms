@@ -438,6 +438,9 @@ class BookingsController extends Controller
             
             if($accessories) {
                 foreach($accessories as $accessory) {
+                    if(!$accessory)
+                        continue;
+                        
                     $productPrice = new ProductPrice();
                     $productPrice = $productPrice->updateOrCreateWithVat($accessory['product_price_id'], $accessory['price'], $accessory['vat']);
 
