@@ -231,6 +231,9 @@ class BookingsController extends Controller
             
             if($accessories) {
                 foreach($accessories as $accessory) {
+                    if(!$accessory || 0 == sizeof($accessory))
+                        continue;
+                        
                     $priceIds[$accessory['product_price_id']]['product_price_id'] = array_key_exists('product_price_id', $accessory) ? $accessory['product_price_id'] : null;
                     $priceIds[$accessory['product_price_id']]['extras_count'] = array_key_exists('count', $accessory) ? $accessory['count'] : null;
                     $priceIds[$accessory['product_price_id']]['extras_pricing'] = array_key_exists('pricing', $accessory) ? $accessory['pricing'] : null;
@@ -438,7 +441,8 @@ class BookingsController extends Controller
             
             if($accessories) {
                 foreach($accessories as $accessory) {
-                    if(!$accessory)
+                    
+                    if(!$accessory || 0 == sizeof($accessory))
                         continue;
                         
                     $productPrice = new ProductPrice();
