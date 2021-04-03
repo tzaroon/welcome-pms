@@ -10,6 +10,7 @@ use App\Models\BookingsHasProductPrice;
 use App\Models\DailyPrice;
 use App\Models\Guest;
 use App\Models\Payment;
+use App\Models\ProductPrice;
 use App\Models\RateType;
 use App\Models\Room;
 use App\User;
@@ -437,7 +438,10 @@ class BookingsController extends Controller
             
             if($accessories) {
                 foreach($accessories as $accessory) {
-                    $priceIds[$accessory['product_price_id']]['product_price_id'] = array_key_exists('product_price_id', $accessory) ? $accessory['product_price_id'] : null;
+                    $productPrice = new ProductPrice();
+                    $productPrice = $productPrice->updateOrCreateWithVat($accessory['product_price_id'], $accessory['price'], $accessory['vat']);
+
+                    $priceIds[$accessory['product_price_id']]['product_price_id'] = $productPrice->id;
                     $priceIds[$accessory['product_price_id']]['extras_count'] = array_key_exists('count', $accessory) ? $accessory['count'] : null;
                     $priceIds[$accessory['product_price_id']]['extras_pricing'] = array_key_exists('pricing', $accessory) ? $accessory['pricing'] : null;
                     $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;

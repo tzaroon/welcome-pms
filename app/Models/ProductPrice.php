@@ -64,4 +64,31 @@ class ProductPrice extends Model
     public function product() {
         return $this->belongsTo(Product::class);
     }
+
+    public function updateOrCreateWithVat($productPriceId, $price, $vat) {
+
+        $productPrice = $this->find($productPriceId);
+        $productPrice->vat;
+
+        if($price != $productPrice->price || $vat != $productPrice->vat->percentage) {
+            
+            $productPriceNew = new ProductPrice();
+            $productPriceNew->company_id = $productPrice->company_id;
+            $productPriceNew->product_id = $productPrice->product_id;
+            $productPriceNew->price = $price;
+            $productPriceNew->is_active = 0;
+            $productPriceNew->save();
+
+            $productPriceHasTax = new ProductPricesHasTax();
+            $productPriceHasTax->tax_id = Tax::VAT;
+            $productPriceHasTax->product_price_id = $productPriceNew->id;
+            $productPriceHasTax->percentage = $vat;
+            $productPriceHasTax->is_active = 1;
+            $productPriceHasTax->save();
+            $productPriceNew->vat;
+            return $productPriceNew;
+        } else {
+            return $productPrice;
+        }
+    }
 }

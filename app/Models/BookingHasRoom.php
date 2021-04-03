@@ -10,6 +10,9 @@ class BookingHasRoom extends Model
 {
     protected $table = 'booking_room';
 
+    protected $fillable = [
+        'booking_id'
+    ];
     protected $appends = [
         'price'
     ];
