@@ -9,6 +9,7 @@ use App\Models\BookingRoomGuest;
 use App\Models\BookingsHasProductPrice;
 use App\Models\DailyPrice;
 use App\Models\Guest;
+use App\Models\Payment;
 use App\Models\RateType;
 use App\Models\Room;
 use App\User;
@@ -385,7 +386,7 @@ class BookingsController extends Controller
                     
                     $guests = array_key_exists('guests', $room) ? $room['guests'] : [];
                     if($guests) {
-                        foreach($guests as $guest) {
+                        foreach($guests as $guestData) {
                             
                             if(!$bookingHasRoom->first_guest_name) {
 
@@ -393,10 +394,10 @@ class BookingsController extends Controller
                                 $bookingHasRoom->save();
                             }
                             
-                            if(array_key_exists('id', $guest)) {
-                                $guest = Guest::find($guest['id']);
-                                $guest->fill($guest);
-                                $guest->user->fill($guest);
+                            if(array_key_exists('id', $guestData)) {
+                                $guest = Guest::find($guestData['id']);
+                                $guest->fill($guestData);
+                                $guest->user->fill($guestData);
                                 $guest->push();
                             } else {
                                 $guestUser = User::create([
@@ -441,8 +442,23 @@ class BookingsController extends Controller
                     $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;
                 }
             }
-
+            
             $booking->productPrice()->sync($priceIds);
+
+            $payments = array_key_exists('payments', $postData) ? $postData['payments'] : [];
+            
+            if($payments) {
+                foreach($payments as $paymentData) {
+                    if(array_key_exists('id', $paymentData) && $paymentData['id']) {
+                        $payment = Payment::find($paymentData['id']);
+                    } else {
+                        $payment = new Payment();
+                    }
+                    $payment->booking_id = $booking->id;
+                    $payment->fill($paymentData);
+                    $payment->save();
+                }
+            }
         });
 
         return response()->json(['message' => 'Reservation successfully updated.']);
