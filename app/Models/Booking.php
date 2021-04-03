@@ -219,4 +219,8 @@ class Booking extends Model
         $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
         return $prices;
     }
+
+    public function payments() {
+        return $this->hasMany(Payment::class);
+    }
 }

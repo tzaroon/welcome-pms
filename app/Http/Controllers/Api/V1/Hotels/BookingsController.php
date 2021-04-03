@@ -274,6 +274,7 @@ class BookingsController extends Controller
             }
         }
         $responseArray['accessories'] = $accessories;
+        $responseArray['payments'] = $booking->payments;
 
         $rooms = [];
 
