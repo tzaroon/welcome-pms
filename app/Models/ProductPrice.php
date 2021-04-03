@@ -91,4 +91,22 @@ class ProductPrice extends Model
             return $productPrice;
         }
     }
+    
+    public function updateOrCreate($productPriceId, $price) {
+
+        $productPrice = $this->find($productPriceId);
+
+        if($price != $productPrice->price) {
+            
+            $productPriceNew = new ProductPrice();
+            $productPriceNew->company_id = $productPrice->company_id;
+            $productPriceNew->product_id = $productPrice->product_id;
+            $productPriceNew->price = $price;
+            $productPriceNew->is_active = 0;
+            $productPriceNew->save();
+            return $productPriceNew;
+        } else {
+            return $productPrice;
+        }
+    }
 }

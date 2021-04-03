@@ -383,7 +383,13 @@ class BookingsController extends Controller
                             ->where('rate_type_id', $bookingHasRoom->rate_type_id)
                             ->first();
                             
-                        $priceIds[$room['room_id'].$i]['product_price_id'] = $dailyPrice->product->price->id;
+                        $productPrice = new ProductPrice();
+                        if(array_key_exists('price', $room) && $room['price']) {
+                            
+                            $productPrice = $productPrice->updateOrCreate($dailyPrice->product->price->id, $room['price']);
+                        }
+                        
+                        $priceIds[$room['room_id'].$i]['product_price_id'] = $productPrice->id ? : $dailyPrice->product->price->id;
                         $priceIds[$room['room_id'].$i]['booking_has_room_id'] =  $bookingHasRoom->id;
 
                         $date = $date->addDay();
@@ -395,7 +401,7 @@ class BookingsController extends Controller
                             
                             if(!$bookingHasRoom->first_guest_name) {
 
-                                $bookingHasRoom->first_guest_name = (array_key_exists('first_name', $guest) ? $guest['first_name'] : '') . ' ' . (array_key_exists('last_name', $guest) ? $guest['last_name'] : '');
+                                $bookingHasRoom->first_guest_name = (array_key_exists('first_name', $guestData) ? $guestData['first_name'] : '') . ' ' . (array_key_exists('last_name', $guestData) ? $guestData['last_name'] : '');
                                 $bookingHasRoom->save();
                             }
                             
@@ -407,29 +413,28 @@ class BookingsController extends Controller
                             } else {
                                 $guestUser = User::create([
                                     'company_id' => $user->company_id,
-                                    'first_name' => array_key_exists('first_name', $guest) ? $guest['first_name'] : null,
-                                    'last_name' => array_key_exists('last_name', $guest) ? $guest['last_name'] : null,
-                                    'email' => array_key_exists('email', $guest) ? $guest['email'] : null,
-                                    'phone_number' => array_key_exists('phone_number', $guest) ? $guest['phone_number'] : null,
-                                    'street' => array_key_exists('street', $guest) ? $guest['street'] : null,
-                                    'postal_code' => array_key_exists('postal_code', $guest) ? $guest['postal_code'] : null,
-                                    'city' => array_key_exists('city', $guest) ? $guest['city'] : null,
-                                    'country_id' => array_key_exists('country_id', $guest) ? $guest['country_id'] : null,
-                                    'gender' => array_key_exists('gender', $guest) ? $guest['gender'] : null,
-                                    'birth_date' => array_key_exists('birth_date', $guest) ? $guest['birth_date'] : null
+                                    'first_name' => array_key_exists('first_name', $guestData) ? $guestData['first_name'] : null,
+                                    'last_name' => array_key_exists('last_name', $guestData) ? $guestData['last_name'] : null,
+                                    'email' => array_key_exists('email', $guestData) ? $guestData['email'] : null,
+                                    'phone_number' => array_key_exists('phone_number', $guestData) ? $guestData['phone_number'] : null,
+                                    'street' => array_key_exists('street', $guestData) ? $guestData['street'] : null,
+                                    'postal_code' => array_key_exists('postal_code', $guestData) ? $guestData['postal_code'] : null,
+                                    'city' => array_key_exists('city', $guestData) ? $guestData['city'] : null,
+                                    'country_id' => array_key_exists('country_id', $guestData) ? $guestData['country_id'] : null,
+                                    'gender' => array_key_exists('gender', $guestData) ? $guestData['gender'] : null,
+                                    'birth_date' => array_key_exists('birth_date', $guestData) ? $guestData['birth_date'] : null
                                 ]);
     
                                 $guest = Guest::create([
                                     'user_id' => $guestUser->id,
-                                    'guest_type' => array_key_exists('guest_type', $guest) ? $guest['guest_type'] : null,
-                                    'identification_number' => array_key_exists('identification_number', $guest) ? $guest['identification_number'] : null,
-                                    'identification' => array_key_exists('identification', $guest) ? $guest['identification'] : null,
-                                    'id_issue_date' => array_key_exists('id_issue_date', $guest) ? $guest['id_issue_date'] : null,
-                                    'id_expiry_date' => array_key_exists('id_expiry_date', $guest) ? $guest['id_expiry_date'] : null,
+                                    'guest_type' => array_key_exists('guest_type', $guestData) ? $guestData['guest_type'] : null,
+                                    'identification_number' => array_key_exists('identification_number', $guestData) ? $guestData['identification_number'] : null,
+                                    'identification' => array_key_exists('identification', $guestData) ? $guestData['identification'] : null,
+                                    'id_issue_date' => array_key_exists('id_issue_date', $guestData) ? $guestData['id_issue_date'] : null,
+                                    'id_expiry_date' => array_key_exists('id_expiry_date', $guestData) ? $guestData['id_expiry_date'] : null,
                                 ]);
                             }
                             
-
                             $bookingRoomGuest = BookingRoomGuest::firstOrNew(['room_id' => $bookingHasRoom->room_id, 'booking_id' => $booking->id, 'guest_id' => $guest->id]);
                             $bookingRoomGuest->save();
                         }
