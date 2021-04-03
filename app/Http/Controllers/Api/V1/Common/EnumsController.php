@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Extra;
 use App\Models\Guest;
+use App\Models\Payment;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -63,5 +64,10 @@ class EnumsController extends Controller
     public function extrasPricing(Request $request) : JsonResponse
     {
         return response()->json(Extra::$__pricing_array);
+    }
+    
+    public function paymentMethods(Request $request) : JsonResponse
+    {
+        return response()->json(Payment::$__types_array);
     }
 }
