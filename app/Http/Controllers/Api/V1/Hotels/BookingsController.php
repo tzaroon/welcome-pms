@@ -289,7 +289,7 @@ class BookingsController extends Controller
                 $j = 0;
                 if($guests) {
                     foreach($guests as $guest) {
-                        $keyedGuests[$j]['id'] = $guest->id;
+                        $keyedGuests[$j]['id'] = $guest->guest_id;
                         $keyedGuests[$j]['guest_type'] = $guest->guest_type;
                         $keyedGuests[$j]['first_name'] = $guest->first_name;
                         $keyedGuests[$j]['last_name'] = $guest->last_name;
