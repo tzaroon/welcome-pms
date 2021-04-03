@@ -76,7 +76,7 @@ class BookingHasRoom extends Model
                 ->join('users', 'guests.user_id', '=', 'users.id')
                 ->where('booking_id', $this->booking_id)
                 ->where('room_id', $this->room_id)
-                ->select('guests.*', 'users.*')
+                ->select('guests.id as guest_id', 'guests.*', 'users.*')
                 ->get();
     }
 
