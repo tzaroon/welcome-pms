@@ -321,7 +321,7 @@ class BookingsController extends Controller
             }
         }
         $responseArray['rooms'] = $rooms;
-        $responseArray['total_price'] = $booking->price;
+        $responseArray['total_price'] = $booking->price['total'];
 
         return response()->json($responseArray);
     }
