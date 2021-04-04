@@ -321,7 +321,7 @@ class BookingsController extends Controller
             }
         }
         $responseArray['rooms'] = $rooms;
-        $responseArray['total_price'] = 500;
+        $responseArray['total_price'] = $booking->price;
 
         return response()->json($responseArray);
     }
@@ -447,11 +447,17 @@ class BookingsController extends Controller
             if($accessories) {
                 foreach($accessories as $accessory) {
                     
-                    if(!$accessory || 0 == sizeof($accessory))
+                    if(!$accessory || 0 == sizeof($accessory) || !array_key_exists('price', $accessory))
                         continue;
                         
                     $productPrice = new ProductPrice();
-                    $productPrice = $productPrice->updateOrCreateWithVat($accessory['product_price_id'], $accessory['price'], $accessory['vat']);
+
+                    $vat = 0;
+                    if(array_key_exists('vat', $accessory)) {
+                        $vat = $accessory['vat'];
+                    }
+                    
+                    $productPrice = $productPrice->updateOrCreateWithVat($accessory['product_price_id'], $accessory['price'], $vat);
 
                     $priceIds[$accessory['product_price_id']]['product_price_id'] = $productPrice->id;
                     $priceIds[$accessory['product_price_id']]['extras_count'] = array_key_exists('count', $accessory) ? $accessory['count'] : null;

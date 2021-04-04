@@ -170,53 +170,101 @@ class Booking extends Model
 
         $totalPrice = 0;
         $onlyPrice = 0;
+        $accessoryVat = 0;
         $taxes = [];
         $prices = [];
+
         if($this->productPrice) {
            
             foreach($this->productPrice as $productPrice) {
 
-                $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_has_room_id);
+                if($productPrice->pivot->booking_has_room_id) {
+                    $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_has_room_id);
 
-                $totalPrice = $totalPrice+$productPrice->price;
-                $onlyPrice = $onlyPrice+$productPrice->price;
-                $prices['price'] = $totalPrice;
+                    $totalPrice = $totalPrice+$productPrice->price;
+                    $onlyPrice = $onlyPrice+$productPrice->price;
+                    $prices['price'] = $totalPrice;
+    
+                    if($productPrice->taxes) {
+                        //$allTaxes = [];
+                        foreach($productPrice->taxes as $tax) {
+                            $guestCount = 0;
+                            if($bookingRoom && array_key_exists($bookingRoom->room_id, $guestreport)) {
+                                //$allTaxes[] = $tax;
+                                switch($tax->tax_id) {
+                                    case 1:
+                                        $guestCount = array_key_exists(Guest::GUEST_TYPE_ADULT, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_ADULT] : 0;
+                                        $guestCount += array_key_exists(Guest::GUEST_TYPE_CORPORATE, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CORPORATE] : 0;
+                                    break;
+                                    case 2:
+                                        $guestCount += array_key_exists(Guest::GUEST_TYPE_CHILD, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CHILD] : 0;
+                                    break;
+                                }
+                                if($tax->percentage) {
+                                    $taxAmount = $productPrice->price*$tax->percentage/100;
+                                    $totalPrice += ($taxAmount*$guestCount);
+                                    $prices['tax'] = $taxAmount*$guestCount;
+                                } else {
+                                    $totalPrice += ($tax->amount*$guestCount);
+                                    $prices['tax'] = $tax->amount*$guestCount;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    $criteria = $productPrice->pivot->extras_pricing;
+                    $date = $productPrice->pivot->extras_date;
+                    if($date) {
 
-                if($productPrice->taxes) {
-                    //$allTaxes = [];
-                    foreach($productPrice->taxes as $tax) {
-                        $guestCount = 0;
-                        if($bookingRoom && array_key_exists($bookingRoom->room_id, $guestreport)) {
-                            //$allTaxes[] = $tax;
-                            switch($tax->tax_id) {
-                                case 1:
-                                    $guestCount = array_key_exists(Guest::GUEST_TYPE_ADULT, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_ADULT] : 0;
-                                    $guestCount += array_key_exists(Guest::GUEST_TYPE_CORPORATE, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CORPORATE] : 0;
+                    } else {
+                        switch($criteria) {
+                            case Extra::PRICING_BY_DAY:
+
+                                $prices['price'] += $this->numberOfDays*$productPrice->price;
+                                $totalPrice += $this->numberOfDays*$productPrice->price;
+                                $vat = $productPrice->price/100*$productPrice->vat->percentage;
+                                $totalPrice += $this->numberOfDays*$vat;
+                                $accessoryVat += $vat*$this->numberOfDays;
                                 break;
-                                case 2:
-                                    $guestCount += array_key_exists(Guest::GUEST_TYPE_CHILD, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CHILD] : 0;
+
+                            case Extra::PRICING_BY_FULL_STAY:
+
+                                $prices['price'] += $productPrice->price;
+                                $totalPrice += $productPrice->price;
+                                $vat = $productPrice->price/100*$productPrice->vat->percentage;
+                                $totalPrice += $vat;
+                                $accessoryVat += $vat;
                                 break;
-                            }
-                            if($tax->percentage) {
-                                $taxAmount = $productPrice->price*$tax->percentage/100;
-                                $totalPrice += ($taxAmount*$guestCount);
-                                $prices['tax'] = $taxAmount*$guestCount;
-                            } else {
-                                $totalPrice += ($tax->amount*$guestCount);
-                                $prices['tax'] = $tax->amount*$guestCount;
-                            }
+                            case Extra::PRICING_BY_PERSON_PER_DAY:
+                                $prices['price'] += $this->numberOfDays*$productPrice->price;
+                                $totalPrice += $this->numberOfDays*$productPrice->price;
+                                $vat = $productPrice->price/100*$productPrice->vat->percentage;
+                                $totalPrice += $this->numberOfDays*$vat;
+                                $accessoryVat += $vat*$this->numberOfDays;
+                                break;
+                            case Extra::PRICING_BY_PERSON_PER_STAY:
+
+                                break;
                         }
                     }
                 }
                 $prices['total'] = $totalPrice;
             }
         }
+
         $acuualPrice = array_key_exists('price', $prices) ? $prices['price'] : 0;
         $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
 
         $prices['price'] = round($acuualPrice*90/100, 2);
         $prices['tax'] =  round($acuualTax*90/100, 2);
         $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
+
+        $prices['total'] = round($prices['total'], 2);
+
+        if(isset($accessoryVat)) {
+            $prices['vat'] += round($accessoryVat, 2);
+            $prices['vat'] = round($prices['vat'], 2);
+        }
         return $prices;
     }
 
