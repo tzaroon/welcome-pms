@@ -179,6 +179,7 @@ class Booking extends Model
         $taxes = [];
         $prices = [];
         $prices['tax'] = 0;
+        $prices['price'] = 0;
         if($this->productPrice) {
            
             foreach($this->productPrice as $productPrice) {
