@@ -285,7 +285,7 @@ class Booking extends Model
         //dd($prices);
 
         $prices['price_breakdown'] = [
-            'daily_price' => [
+            'daily_prices' => [
                 [
                     'date' => '2021-04-06',
                     'value' => '300'
@@ -304,9 +304,8 @@ class Booking extends Model
                 ]
             ],
             'total_price' => "3030"
-        ]
-        
-        ;
+        ];
+
         return $prices;
     }
 
