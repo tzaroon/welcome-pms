@@ -137,7 +137,7 @@ class BookingsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        DB::transaction(function() use ($user, $postData) {
+        $booking = DB::transaction(function() use ($user, $postData) {
             $booking = Booking::create([
                 'company_id' => $user->company_id,
                 'booker_id' => array_key_exists('booker_id', $postData) ? $postData['booker_id'] : null,
@@ -245,9 +245,11 @@ class BookingsController extends Controller
             
             
             $booking->productPrice()->sync($priceIds);
+
+            return $booking;
         });
 
-        return response()->json(['message' => 'Reservation successfully done.']);
+        return response()->json(['booking' => $booking]);
     }
 
     public function edit(Request $request, Booking $booking) {
