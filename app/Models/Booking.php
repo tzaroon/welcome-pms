@@ -162,9 +162,11 @@ class Booking extends Model
             ->get();
 
         $guestreport = [];
+        $guestsTotal = 0;
         if($guestsCount) {
             foreach($guestsCount as $count) {
                 $guestreport[$count->room_id][$count->guest_type] = $count->guest_count;
+                $guestsTotal++;
             }
         }
 
@@ -236,14 +238,18 @@ class Booking extends Model
                                 $accessoryVat += $vat;
                                 break;
                             case Extra::PRICING_BY_PERSON_PER_DAY:
-                                $prices['price'] += $this->numberOfDays*$productPrice->price;
-                                $totalPrice += $this->numberOfDays*$productPrice->price;
-                                $vat = $productPrice->price/100*$productPrice->vat->percentage;
+                                $prices['price'] += $this->numberOfDays*$productPrice->price*$guestsTotal;
+                                $totalPrice += $this->numberOfDays*$productPrice->price*$guestsTotal;
+                                $vat = ($productPrice->price/100*$productPrice->vat->percentage)*$guestsTotal;
                                 $totalPrice += $this->numberOfDays*$vat;
                                 $accessoryVat += $vat*$this->numberOfDays;
                                 break;
                             case Extra::PRICING_BY_PERSON_PER_STAY:
-
+                                $prices['price'] += $productPrice->price*$guestsTotal;
+                                $totalPrice += $productPrice->price*$guestsTotal;
+                                $vat = ($productPrice->price/100*$productPrice->vat->percentage)*$guestsTotal;
+                                $totalPrice += $vat;
+                                $accessoryVat += $vat;
                                 break;
                         }
                     }
