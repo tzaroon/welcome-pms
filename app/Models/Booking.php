@@ -339,9 +339,7 @@ class Booking extends Model
             } 
         }
         $prices['price_breakdown'] = [
-            'daily_prices' => [
-                $keyedDailyPrices
-            ],
+            'daily_prices' => $keyedDailyPrices,
             'total_price' => $gTotal
         ];
 
