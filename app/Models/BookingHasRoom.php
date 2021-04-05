@@ -11,7 +11,8 @@ class BookingHasRoom extends Model
     protected $table = 'booking_room';
 
     protected $fillable = [
-        'booking_id'
+        'booking_id',
+        'room_id'
     ];
     protected $appends = [
         'price'

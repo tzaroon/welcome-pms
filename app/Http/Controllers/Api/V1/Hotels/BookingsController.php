@@ -153,12 +153,14 @@ class BookingsController extends Controller
 
             $rooms = array_key_exists('rooms', $postData) ? $postData['rooms'] : [];
 
+            $priceIds = [];
             if($rooms)  {
-                $priceIds = [];
                 foreach($rooms as $room) {
-                    $bookingHasRoom = new BookingHasRoom();
-                    $bookingHasRoom->booking_id = $booking->id;
-                    $bookingHasRoom->room_id = array_key_exists('room_id', $room) ? $room['room_id'] : null;
+                    if(!array_key_exists('room_id', $room) || !$room['room_id'])
+                        continue;
+
+                    $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id, 'room_id' => $room['room_id']]);
+
                     $bookingHasRoom->rate_type_id = array_key_exists('rate_type_id', $room) ? $room['rate_type_id'] : null;
                     $bookingHasRoom->save();
                    
@@ -240,6 +242,8 @@ class BookingsController extends Controller
                     $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;
                 }
             }
+            
+            
             $booking->productPrice()->sync($priceIds);
         });
 
@@ -321,7 +325,9 @@ class BookingsController extends Controller
             }
         }
         $responseArray['rooms'] = $rooms;
+        $responseArray['price'] = $booking->price['price'];
         $responseArray['total_price'] = $booking->price['total'];
+        $responseArray['total_tax'] = $booking->price['tax'] + $booking->price['vat'];
 
         return response()->json($responseArray);
     }
@@ -469,13 +475,16 @@ class BookingsController extends Controller
                     $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;
                 }
             }
-            
             $booking->productPrice()->sync($priceIds);
 
             $payments = array_key_exists('payments', $postData) ? $postData['payments'] : [];
             
             if($payments) {
                 foreach($payments as $paymentData) {
+
+                    if(!$paymentData || 0 == sizeof($paymentData) || !array_key_exists('initials', $paymentData))
+                        continue;
+
                     if(array_key_exists('id', $paymentData) && $paymentData['id']) {
                         $payment = Payment::find($paymentData['id']);
                     } else {

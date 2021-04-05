@@ -165,8 +165,10 @@ class Booking extends Model
         $guestsTotal = 0;
         if($guestsCount) {
             foreach($guestsCount as $count) {
-                $guestreport[$count->room_id][$count->guest_type] = $count->guest_count;
-                $guestsTotal++;
+                if($count->guest_type) {
+                    $guestreport[$count->room_id][$count->guest_type] = $count->guest_count;
+                    $guestsTotal++;
+                }
             }
         }
 
@@ -175,7 +177,7 @@ class Booking extends Model
         $accessoryVat = 0;
         $taxes = [];
         $prices = [];
-
+        $prices['tax'] = 0;
         if($this->productPrice) {
            
             foreach($this->productPrice as $productPrice) {
@@ -185,7 +187,7 @@ class Booking extends Model
 
                     $totalPrice = $totalPrice+$productPrice->price;
                     $onlyPrice = $onlyPrice+$productPrice->price;
-                    $prices['price'] = $totalPrice;
+                    $prices['price'] = $onlyPrice;
     
                     if($productPrice->taxes) {
                         //$allTaxes = [];
@@ -205,10 +207,10 @@ class Booking extends Model
                                 if($tax->percentage) {
                                     $taxAmount = $productPrice->price*$tax->percentage/100;
                                     $totalPrice += ($taxAmount*$guestCount);
-                                    $prices['tax'] = $taxAmount*$guestCount;
+                                    $prices['tax'] += $taxAmount*$guestCount;
                                 } else {
                                     $totalPrice += ($tax->amount*$guestCount);
-                                    $prices['tax'] = $tax->amount*$guestCount;
+                                    $prices['tax'] += $tax->amount*$guestCount;
                                 }
                             }
                         }
@@ -218,6 +220,7 @@ class Booking extends Model
                     $date = $productPrice->pivot->extras_date;
                     if($date) {
 
+                        
                     } else {
                         switch($criteria) {
                             case Extra::PRICING_BY_DAY:
@@ -271,6 +274,7 @@ class Booking extends Model
             $prices['vat'] += round($accessoryVat, 2);
             $prices['vat'] = round($prices['vat'], 2);
         }
+        //dd($prices);
         return $prices;
     }
 
