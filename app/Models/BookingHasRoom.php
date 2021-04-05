@@ -83,6 +83,7 @@ class BookingHasRoom extends Model
 
     public function getPriceAttribute() {
 
+        $this->room->roomType->rateType;
         $totalPrice = 0;
         if($this->productPrice) {
             foreach($this->productPrice as $productPrice) {
@@ -91,5 +92,9 @@ class BookingHasRoom extends Model
         }
 
         return $totalPrice;
+    }
+
+    public function productPriceByBookingId($bookingId) {
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_id', 'product_price_id'])->wherePivot('booking_id', '=', $bookingId)->first()->price;
     }
 }

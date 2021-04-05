@@ -319,7 +319,7 @@ class BookingsController extends Controller
                 }
                 $rooms[$i]['room_id'] = $room->room_id;
                 $rooms[$i]['rate_type_id'] = $room->rate_type_id;
-                $rooms[$i]['price'] = $room->price;
+                $rooms[$i]['price'] = $room->productPriceByBookingId($booking->id);
                 $rooms[$i]['rate_types'] = $room->room->roomType->rateTypes;
                 $rooms[$i]['guests'] = $keyedGuests;
                 $rooms[$i]['room'] = $room->room;
