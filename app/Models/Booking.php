@@ -26,7 +26,8 @@ class Booking extends Model
         'roomCount',
         'price',
         'accessories',
-        'accessoriesObjects'
+        'accessoriesObjects',
+        'dailyPrices'
     ];
 
     const SOURCE_BUSINESS = 'business';
@@ -280,5 +281,30 @@ class Booking extends Model
 
     public function payments() {
         return $this->hasMany(Payment::class);
+    }
+
+    public function getDailyPricesAttribute() {
+
+        return [
+            'daily_prices' => [
+                [
+                    'date' => '2021-04-06',
+                    'value' => '300'
+                ],
+                [
+                    'date' => '2021-04-05',
+                    'value' => '300'
+                ],
+                [
+                    'date' => '2021-04-08',
+                    'value' => '300'
+                ],
+                [
+                    'date' => '2021-04-09',
+                    'value' => '300'
+                ]
+            ],
+            'total_price' => "5222"
+        ];
     }
 }

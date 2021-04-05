@@ -328,6 +328,7 @@ class BookingsController extends Controller
         $responseArray['price'] = $booking->price['price'];
         $responseArray['total_price'] = $booking->price['total'];
         $responseArray['total_tax'] = $booking->price['tax'] + $booking->price['vat'];
+        $responseArray['price_breakdown'] = $booking->dailyPrices;
 
         return response()->json($responseArray);
     }
