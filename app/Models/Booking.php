@@ -179,17 +179,20 @@ class Booking extends Model
         $prices = [];
         $prices['tax'] = 0;
         $prices['price'] = 0;
+        $dailyPrices = [];
         if($this->productPrice) {
            
             foreach($this->productPrice as $productPrice) {
 
+                $totalDayPrice = 0;
                 if($productPrice->pivot->booking_has_room_id) {
                     $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_has_room_id);
 
                     $totalPrice = $totalPrice+$productPrice->price;
                     $onlyPrice = $onlyPrice+$productPrice->price;
                     $prices['price'] = $onlyPrice;
-    
+                    
+                    $totalDayPrice += $productPrice->price;
                     if($productPrice->taxes) {
                         //$allTaxes = [];
                         foreach($productPrice->taxes as $tax) {
@@ -259,6 +262,10 @@ class Booking extends Model
                     }
                 }
                 $prices['total'] = $totalPrice;
+               /*  $dailyPrices[] = [
+                    'date' => $date,
+                    'value' => $totalPrice
+                ]; */
             }
         }
 
