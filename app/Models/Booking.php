@@ -265,7 +265,7 @@ class Booking extends Model
         $prices['tax'] =  round($acuualTax*90/100, 2);
         $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
 
-        $prices['total'] = round($prices['total'], 2);
+        $prices['total'] = array_key_exists('total', $prices) ? round($prices['total'], 2) : 0;
 
         if(isset($accessoryVat)) {
             $prices['vat'] += round($accessoryVat, 2);
