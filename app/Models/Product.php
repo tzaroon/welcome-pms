@@ -35,4 +35,8 @@ class Product extends Model
     public function extra() {
         return $this->hasOne(Extra::class);
     }
+    
+    public function dailyPrice() {
+        return $this->hasOne(DailyPrice::class);
+    }
 }

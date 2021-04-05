@@ -180,19 +180,30 @@ class Booking extends Model
         $prices['tax'] = 0;
         $prices['price'] = 0;
         $dailyPrices = [];
+
         if($this->productPrice) {
            
+            $bookingDate = Carbon::parse($this->reservation_from);
+
             foreach($this->productPrice as $productPrice) {
 
                 $totalDayPrice = 0;
+                $priceDate = '';
+                
                 if($productPrice->pivot->booking_has_room_id) {
                     $bookingRoom = BookingHasRoom::find($productPrice->pivot->booking_has_room_id);
 
                     $totalPrice = $totalPrice+$productPrice->price;
                     $onlyPrice = $onlyPrice+$productPrice->price;
+
+                    $dailyPrice = $productPrice->product->dailyPrice;
                     $prices['price'] = $onlyPrice;
+                    $priceDate = $dailyPrice->date;
                     
                     $totalDayPrice += $productPrice->price;
+
+                   // $bookingDate = $bookingDate->addDay();
+
                     if($productPrice->taxes) {
                         //$allTaxes = [];
                         foreach($productPrice->taxes as $tax) {
@@ -212,20 +223,27 @@ class Booking extends Model
                                     $taxAmount = $productPrice->price*$tax->percentage/100;
                                     $totalPrice += ($taxAmount*$guestCount);
                                     $prices['tax'] += $taxAmount*$guestCount;
+
+                                    $totalDayPrice +=  $taxAmount*$guestCount;
                                 } else {
                                     $totalPrice += ($tax->amount*$guestCount);
                                     $prices['tax'] += $tax->amount*$guestCount;
+                                    $totalDayPrice +=  $tax->amount*$guestCount;
                                 }
                             }
                         }
                     }
+                    $dailyPrices[$priceDate] = $totalDayPrice;
                 } else {
                     $criteria = $productPrice->pivot->extras_pricing;
                     $date = $productPrice->pivot->extras_date;
                     if($date) {
 
-                        
+                        $priceDate = $date;
                     } else {
+
+                        $priceDate = $bookingDate->format('Y-m-d');
+                        
                         switch($criteria) {
                             case Extra::PRICING_BY_DAY:
 
@@ -234,6 +252,12 @@ class Booking extends Model
                                 $vat = $productPrice->price/100*$productPrice->vat->percentage;
                                 $totalPrice += $this->numberOfDays*$vat;
                                 $accessoryVat += $vat*$this->numberOfDays;
+                                $dailyPricesx = $dailyPrices;
+                                if($dailyPricesx) {
+                                    foreach($dailyPricesx as $date=>$price){
+                                        $dailyPrices[$date] = round($price+$vat+$productPrice->price, 2);
+                                    }
+                                }
                                 break;
 
                             case Extra::PRICING_BY_FULL_STAY:
@@ -243,6 +267,13 @@ class Booking extends Model
                                 $vat = $productPrice->price/100*$productPrice->vat->percentage;
                                 $totalPrice += $vat;
                                 $accessoryVat += $vat;
+                                $totalDayPrice +=  $vat/$this->numberOfDays;
+                                $dailyPricesx = $dailyPrices;
+                                if($dailyPricesx) {
+                                    foreach($dailyPricesx as $date=>$price){
+                                        $dailyPrices[$date] = round(($vat/$this->numberOfDays)+($productPrice->price/$this->numberOfDays), 2);
+                                    }
+                                }
                                 break;
                             case Extra::PRICING_BY_PERSON_PER_DAY:
                                 $prices['price'] += $this->numberOfDays*$productPrice->price*$guestsTotal;
@@ -250,6 +281,13 @@ class Booking extends Model
                                 $vat = ($productPrice->price/100*$productPrice->vat->percentage)*$guestsTotal;
                                 $totalPrice += $this->numberOfDays*$vat;
                                 $accessoryVat += $vat*$this->numberOfDays;
+
+                                $dailyPricesx = $dailyPrices;
+                                if($dailyPricesx) {
+                                    foreach($dailyPricesx as $date=>$price){
+                                        $dailyPrices[$date] = round(($price+$vat+$productPrice->price), 2);
+                                    }
+                                }
                                 break;
                             case Extra::PRICING_BY_PERSON_PER_STAY:
                                 $prices['price'] += $productPrice->price*$guestsTotal;
@@ -257,15 +295,21 @@ class Booking extends Model
                                 $vat = ($productPrice->price/100*$productPrice->vat->percentage)*$guestsTotal;
                                 $totalPrice += $vat;
                                 $accessoryVat += $vat;
+                                $totalDayPrice += $vat/$this->numberOfDays;
+                                
+                                $dailyPricesx = $dailyPrices;
+                                if($dailyPricesx) {
+                                    foreach($dailyPricesx as $date=>$price){
+                                        $dailyPrices[$date] = round(($price+$vat+$productPrice->price)/$this->numberOfDays, 2);
+                                    }
+                                }
+
                                 break;
                         }
                     }
                 }
                 $prices['total'] = $totalPrice;
-               /*  $dailyPrices[] = [
-                    'date' => $date,
-                    'value' => $totalPrice
-                ]; */
+                
             }
         }
 
@@ -282,28 +326,23 @@ class Booking extends Model
             $prices['vat'] += round($accessoryVat, 2);
             $prices['vat'] = round($prices['vat'], 2);
         }
-        //dd($prices);
 
+        $keyedDailyPrices = [];
+        $gTotal = 0;
+        if( $dailyPrices) {
+            foreach( $dailyPrices as $date=>$price) {
+                $keyedDailyPrices[] = [
+                    'date' => $date,
+                    'value' => $price
+                ];
+                $gTotal += $price;
+            } 
+        }
         $prices['price_breakdown'] = [
             'daily_prices' => [
-                [
-                    'date' => '2021-04-06',
-                    'value' => '300'
-                ],
-                [
-                    'date' => '2021-04-05',
-                    'value' => '300'
-                ],
-                [
-                    'date' => '2021-04-08',
-                    'value' => '300'
-                ],
-                [
-                    'date' => '2021-04-09',
-                    'value' => '300'
-                ]
+                $keyedDailyPrices
             ],
-            'total_price' => "3030"
+            'total_price' => $gTotal
         ];
 
         return $prices;
