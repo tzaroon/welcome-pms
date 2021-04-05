@@ -271,7 +271,7 @@ class Booking extends Model
                                 $dailyPricesx = $dailyPrices;
                                 if($dailyPricesx) {
                                     foreach($dailyPricesx as $date=>$price){
-                                        $dailyPrices[$date] = round(($vat/$this->numberOfDays)+($productPrice->price/$this->numberOfDays), 2);
+                                        $dailyPrices[$date] = round(($price+$vat/$this->numberOfDays+$productPrice->price)/$this->numberOfDays, 2);
                                     }
                                 }
                                 break;
@@ -285,7 +285,7 @@ class Booking extends Model
                                 $dailyPricesx = $dailyPrices;
                                 if($dailyPricesx) {
                                     foreach($dailyPricesx as $date=>$price){
-                                        $dailyPrices[$date] = round(($price+$vat+$productPrice->price), 2);
+                                        $dailyPrices[$date] = round(($price+$vat+($productPrice->price*$guestsTotal)), 2);
                                     }
                                 }
                                 break;
@@ -300,7 +300,7 @@ class Booking extends Model
                                 $dailyPricesx = $dailyPrices;
                                 if($dailyPricesx) {
                                     foreach($dailyPricesx as $date=>$price){
-                                        $dailyPrices[$date] = round(($price+$vat+$productPrice->price)/$this->numberOfDays, 2);
+                                        $dailyPrices[$date] = round(($price+$vat+($productPrice->price*$guestsTotal))/$this->numberOfDays, 2);
                                     }
                                 }
 
