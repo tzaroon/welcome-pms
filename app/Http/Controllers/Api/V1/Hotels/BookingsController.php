@@ -500,7 +500,7 @@ class BookingsController extends Controller
             }
         });
 
-        return response()->json(['message' => 'Reservation successfully updated.']);
+        return response()->json(['booking' => $booking]);
     }
 
     public function changeRoom(Request $request, BookingHasRoom $bookingRoom) {
