@@ -363,6 +363,10 @@ class BookingsController extends Controller
             if($rooms)  {
                 $priceIds = [];
                 foreach($rooms as $room) {
+                    
+                    if(!array_key_exists('room_id', $room) || !$room['room_id'])
+                        continue;
+
                     $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id, 'room_id' => $room['room_id']]);
                     $bookingHasRoom->rate_type_id = array_key_exists('rate_type_id', $room) ? $room['rate_type_id'] : $bookingHasRoom->rate_type_id;
                     $bookingHasRoom->save();
