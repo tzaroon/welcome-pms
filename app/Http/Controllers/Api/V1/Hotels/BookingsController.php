@@ -363,7 +363,7 @@ class BookingsController extends Controller
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
-dd($postData['deleted_payments']);
+
         DB::transaction(function() use ($booking, $user, $postData) {
             $booking->fill($postData);
             $booking->save();
