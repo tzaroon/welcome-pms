@@ -273,9 +273,10 @@ class BookingsController extends Controller
         if($booking->accessoriesObjects) {
             $i = 0;
             foreach($booking->accessoriesObjects as $accessory) {
+
                 $accessories[$i]['product_price_id'] = $accessory->id;
-                $accessories[$i]['price'] = $accessory->product->price->price;
-                $accessories[$i]['vat'] = $accessory->product->price->vat->percentage;
+                $accessories[$i]['price'] = $accessory->price;
+                $accessories[$i]['vat'] = $accessory->vat->percentage;
                 $accessories[$i]['count'] = $accessory->pivot->extras_count;
                 $accessories[$i]['date'] = $accessory->pivot->extras_date;
                 $accessories[$i]['pricing'] = $accessory->pivot->extras_pricing;
@@ -362,7 +363,7 @@ class BookingsController extends Controller
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
-
+dd($postData['deleted_payments']);
         DB::transaction(function() use ($booking, $user, $postData) {
             $booking->fill($postData);
             $booking->save();
@@ -478,6 +479,7 @@ class BookingsController extends Controller
                     $priceIds[$accessory['product_price_id']]['extras_date'] = array_key_exists('date', $accessory) ? $accessory['date'] : null;
                 }
             }
+
             $booking->productPrice()->sync($priceIds);
 
             $payments = array_key_exists('payments', $postData) ? $postData['payments'] : [];

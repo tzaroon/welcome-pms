@@ -26,7 +26,8 @@ class Booking extends Model
         'roomCount',
         'price',
         'accessories',
-        'accessoriesObjects'
+        'accessoriesObjects',
+        'totalPaid'
     ];
 
     const SOURCE_BUSINESS = 'business';
@@ -155,19 +156,28 @@ class Booking extends Model
 
         $guestsCount = DB::table('booking_room_guests')
             ->join('guests', 'booking_room_guests.guest_id', '=', 'guests.id')
-            ->select('booking_room_guests.room_id', 'guests.guest_type', DB::raw('count(*) as guest_count'))
+            ->join('users', 'guests.user_id', '=', 'users.id')
+            ->select('booking_room_guests.room_id', 'guests.guest_type','users.first_name', DB::raw('count(*) as guest_count'))
             ->where('booking_room_guests.booking_id', $this->id)
             ->groupBy('guests.guest_type')
+            ->groupBy('users.first_name')
             ->groupBy('booking_room_guests.room_id')
             ->get();
 
         $guestreport = [];
         $guestsTotal = 0;
+        
         if($guestsCount) {
             foreach($guestsCount as $count) {
-                if($count->guest_type) {
-                    $guestreport[$count->room_id][$count->guest_type] = $count->guest_count;
-                    $guestsTotal++;
+                if($count->first_name) {
+                    $guestType = $count->guest_type ? : Guest::GUEST_TYPE_ADULT;
+                    if(array_key_exists($count->room_id, $guestreport) && array_key_exists($guestType, $guestreport[$count->room_id])) {
+                        $guestreport[$count->room_id][$guestType] += $count->guest_count;
+                    } else {
+                        $guestreport[$count->room_id][$guestType] = $count->guest_count;
+                    }
+
+                    $guestsTotal += $count->guest_count;
                 }
             }
         }
@@ -186,7 +196,7 @@ class Booking extends Model
             $bookingDate = Carbon::parse($this->reservation_from);
 
             foreach($this->productPrice as $productPrice) {
-
+                
                 $totalDayPrice = 0;
                 $priceDate = '';
                 
@@ -211,11 +221,11 @@ class Booking extends Model
                             if($bookingRoom && array_key_exists($bookingRoom->room_id, $guestreport)) {
                                 //$allTaxes[] = $tax;
                                 switch($tax->tax_id) {
-                                    case 1:
+                                    case Tax::CITY_TAX:
                                         $guestCount = array_key_exists(Guest::GUEST_TYPE_ADULT, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_ADULT] : 0;
                                         $guestCount += array_key_exists(Guest::GUEST_TYPE_CORPORATE, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CORPORATE] : 0;
                                     break;
-                                    case 2:
+                                    case Tax::CHILDREN_CITY_TAX:
                                         $guestCount += array_key_exists(Guest::GUEST_TYPE_CHILD, $guestreport[$bookingRoom->room_id]) ? $guestreport[$bookingRoom->room_id][Guest::GUEST_TYPE_CHILD] : 0;
                                     break;
                                 }
@@ -234,16 +244,28 @@ class Booking extends Model
                         }
                     }
                     $dailyPrices[$priceDate] = $totalDayPrice;
-                } else {
+                }    
+            }
+            
+            foreach($this->productPrice as $productPrice) {
+                
+                if(!$productPrice->pivot->booking_has_room_id) {
+
                     $criteria = $productPrice->pivot->extras_pricing;
                     $date = $productPrice->pivot->extras_date;
                     if($date) {
 
                         $priceDate = $date;
+                        $dailyPricesx = $dailyPrices;
+                        $vat = $productPrice->price/100*$productPrice->vat->percentage;
+                        if($dailyPricesx) {
+                            foreach($dailyPricesx as $date=>$price){
+                                if($priceDate == $date) {
+                                    $dailyPrices[$date] = round($price+$vat+$productPrice->price, 2);
+                                }
+                            }
+                        }
                     } else {
-
-                        $priceDate = $bookingDate->format('Y-m-d');
-                        
                         switch($criteria) {
                             case Extra::PRICING_BY_DAY:
 
@@ -300,7 +322,7 @@ class Booking extends Model
                                 $dailyPricesx = $dailyPrices;
                                 if($dailyPricesx) {
                                     foreach($dailyPricesx as $date=>$price){
-                                        $dailyPrices[$date] = round(($price+$vat+($productPrice->price*$guestsTotal))/$this->numberOfDays, 2);
+                                        $dailyPrices[$date] = round(($price+($vat/$this->numberOfDays)+(($productPrice->price/$this->numberOfDays)*$guestsTotal)), 2);
                                     }
                                 }
 
@@ -309,7 +331,6 @@ class Booking extends Model
                     }
                 }
                 $prices['total'] = $totalPrice;
-                
             }
         }
 
@@ -320,7 +341,7 @@ class Booking extends Model
         $prices['tax'] =  round($acuualTax*90/100, 2);
         $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
 
-        $prices['total'] = array_key_exists('total', $prices) ? round($prices['total'], 2) : 0;
+        $prices['total'] = array_key_exists('total', $prices) ? round(($prices['total'] + $this->tourist_tax - $this->discount) - $this->totalPaid, 2) : 0;
 
         if(isset($accessoryVat)) {
             $prices['vat'] += round($accessoryVat, 2);
@@ -338,9 +359,10 @@ class Booking extends Model
                 $gTotal += $price;
             } 
         }
+        
         $prices['price_breakdown'] = [
             'daily_prices' => $keyedDailyPrices,
-            'total_price' => $gTotal
+            'total_price' => round(($gTotal + $this->tourist_tax - $this->discount) - $this->totalPaid, 2)
         ];
 
         return $prices;
@@ -348,5 +370,15 @@ class Booking extends Model
 
     public function payments() {
         return $this->hasMany(Payment::class);
+    }
+
+    public function getTotalPaidAttribute() {
+        $totalPayment = 0;
+        if($this->payments) {
+            foreach($this->payments as $payment) {
+                $totalPayment += $payment->amount;
+            }
+        }
+        return $totalPayment;
     }
 }
