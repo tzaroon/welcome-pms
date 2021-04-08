@@ -474,7 +474,31 @@ class Booking extends Model
 
         if($this->onlyAccessoriesPrices) {
             foreach($this->onlyAccessoriesPrices as $price) {
-                $totalVat += $price->vat->percentage/100*$price->price;
+                $criteria = $price->pivot->extras_pricing;
+                $date = $price->pivot->extras_date;
+                if($date) {
+
+                    $totalVat += $price->vat->percentage/100*$price->price;
+                } else {
+                    switch($criteria) {
+                        case Extra::PRICING_BY_DAY:
+
+                            $totalVat += $this->numberOfDays*($price->vat->percentage/100*$price->price);
+                            break;
+
+                        case Extra::PRICING_BY_FULL_STAY:
+
+                            $totalVat += $price->vat->percentage/100*$price->price;
+                            break;
+                        case Extra::PRICING_BY_PERSON_PER_DAY:
+                            $totalVat += $this->numberOfDays*($price->vat->percentage/100*$price->price)*($this->getAdultGuestCount()+$this->getChildrenGuestsCount());
+                            break;
+                        case Extra::PRICING_BY_PERSON_PER_STAY:
+                            
+                            $totalVat += ($price->vat->percentage/100*$price->price)*($this->getAdultGuestCount()+$this->getChildrenGuestsCount());
+                            break;
+                    }
+                }
             }
         }
 
