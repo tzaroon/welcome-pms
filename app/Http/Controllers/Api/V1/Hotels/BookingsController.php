@@ -332,6 +332,13 @@ class BookingsController extends Controller
         $responseArray['total_price'] = $booking->price['total'];
         $responseArray['total_tax'] = $booking->price['tax'] + $booking->price['vat'];
         $responseArray['price_breakdown'] = $booking->price['price_breakdown'];
+        
+        
+        $responseArray['accommodation_price'] = $booking->getAccomudationPrice();
+        $responseArray['accessories_price'] = $booking->getAccessoriesPrice();
+        $responseArray['city_tax'] = $booking->getCityTax()+$booking->getChildrenCityTax();
+        $responseArray['vat'] = $booking->getVat();
+        $responseArray['total_booking_price'] = number_format($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'], 2, ',', ' ');
 
         return response()->json($responseArray);
     }

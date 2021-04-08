@@ -381,4 +381,132 @@ class Booking extends Model
         }
         return $totalPayment;
     }
+
+    public function getAccomudationPrice() {
+
+        $totalPrice = 0;
+        if($this->onlyAccomudationPrices) {
+            foreach($this->onlyAccomudationPrices as $price) {
+                $totalPrice += 90/100*$price->price;
+            }
+        }
+
+        return round($totalPrice, 2);
+    }
+    
+    public function getAccessoriesPrice() {
+
+        $totalPrice = 0;
+        if($this->onlyAccessoriesPrices) {
+            foreach($this->onlyAccessoriesPrices as $price) {
+                $criteria = $price->pivot->extras_pricing;
+                $date = $price->pivot->extras_date;
+                if($date) {
+
+                    $totalPrice += $price->price;
+                } else {
+                    switch($criteria) {
+                        case Extra::PRICING_BY_DAY:
+
+                            $totalPrice += $this->numberOfDays*$price->price;
+                            break;
+
+                        case Extra::PRICING_BY_FULL_STAY:
+
+                            $totalPrice += $price->price;
+                            break;
+                        case Extra::PRICING_BY_PERSON_PER_DAY:
+                            $totalPrice += $price->price*($this->getAdultGuestCount()+$this->getChildrenGuestsCount())*$this->numberOfDays;
+                            break;
+                        case Extra::PRICING_BY_PERSON_PER_STAY:
+                            $totalPrice += $price->price*($this->getAdultGuestCount()+$this->getChildrenGuestsCount());
+                            break;
+                    }
+                }
+                $totalPrice += $price->price;
+            }
+        }
+
+        return round($totalPrice, 2);
+    }
+    
+    public function getCityTax() {
+
+        $totalCityTax = 0;
+        if($this->onlyAccomudationPrices) {
+            foreach($this->onlyAccomudationPrices as $price) {
+                $taxAmont = $price->cityTax->amount;
+                if($price->cityTax->percentage) {
+                    $taxAmont = $price->cityTax->percentage/100*$price->price;
+                }
+                $totalCityTax += $taxAmont;
+            }
+        }
+
+        $totalCityTax = $totalCityTax*$this->getAdultGuestCount();
+        return round($totalCityTax, 2);
+    }
+    
+    public function getChildrenCityTax() {
+
+        $totalChildrenCityTax = 0;
+        if($this->onlyAccomudationPrices) {
+            foreach($this->onlyAccomudationPrices as $price) {
+                $taxAmont = $price->childrenCityTax->amount;
+                if($price->childrenCityTax->percentage) {
+                    $taxAmont = $price->childrenCityTax->percentage/100*$price->price;
+                }
+                $totalChildrenCityTax += $taxAmont;
+            }
+        }
+
+        $totalChildrenCityTax = $totalChildrenCityTax*$this->getChildrenGuestsCount();
+        return round($totalChildrenCityTax, 2);
+    }
+  
+    public function getVat() {
+
+        $totalVat = 0;
+        if($this->onlyAccomudationPrices) {
+            foreach($this->onlyAccomudationPrices as $price) {
+                $totalVat += 10/100*$price->price;
+            }
+        }
+
+        if($this->onlyAccessoriesPrices) {
+            foreach($this->onlyAccessoriesPrices as $price) {
+                $totalVat += $price->vat->percentage/100*$price->price;
+            }
+        }
+
+        return round($totalVat, 2);
+    }
+
+    public function getAdultGuestCount() {
+        return $this->adultGuests->count();
+    }
+    
+    public function getChildrenGuestsCount() {
+        return $this->childrenGuests->count();
+    }
+
+    public function adultGuests() {
+
+        return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->where('guest_type', Guest::GUEST_TYPE_ADULT)->withPivot('room_id');
+    }
+    
+    public function childrenGuests() {
+
+        return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->where('guest_type', Guest::GUEST_TYPE_CHILD)->withPivot('room_id');
+    }
+
+    public function onlyAccomudationPrices() {
+
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->whereNotNull('booking_has_room_id')->withPivot(['booking_has_room_id', 'extras_count', 'extras_pricing', 'extras_date']);
+    }
+    
+    public function onlyAccessoriesPrices() {
+
+        return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->whereNull('booking_has_room_id')->withPivot(['booking_has_room_id', 'extras_count', 'extras_pricing', 'extras_date']);
+    }
 }

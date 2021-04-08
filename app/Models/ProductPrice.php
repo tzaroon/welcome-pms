@@ -58,7 +58,17 @@ class ProductPrice extends Model
     
     public function vat() {
         
-        return $this->hasOne(ProductPricesHasTax::class)->where('is_active', 1)->where('tax_id', 3);
+        return $this->hasOne(ProductPricesHasTax::class)->where('is_active', 1)->where('tax_id', Tax::VAT);
+    }
+    
+    public function cityTax() {
+        
+        return $this->hasOne(ProductPricesHasTax::class)->where('is_active', 1)->where('tax_id', Tax::CITY_TAX);
+    }
+    
+    public function childrenCityTax() {
+        
+        return $this->hasOne(ProductPricesHasTax::class)->where('is_active', 1)->where('tax_id', Tax::CHILDREN_CITY_TAX);
     }
 
     public function product() {
