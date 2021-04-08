@@ -423,7 +423,6 @@ class Booking extends Model
                             break;
                     }
                 }
-                $totalPrice += $price->price;
             }
         }
 
