@@ -233,7 +233,8 @@ class BookingsController extends Controller
             
             if($accessories) {
                 foreach($accessories as $accessory) {
-                    if(!$accessory || 0 == sizeof($accessory))
+
+                    if(!$accessory || 0 == sizeof($accessory) || !array_key_exists('product_price_id', $accessory))
                         continue;
                         
                     $priceIds[$accessory['product_price_id']]['product_price_id'] = array_key_exists('product_price_id', $accessory) ? $accessory['product_price_id'] : null;
@@ -338,7 +339,18 @@ class BookingsController extends Controller
         $responseArray['accessories_price'] = $booking->getAccessoriesPrice();
         $responseArray['city_tax'] = $booking->getCityTax()+$booking->getChildrenCityTax();
         $responseArray['vat'] = $booking->getVat();
-        $responseArray['total_booking_price'] = number_format($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'], 2, ',', ' ');
+        $responseArray['total_booking_price'] = number_format($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'], 2, ',', '.');
+        $responseArray['total_paid'] = $booking->totalPaid;
+        $responseArray['amount_to_pay'] = number_format($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat']-$responseArray['total_paid'], 2, ',', '.');
+
+        $responseArray['price'] = number_format($responseArray['price'], 2, ',', '.');
+        $responseArray['total_price'] = number_format($responseArray['total_price'], 2, ',', '.');
+        $responseArray['total_tax'] = number_format($responseArray['total_tax'], 2, ',', '.'); 
+        $responseArray['accommodation_price'] = number_format($responseArray['accommodation_price'], 2, ',', '.'); 
+        $responseArray['accessories_price'] = number_format($responseArray['accessories_price'], 2, ',', '.');
+        $responseArray['city_tax'] = number_format($responseArray['city_tax'], 2, ',', '.'); 
+        $responseArray['vat'] = number_format($responseArray['vat'], 2, ',', '.');
+        $responseArray['total_paid'] =  number_format($responseArray['total_paid'], 2, ',', '.');
 
         return response()->json($responseArray);
     }

@@ -354,7 +354,7 @@ class Booking extends Model
             foreach( $dailyPrices as $date=>$price) {
                 $keyedDailyPrices[] = [
                     'date' => $date,
-                    'value' => $price
+                    'value' => number_format($price, 2, ',', '.')
                 ];
                 $gTotal += $price;
             } 
@@ -434,11 +434,14 @@ class Booking extends Model
         $totalCityTax = 0;
         if($this->onlyAccomudationPrices) {
             foreach($this->onlyAccomudationPrices as $price) {
-                $taxAmont = $price->cityTax->amount;
-                if($price->cityTax->percentage) {
-                    $taxAmont = $price->cityTax->percentage/100*$price->price;
+                if($price->cityTax)
+                {
+                    $taxAmont = $price->cityTax->amount;
+                    if($price->cityTax->percentage) {
+                        $taxAmont = $price->cityTax->percentage/100*$price->price;
+                    }
+                    $totalCityTax += $taxAmont;
                 }
-                $totalCityTax += $taxAmont;
             }
         }
 
@@ -451,11 +454,14 @@ class Booking extends Model
         $totalChildrenCityTax = 0;
         if($this->onlyAccomudationPrices) {
             foreach($this->onlyAccomudationPrices as $price) {
-                $taxAmont = $price->childrenCityTax->amount;
-                if($price->childrenCityTax->percentage) {
-                    $taxAmont = $price->childrenCityTax->percentage/100*$price->price;
+                if($price->childrenCityTax)
+                {
+                    $taxAmont = $price->childrenCityTax->amount;
+                    if($price->childrenCityTax->percentage) {
+                        $taxAmont = $price->childrenCityTax->percentage/100*$price->price;
+                    }
+                    $totalChildrenCityTax += $taxAmont;
                 }
-                $totalChildrenCityTax += $taxAmont;
             }
         }
 
