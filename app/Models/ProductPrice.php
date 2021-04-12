@@ -114,6 +114,21 @@ class ProductPrice extends Model
             $productPriceNew->price = $price;
             $productPriceNew->is_active = 0;
             $productPriceNew->save();
+            
+            if($productPrice->taxes)   
+            {
+                foreach($productPrice->taxes as $tax)
+                {
+                    $productPriceHasTax = new ProductPricesHasTax();
+                    $productPriceHasTax->tax_id = $tax->tax_id;
+                    $productPriceHasTax->product_price_id = $productPriceNew->id;
+                    $productPriceHasTax->amount = $tax->amount;
+                    $productPriceHasTax->percentage = $tax->percentage;
+                    $productPriceHasTax->is_active = 1;
+                    $productPriceHasTax->save();
+                }
+            }
+
             return $productPriceNew;
         } else {
             return $productPrice;
