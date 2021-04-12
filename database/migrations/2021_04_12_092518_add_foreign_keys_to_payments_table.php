@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddTaxDiscountToBookings extends Migration
+class AddForeignKeysToPaymentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddTaxDiscountToBookings extends Migration
      */
     public function up()
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->float('tourist_tax')->nullable();
-            $table->float('discount')->nullable();
+        Schema::table('payments', function (Blueprint $table) {
+            $table->foreign('booking_id')->references('id')->on('bookings')->onUpdate('RESTRICT')->onDelete('RESTRICT');
         });
     }
 
@@ -26,8 +25,8 @@ class AddTaxDiscountToBookings extends Migration
      */
     public function down()
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            //
+        Schema::table('payments', function (Blueprint $table) {
+            $table->dropForeign('payments_booking_id_foreign');
         });
     }
 }

@@ -16,8 +16,8 @@ class CreateProductPricesHasTaxesTable extends Migration
         Schema::create('product_prices_has_taxes', function (Blueprint $table) {
             $table->unsignedInteger('tax_id')->index('fk_products_has_taxes_taxes1_idx');
             $table->unsignedInteger('product_price_id')->index('fk_products_has_taxes_product_prices1_idx');
-            $table->float('amount', 10, 0);
-            $table->integer('percentage');
+            $table->float('amount', 10, 0)->nullable();
+            $table->integer('percentage')->nullable();
             $table->unsignedInteger('is_active')->default(1);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();

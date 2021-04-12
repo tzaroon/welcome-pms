@@ -21,8 +21,8 @@ class CreateExtrasTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('image')->nullable();
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->dateTime('created_at')->useCurrent();
+            $table->dateTime('updated_at')->useCurrent();
             $table->softDeletes();
         });
     }

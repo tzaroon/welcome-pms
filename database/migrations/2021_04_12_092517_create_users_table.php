@@ -17,10 +17,10 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('company_id')->index('fk_users_companies1_idx');
             $table->string('title', 45)->nullable();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->enum('gender', ['male', 'female', 'none']);
-            $table->string('email');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->enum('gender', ['male', 'female', 'none'])->nullable();
+            $table->string('email')->nullable();
             $table->string('phone_number', 45)->nullable();
             $table->string('username')->nullable();
             $table->timestamp('email_verified_at')->nullable();

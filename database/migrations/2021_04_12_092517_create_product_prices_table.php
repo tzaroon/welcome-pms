@@ -18,7 +18,7 @@ class CreateProductPricesTable extends Migration
             $table->unsignedInteger('company_id')->index('fk_product_prices_company_idx');
             $table->unsignedInteger('product_id')->index('fk_product_prices_products1_idx');
             $table->float('price', 10, 0);
-            $table->boolean('is_active')->unsigned()->default(0);
+            $table->unsignedTinyInteger('is_active')->default(0);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
         });

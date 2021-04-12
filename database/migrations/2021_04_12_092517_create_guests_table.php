@@ -16,7 +16,7 @@ class CreateGuestsTable extends Migration
         Schema::create('guests', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('user_id')->index('fk_guests_users1_idx');
-            $table->enum('guest_type', ['adult', 'child', 'corporate']);
+            $table->enum('guest_type', ['adult', 'child', 'corporate'])->nullable();
             $table->text('identification_number')->nullable();
             $table->enum('identification', ['id', 'passport', 'licence', 'other'])->nullable();
             $table->date('id_issue_date')->nullable();

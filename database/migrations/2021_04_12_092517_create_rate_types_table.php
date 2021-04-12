@@ -38,7 +38,7 @@ class CreateRateTypesTable extends Migration
             $table->string('max_booking_hour', 8)->nullable();
             $table->softDeletes();
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamp('updated_at')->nullable()->useCurrent();
         });
     }
 
