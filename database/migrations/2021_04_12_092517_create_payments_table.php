@@ -14,17 +14,14 @@ class CreatePaymentsTable extends Migration
     public function up()
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id();
-            $table->integer('booking_id', false, true)->length(10);
+            $table->bigIncrements('id');
+            $table->unsignedInteger('booking_id')->index();
             $table->enum('payment_method', ['bankcard', 'cash', 'giftcard', 'invoice', 'ota', 'creditcard']);
             $table->string('initials');
             $table->string('payment_date');
-            $table->float('amount');
+            $table->double('amount', 8, 2);
             $table->softDeletes();
             $table->timestamps();
-
-            $table->index('booking_id');
-            $table->foreign('booking_id')->references('id')->on('bookings')->onDelete('restrict');
         });
     }
 
