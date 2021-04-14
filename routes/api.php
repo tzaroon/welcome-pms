@@ -47,6 +47,9 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('bookers', 'BookersController', ['except' => ['create']]);
                 Route::get('bookers/autocomplete/{keyword}', 'BookersController@autocomplete')->name('bookers_list');
             });
+            Route::namespace('Communication')->name('communication.')->prefix('communication')->group(function (){
+                Route::get('whats-app', 'WhatsAppController@sendMessage')->name('whats_app');
+            });
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
                 Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
@@ -57,6 +60,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('{hotel}/rooms', 'RoomsController@index')->name('rooms_list');
                 Route::resource('{hotel}/bookings', 'BookingsController');
                 Route::resource('bookings', 'BookingsController');
+                Route::get('daily-rates/{id}', 'DailyRatesController@index');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
                 Route::get('room-rate-types/{hotel}', 'HotelsController@loadRoomTypeRateType')->name('load-room-type-rate-type');
                 Route::post('change-room/{bookingRoom}', 'BookingsController@changeRoom')->name('change_room');
