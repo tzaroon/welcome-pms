@@ -176,6 +176,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Orangehill\Iseed\IseedServiceProvider::class,
+        Wubook\Wired\WubookWiredServiceProvider::class
     ],
 
     /*
@@ -227,6 +228,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'WuBook' => \Wubook\Wired\Facades\WuBook::class
     ],
 
     /*

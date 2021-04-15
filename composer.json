@@ -6,6 +6,15 @@
         "framework",
         "laravel"
     ],
+    "repositories": {
+        "wired":{
+            "type": "path",
+            "url": "packages/wubook/wired",
+            "options":{
+                "symlink": true
+            }
+        }
+    },
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
@@ -17,7 +26,8 @@
         "laravel/ui": "^2.0",
         "maatwebsite/excel": "^3.1",
         "twilio/sdk": "^6.17",
-        "tymon/jwt-auth": "^1.0"
+        "tymon/jwt-auth": "^1.0",
+        "wubook/wired": "@dev"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.4",
