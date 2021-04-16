@@ -105,7 +105,9 @@ class DailyRatesController extends Controller
 
 			foreach($rateTypes as $rateType)
 			{
+				$resultData[$count]['rate_types'][$countJ]['id'] = $rateType->id;
 				$resultData[$count]['rate_types'][$countJ]['name'] = $rateType->detail->name;
+				$resultData[$count]['rate_types'][$countJ]['rate_type_id'] = $rateType->rate_type_id;
 				$carbonFromDate = new Carbon($dateFrom); 
 
 				for($i=0; $i <= $days; $i++)
@@ -123,6 +125,8 @@ class DailyRatesController extends Controller
 					$dailyPrice = new DailyPrice();
 					$resultData[$count]['rate_types'][$countJ]['rate'][] = [
 						'id' => $id,
+						'rate_type_id' => $rateType->id,
+						'parent_rate_type_id' => $rateType->rate_type_id,
 						'date' => $rateDate,
 						'price' => $price,
 						'checkin_closed' => $checkinClosed,
