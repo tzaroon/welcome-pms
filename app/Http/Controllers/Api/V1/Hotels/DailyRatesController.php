@@ -28,7 +28,7 @@ class DailyRatesController extends Controller
 		$days = $carbonToDate->diffInDays($carbonFromDate);
 		$inputRoomType = $request->input('room-type') ? : null;		
 
-		$roomsTypes = RoomType::where(['company_id' => $user->company_id])
+		$roomsTypes = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $id])
 			->with(
 				[
 					'roomTypeDetail',
@@ -43,7 +43,10 @@ class DailyRatesController extends Controller
 		$dailyPrices = DailyPrice::where('date', '>=', $dateFrom)
 			->where('date', '<=', $dateTo)
 			->with([
-				'product.price'
+				'product.price',
+				'rateType.roomType.hotel' => function($q) use ($id){
+					$q->where('id', $id);
+				}
 			])->get();
 
 		$keyedPrices = [];
