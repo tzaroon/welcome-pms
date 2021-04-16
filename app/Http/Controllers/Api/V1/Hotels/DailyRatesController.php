@@ -60,6 +60,8 @@ class DailyRatesController extends Controller
 			}
 		}
 
+		$totalRoomTypesOnDate = [];
+
 		foreach($roomsTypes as $roomType)
 		{
 			
@@ -92,6 +94,12 @@ class DailyRatesController extends Controller
 					'available' => $avaliableRooms
 				];
 
+				if(array_key_exists($rateDate, $totalRoomTypesOnDate)) {
+					$totalRoomTypesOnDate[$rateDate] += $avaliableRooms;
+				} else {
+					$totalRoomTypesOnDate[$rateDate] = $avaliableRooms;
+				}
+				
 				$carbonFromDate = $carbonFromDate->addDay();
 			}
 
@@ -102,28 +110,28 @@ class DailyRatesController extends Controller
 
 				for($i=0; $i <= $days; $i++)
 				{
-				$bookedCount = 0;
-				$rateDate = $carbonFromDate->format('Y-m-d'); 
-				$id = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['id'] : 0;
-				$price = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['price'] : 0;
-				$checkinClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['checkin_closed'] : 0;
-				$exitClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['exit_closed'] : 0; 
-				$minimumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['minimum_stay'] : 0; 
-				$maximumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['maximum_stay'] : 0;  
+					$bookedCount = 0;
+					$rateDate = $carbonFromDate->format('Y-m-d'); 
+					$id = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['id'] : 0;
+					$price = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['price'] : 0;
+					$checkinClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['checkin_closed'] : 0;
+					$exitClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['exit_closed'] : 0; 
+					$minimumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['minimum_stay'] : 0; 
+					$maximumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['maximum_stay'] : 0;  
 
-				$avaliableRooms = $totalRooms - $bookedCount;
-				$dailyPrice = new DailyPrice();
-				$resultData[$count]['rate_types'][$countJ]['rate'][] = [
-				'id' => $id,
-				'date' => $rateDate,
-				'price' => $price,
-				'checkin_closed' => $checkinClosed,
-				'exit_closed' => $exitClosed,
-				'minimum_stay' => $minimumStay,
-				'maximum_stay' => $maximumStay,
-				];
+					$avaliableRooms = $totalRooms - $bookedCount;
+					$dailyPrice = new DailyPrice();
+					$resultData[$count]['rate_types'][$countJ]['rate'][] = [
+						'id' => $id,
+						'date' => $rateDate,
+						'price' => $price,
+						'checkin_closed' => $checkinClosed,
+						'exit_closed' => $exitClosed,
+						'minimum_stay' => $minimumStay,
+						'maximum_stay' => $maximumStay,
+					];
 
-				$carbonFromDate = $carbonFromDate->addDay();
+					$carbonFromDate = $carbonFromDate->addDay();
 				}
 
 				$countJ++;
@@ -131,6 +139,16 @@ class DailyRatesController extends Controller
 		
 			$bookedCount = 0;
 			$count++;
+		}
+
+		if($totalRoomTypesOnDate) {
+			foreach($totalRoomTypesOnDate as $date => $dateAvailability) {
+
+				$resultData['avaiability_total'][] = [
+					'date' => $date,
+					'available' => $dateAvailability
+				];
+			}
 		}
 
 		return response()->json($resultData);
