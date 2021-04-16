@@ -141,16 +141,17 @@ class DailyRatesController extends Controller
 			$count++;
 		}
 
+		$totalAvailabilityCount = [];
 		if($totalRoomTypesOnDate) {
 			foreach($totalRoomTypesOnDate as $date => $dateAvailability) {
 
-				$resultData['avaiability_total'][] = [
+				$totalAvailabilityCount[] = [
 					'date' => $date,
 					'available' => $dateAvailability
 				];
 			}
 		}
 
-		return response()->json($resultData);
+		return response()->json(['calendar_data' => $resultData, 'total_available' => $totalAvailabilityCount]);
 	}
 }
