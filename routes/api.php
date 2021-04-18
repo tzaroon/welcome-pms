@@ -21,6 +21,10 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::post('verify', 'SessionsController@verify')->name('verify');
         });
 
+        Route::namespace('WuBook')->name('wubook.')->prefix('wubook')->group(function (){
+            Route::post('push-notification', 'PushNotificationController@index')->name('push-notification');
+        });
+        
         Route::middleware('auth:api')->group(function () {
             Route::namespace('Common')->name('common.')->prefix('common')->group(function () {
                 Route::resource('taxes', 'TaxesController', ['except' => ['create']]);
@@ -50,9 +54,7 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::namespace('Communication')->name('communication.')->prefix('communication')->group(function (){
                 Route::get('whats-app', 'WhatsAppController@sendMessage')->name('whats_app');
             });
-            Route::namespace('WuBook')->name('wubook.')->prefix('wubook')->group(function (){
-                Route::post('push-notification', 'PushNotificationController@index')->name('push-notification');
-            });
+            
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
                 Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);

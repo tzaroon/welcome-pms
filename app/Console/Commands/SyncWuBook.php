@@ -65,8 +65,13 @@ class SyncWuBook extends Command
 
         foreach($hotels as $hotel)
         {
+            $pushUrl = WuBook::reservations($token)->push_url();
+            if(!$pushUrl['data']) {
+                WuBook::reservations($token)->push_activation('http://light.tripgofersolutions.com/api/v1/wubook/push-notification', 1);
+            }
+            exit;
             foreach($rooms['data'] as $room)
-            {                  
+            {
                 $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
                     function($q) use ($room) {
                         $q->where('name', $room['name']);                        
