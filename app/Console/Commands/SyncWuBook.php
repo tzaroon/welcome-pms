@@ -47,11 +47,11 @@ class SyncWuBook extends Command
         $token = WuBook::auth()->acquire_token();
         $rooms = WuBook::rooms($token)->fetch_rooms();
         $companyId = 1;
-       /*  $plan = WuBook::prices($token)->add_pricing_plan('daily', 1);        
+/*         $plan = WuBook::prices($token)->add_pricing_plan('Daily', 1);        
         $planId = $plan['data'];
-        dd($planId);  */
-        $planId = 182114;
-       
+        dd($planId); */
+        $planId = 182115;
+        
         $hotels = Hotel::where('company_id', $companyId)->whereNotNull('l_code')->get();
 
         $dfrom =  Carbon::now();    
@@ -67,17 +67,14 @@ class SyncWuBook extends Command
         {
             foreach($rooms['data'] as $room)
             {                  
-                $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)
-                ->with(
-                    [                                      
-                        'roomTypeDetails' => function($q) use ($room) {
-                            $q->where('name', $room['name']);                        
-                        }
-                    ]
-                )->get()->first();           
+                $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
+                    function($q) use ($room) {
+                        $q->where('name', $room['name']);                        
+                    }
+                )->first();           
                 
                 if($roomType) 
-                {                
+                {
                     $roomType->ref_id = $room['id']; 
                     $roomType->save();              
                 }
@@ -86,14 +83,14 @@ class SyncWuBook extends Command
                 {
                     $rateType = RateType::where('company_id',  $companyId)->whereHas( 'details', 
                         function($q) use ($room) {
-                            $q->where('name', $room['name']);                            
+                            $q->where('name', $room['name']);
                         }
                     )->first();
 
-                    if($rateType) 
+                    if($rateType)
                     {
-                        $rateType->ref_id = $room['id'];                    
-                        $rateType->save();     
+                        $rateType->ref_id = $room['id'];
+                        $rateType->save();
                         
                         $dailyPrices = DailyPrice::where('company_id', $companyId)
                             ->where('rate_type_id', $rateType->id)
@@ -102,12 +99,12 @@ class SyncWuBook extends Command
 
                         $i = 0;
                         foreach($dailyPrices as $dailyPrice)
-                        {                                       
-                            $prices[$room['id']][$i] = $dailyPrice->product->price->price;       
-                            $i++;                                          
-                        }                
-                    }                
-                }         
+                        {
+                            $prices[$room['id']][$i] = $dailyPrice->product->price->price;
+                            $i++;
+                        }
+                    }
+                }
             }
             $result = WuBook::prices($token)->update_plan_prices($planId, $dfromdmY, $prices);
         }      
