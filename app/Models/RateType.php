@@ -53,4 +53,8 @@ class RateType extends Model
         }
         return $this->price;
     }
+    public function bookings() {
+
+		return $this->belongsToMany(Booking::class, 'booking_room');
+	}
 }

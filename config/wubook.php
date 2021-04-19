@@ -15,6 +15,7 @@ return [
     /*
      * Account informations
      */
+    //TODO: Get from .env
     'username' => 'IS176',
     'password' => '59v381t8',
     'provider_key' => '867d5d912fc3cf9bbe3b68ddc6a6add202daf46ab909c81f',

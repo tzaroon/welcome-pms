@@ -59,6 +59,47 @@ class BookingsController extends Controller
                 $processedData[$count]['room_number'] = $room->room_number;
                 $processedData[$count]['room_name'] = $room->name;
                 $processedData[$count]['bookings'] = [];
+                $processedData[$count]['rate_type_bookings'] = [];
+                if($room->roomType && $room->roomType->rateTypes) {
+                   
+                    $bookingGuest = null;
+                    foreach($room->roomType->rateTypes as $rateType)
+                    {    
+                        if($rateType->bookings) {
+                            foreach($rateType->bookings as $booking) {
+                                $bookingHasRoom = BookingHasRoom::where('booking_id', $booking->id)
+                                    ->where('rate_type_id', $rateType->id)
+                                    ->with('rateType')
+                                    ->first();
+    
+                                $associatedRooms = [];
+                                
+                                $paymentStatus = [
+                                    'not-paid', 'partially-paid', 'payed'
+                                ];
+                                shuffle($paymentStatus);
+                                
+                                $processedData[$count]['rate_type_bookings'][] = [
+                                    'id' => $booking->id,
+                                    'booking_room_id' => $bookingHasRoom ? $bookingHasRoom->id : null,
+                                    'reservation_from' => $booking->reservation_from,
+                                    'reservation_to' => $booking->reservation_to,
+                                    'time_start' => $booking->time_start,
+                                    'status' => $booking->status,
+                                    'roomCount' => $booking->roomCount,
+                                    'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                    'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
+                                    'numberOfDays' => $booking->numberOfDays,
+                                    'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
+                                    'rooms' => $associatedRooms,
+                                    'total_price' => $booking->price,
+                                    'payment_atatus' => $paymentStatus[0],
+                                    'addons' => $booking->accessories
+                                ];
+                            }
+                        }
+                    }
+                }
                 if($room->bookings) {
                     $bookingGuest = null;
                     foreach($room->bookings as $booking) {
