@@ -45,7 +45,7 @@ class SyncWuBook extends Command
     public function handle()
     {
         $token = WuBook::auth()->acquire_token();
-        $rooms = WuBook::rooms($token)->fetch_rooms();
+        
         $companyId = 1;
 /*         $plan = WuBook::prices($token)->add_pricing_plan('Daily', 1);        
         $planId = $plan['data'];
@@ -65,11 +65,14 @@ class SyncWuBook extends Command
 
         foreach($hotels as $hotel)
         {
-            $pushUrl = WuBook::reservations($token)->push_url();
+            
+            $pushUrl = WuBook::reservations($token, $hotel->l_code)->push_url();
+
             if(!$pushUrl['data']) {
-                WuBook::reservations($token)->push_activation('http://light.tripgofersolutions.com/api/v1/wubook/push-notification', 1);
+                WuBook::reservations($token, $hotel->l_code)->push_activation('http://light.tripgofersolutions.com/api/v1/wubook/push-notification', 1);
             }
-            exit;
+            
+            $rooms = WuBook::rooms($token, $hotel->l_code)->fetch_rooms();
             foreach($rooms['data'] as $room)
             {
                 $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
@@ -111,7 +114,7 @@ class SyncWuBook extends Command
                     }
                 }
             }
-            $result = WuBook::prices($token)->update_plan_prices($planId, $dfromdmY, $prices);
+            $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);
         }      
     }
 }

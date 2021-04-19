@@ -39,4 +39,8 @@ class Product extends Model
     public function dailyPrice() {
         return $this->hasOne(DailyPrice::class);
     }
+
+    public function getPriceByAmount($amount) {
+        return $this->hasOne(ProductPrice::class)->where('price', $amount)->first();
+    }
 }

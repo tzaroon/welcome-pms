@@ -12,7 +12,9 @@ class BookingHasRoom extends Model
 
     protected $fillable = [
         'booking_id',
-        'room_id'
+        'room_id',
+        'rate_type_id',
+        'first_guest_name'
     ];
     protected $appends = [
         'price'

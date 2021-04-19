@@ -163,10 +163,14 @@ class WuBookManager
      * @param string $token
      * @return Wubook\Wired\Api\WuBookPrices
      */
-    public function prices($token = null)
+    public function prices($token = null, $lcode = null)
     {
         // Setup client
         $client = new Client(self::ENDPOINT, null, new NativeParser(), new NativeSerializer());
+
+        if($lcode) {
+            $this->config['lcode'] = $lcode;
+        }
 
         return new WuBookPrices($this->config, $this->cache, $client, $token);
     }
@@ -177,10 +181,13 @@ class WuBookManager
      * @param string $token
      * @return Wubook\Wired\Api\WuBookPrices
      */
-    public function reservations($token = null)
+    public function reservations($token = null, $lcode = null)
     {
         // Setup client
         $client = new Client(self::ENDPOINT, null, new NativeParser(), new NativeSerializer());
+        if($lcode) {
+            $this->config['lcode'] = $lcode;
+        }
 
         return new WuBookReservations($this->config, $this->cache, $client, $token);
     }
@@ -205,10 +212,14 @@ class WuBookManager
      * @param string $token
      * @return Wubook\Wired\Api\WuBookRooms
      */
-    public function rooms($token = null)
+    public function rooms($token = null, $lcode = null)
     {
         // Setup client
         $client = new Client(self::ENDPOINT, null, new NativeParser(), new NativeSerializer());
+        
+        if($lcode) {
+            $this->config['lcode'] = $lcode;
+        }
 
         return new WuBookRooms($this->config, $this->cache, $client, $token);
     }
