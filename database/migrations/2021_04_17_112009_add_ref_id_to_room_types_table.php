@@ -14,7 +14,7 @@ class AddRefIdToRoomTypesTable extends Migration
     public function up()
     {
         Schema::table('room_types', function (Blueprint $table) {
-            $table->integer('ref_id');
+            $table->integer('ref_id')->after('max_people')->nullable();
         });
     }
 

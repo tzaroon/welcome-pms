@@ -15,6 +15,7 @@ class Booking extends Model
         'reservation_to',
         'time_start',
         'status',
+        'wubook_response',
         'source',
         'comment',
         'tourist_tax',
@@ -44,12 +45,22 @@ class Booking extends Model
 
     const STATUS_CONFIRMED = 'confirmed';
     const STATUS_CHICKIN = 'check-in';
-    const STATUS_CHICKOUT = 'check-out';
+    const STATUS_CHICKOUT = 'check-out';    
+    const STATUS_WAITING_APPROVAL = 'waiting for approval';
+    const STATUS_REFUSED = 'refused';
+    const STATUS_ACCEPTED = 'accepted';
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_CANCELLED_WITH_PANELATY = 'cancelled with penalty';
 
     static $__status = [
         self::STATUS_CONFIRMED => 'Confirmed',
         self::STATUS_CHICKIN => 'Check In',
-        self::STATUS_CHICKOUT => 'Check Out'
+        self::STATUS_CHICKOUT => 'Check Out',
+        self::STATUS_WAITING_APPROVAL => 'waiting for approval',
+        self::STATUS_REFUSED => 'refused',
+        self::STATUS_ACCEPTED => 'accepted',
+        self::STATUS_CANCELLED => 'cancelled',
+        self::STATUS_CANCELLED_WITH_PANELATY => 'cancelled with penalty'
     ];
     
     static $__status_array = [

@@ -14,7 +14,7 @@ class AddRefIdToRateTypesTable extends Migration
     public function up()
     {
         Schema::table('rate_types', function (Blueprint $table) {
-            $table->integer('ref_id');
+            $table->integer('ref_id')->after('max_booking_hour')->nullable();
         });
     }
 

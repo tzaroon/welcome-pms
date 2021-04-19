@@ -75,6 +75,7 @@ class SyncWuBook extends Command
             $rooms = WuBook::rooms($token, $hotel->l_code)->fetch_rooms();
             foreach($rooms['data'] as $room)
             {
+               DB::transaction(function() use ($room) {
                 $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
                     function($q) use ($room) {
                         $q->where('name', $room['name']);                        
@@ -113,6 +114,7 @@ class SyncWuBook extends Command
                         }
                     }
                 }
+            });
             }
             $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);
         }      

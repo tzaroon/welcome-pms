@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddLCodeToHotelsTable extends Migration
+class SetRoomIdNullableOnBookingRoomTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddLCodeToHotelsTable extends Migration
      */
     public function up()
     {
-        Schema::table('hotels', function (Blueprint $table) {
-            $table->string('l_code')->after('logo_email')->nullable();
+        Schema::table('booking_room', function (Blueprint $table) {
+            $table->integer('room_id')->nullable()->change();
         });
     }
 
@@ -25,8 +25,8 @@ class AddLCodeToHotelsTable extends Migration
      */
     public function down()
     {
-        Schema::table('hotels', function (Blueprint $table) {
-            $table->dropColumn('l_code');
+        Schema::table('booking_room', function (Blueprint $table) {
+            //
         });
     }
 }
