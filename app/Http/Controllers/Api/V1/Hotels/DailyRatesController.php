@@ -13,6 +13,7 @@ use Validator;
 use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\DailyPrice;
+use Wubook\Wired\Facades\WuBook;
 
 class DailyRatesController extends Controller
 {
@@ -161,4 +162,51 @@ class DailyRatesController extends Controller
 
 		return response()->json(['calendar_data' => $resultData, 'total_available' => $totalAvailabilityCount]);
 	}
+
+	public function update(Request $request) : JsonResponse
+    {      
+        
+        $postData = $request->getContent();
+
+        $postData = json_decode($postData, true);	
+
+		if(array_key_exists('id',  $postData))
+		{
+			$dailyPrice = DailyPrice::where('id', $postData['id'])->get()->first();						
+
+			if(array_key_exists('price',  $postData))
+			{										
+				$product = $dailyPrice->product;
+				$product->createPrice($postData['price']);	
+				if($dailyPrice->rateType->ref_id){
+				$token = WuBook::auth()->acquire_token();				
+				$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');
+				$prices[$dailyPrice->rateType->ref_id][0] = $postData['price'];		
+				$hotel = $dailyPrice->rateType->roomType->hotel;							  
+				$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);			
+			}
+						
+			}
+			if(array_key_exists('checkin_closed',  $postData))
+			{								
+				$dailyPrice->checkin_closed = $postData['checkin_closed'];
+			}
+			if(array_key_exists('exit_closed',  $postData))
+			{				
+				$dailyPrice->exit_closed = $postData['exit_closed'];
+			}
+			if(array_key_exists('minimum_stay',  $postData))
+			{
+				$dailyPrice->minimum_stay = $postData['minimum_stay'];
+			}
+			if(array_key_exists('maximum_stay',  $postData))
+			{
+				$dailyPrice->maximum_stay = $postData['maximum_stay'];
+			}
+			$dailyPrice->save();			
+		}
+
+		return response()->json(array('message' => ' Record updated successfully.'));
+    }
 }
+
