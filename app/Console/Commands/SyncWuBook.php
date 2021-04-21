@@ -10,6 +10,7 @@ use App\User;
 use App\Models\DailyPrice;
 use Carbon\Carbon;
 use App\Models\Hotel;
+use DB;
 
 class SyncWuBook extends Command
 {
@@ -44,8 +45,9 @@ class SyncWuBook extends Command
      */
     public function handle()
     {
-        $token = WuBook::auth()->acquire_token();
-        
+        //$token = WuBook::auth()->acquire_token();
+        $token = "2922388247.1211";
+
         $companyId = 1;
 
         //TODO: Create env variable "PLAN_ID" for it and get from that
@@ -72,9 +74,9 @@ class SyncWuBook extends Command
             }
             
             $rooms = WuBook::rooms($token, $hotel->l_code)->fetch_rooms();
-            foreach($rooms['data'] as $room)
-            {
-                DB::transaction(function() use ($room) {
+            $prices = DB::transaction(function() use ($rooms, $companyId, $hotel, $fromDateYmd, $toDate) {
+                foreach($rooms['data'] as $room)
+                {
                     $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
                         function($q) use ($room) {
                             $q->where('name', $room['name']);                        
@@ -113,8 +115,9 @@ class SyncWuBook extends Command
                             }
                         }
                     }
-                });
-            }
+                }
+                return $prices;
+            });
             $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);
         }      
     }
