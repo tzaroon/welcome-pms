@@ -180,7 +180,7 @@ class DailyRatesController extends Controller
 				$product->createPrice($postData['price']);
 				if($dailyPrice->rateType->ref_id)
 				{
-					//TODO: Create env variable "PLAN_ID" for it and get from that
+					//TODO: Get it from hotels table
 					$planId = 182115;
 					$token = WuBook::auth()->acquire_token();				
 					$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');

@@ -50,7 +50,10 @@ class SyncWuBook extends Command
 
         $companyId = 1;
 
-        //TODO: Create env variable "PLAN_ID" for it and get from that
+        /* $plan = WuBook::prices($token)->add_pricing_plan('Daily' .  $hotelName, 1);        
+        $planId = $plan['data'];
+        dd($planId); */
+        //TODO: Set it on hotel record
         $planId = 182115;
         
         $hotels = Hotel::where('company_id', $companyId)->whereNotNull('l_code')->get();
