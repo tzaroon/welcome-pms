@@ -47,9 +47,8 @@ class SyncWuBook extends Command
         $token = WuBook::auth()->acquire_token();
         
         $companyId = 1;
-/*         $plan = WuBook::prices($token)->add_pricing_plan('Daily', 1);        
-        $planId = $plan['data'];
-        dd($planId); */
+
+        //TODO: Create env variable "PLAN_ID" for it and get from that
         $planId = 182115;
         
         $hotels = Hotel::where('company_id', $companyId)->whereNotNull('l_code')->get();
@@ -65,56 +64,56 @@ class SyncWuBook extends Command
 
         foreach($hotels as $hotel)
         {
-            
             $pushUrl = WuBook::reservations($token, $hotel->l_code)->push_url();
 
             if(!$pushUrl['data']) {
+                //TODO: set API_URL in env file and use instead of http://light.tripgofersolutions.com
                 WuBook::reservations($token, $hotel->l_code)->push_activation('http://light.tripgofersolutions.com/api/v1/wubook/push-notification', 1);
             }
             
             $rooms = WuBook::rooms($token, $hotel->l_code)->fetch_rooms();
             foreach($rooms['data'] as $room)
             {
-               DB::transaction(function() use ($room) {
-                $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
-                    function($q) use ($room) {
-                        $q->where('name', $room['name']);                        
-                    }
-                )->first();           
-                
-                if($roomType) 
-                {
-                    $roomType->ref_id = $room['id']; 
-                    $roomType->save();              
-                }
-
-                if($room['subroom'] > 0)
-                {
-                    $rateType = RateType::where('company_id',  $companyId)->whereHas( 'details', 
+                DB::transaction(function() use ($room) {
+                    $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
                         function($q) use ($room) {
-                            $q->where('name', $room['name']);
+                            $q->where('name', $room['name']);                        
                         }
-                    )->first();
-
-                    if($rateType)
+                    )->first();           
+                    
+                    if($roomType) 
                     {
-                        $rateType->ref_id = $room['id'];
-                        $rateType->save();
-                        
-                        $dailyPrices = DailyPrice::where('company_id', $companyId)
-                            ->where('rate_type_id', $rateType->id)
-                            ->where('date', '>=', $fromDateYmd)
-                            ->where('date', '<=', $toDate)->get();
+                        $roomType->ref_id = $room['id']; 
+                        $roomType->save();              
+                    }
 
-                        $i = 0;
-                        foreach($dailyPrices as $dailyPrice)
+                    if($room['subroom'] > 0)
+                    {
+                        $rateType = RateType::where('company_id',  $companyId)->whereHas( 'details', 
+                            function($q) use ($room) {
+                                $q->where('name', $room['name']);
+                            }
+                        )->first();
+
+                        if($rateType)
                         {
-                            $prices[$room['id']][$i] = $dailyPrice->product->price->price;
-                            $i++;
+                            $rateType->ref_id = $room['id'];
+                            $rateType->save();
+                            
+                            $dailyPrices = DailyPrice::where('company_id', $companyId)
+                                ->where('rate_type_id', $rateType->id)
+                                ->where('date', '>=', $fromDateYmd)
+                                ->where('date', '<=', $toDate)->get();
+
+                            $i = 0;
+                            foreach($dailyPrices as $dailyPrice)
+                            {
+                                $prices[$room['id']][$i] = $dailyPrice->product->price->price;
+                                $i++;
+                            }
                         }
                     }
-                }
-            });
+                });
             }
             $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);
         }      
