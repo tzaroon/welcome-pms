@@ -64,7 +64,7 @@ class SyncWuBook extends Command
         $toDate = $dfrom->add('day', 999);                
         $toDate = $toDate->format('Y-m-d');
 
-        $prices = [];
+       
 
         foreach($hotels as $hotel)
         {
@@ -72,14 +72,17 @@ class SyncWuBook extends Command
             $pushUrl = WuBook::reservations($token, $hotel->l_code)->push_url();
             
             if(!$pushUrl['data']) {
+                //TODO: set API_URL in env file and use instead of http://light.tripgofersolutions.com
                 WuBook::reservations($token, $hotel->l_code)->push_activation('http://light.tripgofersolutions.com/api/v1/wubook/push-notification', 1);
             }
             
             $rooms = WuBook::rooms($token, $hotel->l_code)->fetch_rooms();
 
-            foreach($rooms['data'] as $room)
-            {
-                DB::transaction(function() use ($room, $companyId ,$hotel ,$fromDateYmd , $toDate ,$prices) {
+            $prices = DB::transaction(function() use ($rooms, $companyId ,$hotel ,$fromDateYmd , $toDate) {
+                
+                $prices = [];
+                foreach($rooms['data'] as $room)
+                {
                     $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
                         function($q) use ($room) {
                             $q->where('name', $room['name']);                        
@@ -118,8 +121,10 @@ class SyncWuBook extends Command
                             }
                         }
                     }
-                });
-            }
+                }
+                return $prices;
+            });
+            
             if(!$hotel->plan_id)
             {
                 $plan = WuBook::prices($token)->add_pricing_plan('daily' . '_'. $hotel->name, 1);        
@@ -127,6 +132,7 @@ class SyncWuBook extends Command
                 $hotel->plan_id = $planId;
                 $hotel->save();    
             }
+
             $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $prices);
         } 
         
