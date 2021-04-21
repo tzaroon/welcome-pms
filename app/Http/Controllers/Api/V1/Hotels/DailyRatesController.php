@@ -172,27 +172,30 @@ class DailyRatesController extends Controller
 
 		if(array_key_exists('id',  $postData))
 		{
-			$dailyPrice = DailyPrice::where('id', $postData['id'])->get()->first();						
+			$dailyPrice = DailyPrice::find($postData['id']);						
 
 			if(array_key_exists('price',  $postData))
 			{										
 				$product = $dailyPrice->product;
-				$product->createPrice($postData['price']);	
-				if($dailyPrice->rateType->ref_id){
-				$token = WuBook::auth()->acquire_token();				
-				$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');
-				$prices[$dailyPrice->rateType->ref_id][0] = $postData['price'];		
-				$hotel = $dailyPrice->rateType->roomType->hotel;							  
-				$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);			
+				$product->createPrice($postData['price']);
+				if($dailyPrice->rateType->ref_id)
+				{
+					//TODO: Get it from hotels table
+					$planId = 182115;
+					$token = WuBook::auth()->acquire_token();				
+					$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');
+					$prices[$dailyPrice->rateType->ref_id][] = $postData['price'];		
+					$hotel = $dailyPrice->rateType->roomType->hotel;							  
+					$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);			
+				}
 			}
-						
-			}
+
 			if(array_key_exists('checkin_closed',  $postData))
-			{								
+			{
 				$dailyPrice->checkin_closed = $postData['checkin_closed'];
 			}
 			if(array_key_exists('exit_closed',  $postData))
-			{				
+			{
 				$dailyPrice->exit_closed = $postData['exit_closed'];
 			}
 			if(array_key_exists('minimum_stay',  $postData))
