@@ -181,12 +181,21 @@ class DailyRatesController extends Controller
 				if($dailyPrice->rateType->ref_id)
 				{
 					//TODO: Get it from hotels table
-					$planId = 182115;
+					//$planId = 182115;
 					$token = WuBook::auth()->acquire_token();				
-					$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');
+					$dfromdmY = Carbon::parse(now())->format('d/m/Y');
 					$prices[$dailyPrice->rateType->ref_id][] = $postData['price'];		
-					$hotel = $dailyPrice->rateType->roomType->hotel;							  
-					$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($planId, $dfromdmY, $prices);			
+					$hotel = $dailyPrice->rateType->roomType->hotel;
+					
+					if(!$hotel->plan_id)
+					{
+					$plan = WuBook::prices($token)->add_pricing_plan('daily' . '_'. $hotel->name, 1);        
+					$planId = $plan['data'];                
+					$hotel->plan_id = $planId;
+					$hotel->save();    
+					}					
+					$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $prices);
+												
 				}
 			}
 
