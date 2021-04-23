@@ -163,60 +163,58 @@ class DailyRatesController extends Controller
 		return response()->json(['calendar_data' => $resultData, 'total_available' => $totalAvailabilityCount]);
 	}
 
-	public function update(Request $request) : JsonResponse
-    {      
-        
+	public function update(Request $request, $id) : JsonResponse
+    {
         $postData = $request->getContent();
 
         $postData = json_decode($postData, true);	
 
-		if(array_key_exists('id',  $postData))
+		$dailyPrice = DailyPrice::find($id);
+
+		if(array_key_exists('price',  $postData))
 		{
-			$dailyPrice = DailyPrice::find($postData['id']);						
+			$product = $dailyPrice->product;
+			$product->createPrice($postData['price']);
+			$prices = [];
+			if($dailyPrice->rateType->ref_id)
+			{
+				$token = WuBook::auth()->acquire_token();
 
-			if(array_key_exists('price',  $postData))
-			{										
-				$product = $dailyPrice->product;
-				$product->createPrice($postData['price']);
-				if($dailyPrice->rateType->ref_id)
+				$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');
+
+				$roomId = $dailyPrice->rateType->ref_id;
+				$prices["$roomId "] = [(int)$postData['price']];	
+
+				$hotel = $dailyPrice->rateType->roomType->hotel;
+				
+				if(!$hotel->plan_id)
 				{
-					//TODO: Get it from hotels table
-					//$planId = 182115;
-					$token = WuBook::auth()->acquire_token();				
-					$dfromdmY = Carbon::parse(now())->format('d/m/Y');
-					$prices[$dailyPrice->rateType->ref_id][] = $postData['price'];		
-					$hotel = $dailyPrice->rateType->roomType->hotel;
-					
-					if(!$hotel->plan_id)
-					{
-					$plan = WuBook::prices($token)->add_pricing_plan('daily' . '_'. $hotel->name, 1);        
-					$planId = $plan['data'];                
-					$hotel->plan_id = $planId;
-					$hotel->save();    
-					}					
-					$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $prices);
-												
+					$plan = WuBook::prices($token)->add_pricing_plan('daily' . '_'. $hotel->name, 1);
+					$hotel->plan_id = $plan['data'];
+					$hotel->save();
 				}
-			}
 
-			if(array_key_exists('checkin_closed',  $postData))
-			{
-				$dailyPrice->checkin_closed = $postData['checkin_closed'];
+				$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $prices);							
 			}
-			if(array_key_exists('exit_closed',  $postData))
-			{
-				$dailyPrice->exit_closed = $postData['exit_closed'];
-			}
-			if(array_key_exists('minimum_stay',  $postData))
-			{
-				$dailyPrice->minimum_stay = $postData['minimum_stay'];
-			}
-			if(array_key_exists('maximum_stay',  $postData))
-			{
-				$dailyPrice->maximum_stay = $postData['maximum_stay'];
-			}
-			$dailyPrice->save();			
 		}
+
+		if(array_key_exists('checkin_closed',  $postData))
+		{
+			$dailyPrice->checkin_closed = $postData['checkin_closed'];
+		}
+		if(array_key_exists('exit_closed',  $postData))
+		{
+			$dailyPrice->exit_closed = $postData['exit_closed'];
+		}
+		if(array_key_exists('minimum_stay',  $postData))
+		{
+			$dailyPrice->minimum_stay = $postData['minimum_stay'];
+		}
+		if(array_key_exists('maximum_stay',  $postData))
+		{
+			$dailyPrice->maximum_stay = $postData['maximum_stay'];
+		}
+		$dailyPrice->save();
 
 		return response()->json(array('message' => ' Record updated successfully.'));
     }
