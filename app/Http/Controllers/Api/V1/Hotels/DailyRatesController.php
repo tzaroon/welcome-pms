@@ -112,6 +112,7 @@ class DailyRatesController extends Controller
 				$resultData[$count]['rate_types'][$countJ]['id'] = $rateType->id;
 				$resultData[$count]['rate_types'][$countJ]['name'] = $rateType->detail->name;
 				$resultData[$count]['rate_types'][$countJ]['rate_type_id'] = $rateType->rate_type_id;
+				$resultData[$count]['rate_types'][$countJ]['number_of_people'] = $rateType->number_of_people;
 				$carbonFromDate = new Carbon($dateFrom); 
 
 				for($i=0; $i <= $days; $i++)
