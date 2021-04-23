@@ -48,11 +48,7 @@ class SyncWuBook extends Command
         $token = WuBook::auth()->acquire_token();
                
         $companyId = 1;
-/*         $plan = WuBook::prices($token)->add_pricing_plan('Daily', 1);        
-        $planId = $plan['data'];
-        dd($planId); */
-       // $planId = 182115;
-        
+
         $hotels = Hotel::where('company_id', $companyId)->whereNotNull('l_code')->get();
 
         $dfrom =  Carbon::now();    
@@ -78,9 +74,11 @@ class SyncWuBook extends Command
             
             $rooms = WuBook::rooms($token, $hotel->l_code)->fetch_rooms();
 
-            $prices = DB::transaction(function() use ($rooms, $companyId ,$hotel ,$fromDateYmd , $toDate) {
+            $priceRoomDays = DB::transaction(function() use ($rooms, $companyId ,$hotel ,$fromDateYmd , $toDate) {
                 
                 $prices = [];
+                $roomdays = [];
+
                 foreach($rooms['data'] as $room)
                 {
                     $roomType = RoomType::where('company_id', $companyId)->where('hotel_id', $hotel->id)->whereHas('roomTypeDetails', 
@@ -92,9 +90,9 @@ class SyncWuBook extends Command
                     if($roomType) 
                     {
                         $roomType->ref_id = $room['id']; 
-                        $roomType->save();              
+                        $roomType->save();
                     }
-
+                    
                     if($room['subroom'] > 0)
                     {
                         $rateType = RateType::where('company_id',  $companyId)->whereHas( 'details', 
@@ -102,7 +100,7 @@ class SyncWuBook extends Command
                                 $q->where('name', $room['name']);
                             }
                         )->first();
-
+                        
                         if($rateType)
                         {
                             $rateType->ref_id = $room['id'];
@@ -114,15 +112,31 @@ class SyncWuBook extends Command
                                 ->where('date', '<=', $toDate)->get();
 
                             $i = 0;
+
+                            $days = [];
+                        
                             foreach($dailyPrices as $dailyPrice)
                             {
                                 $prices[$room['id']][$i] = $dailyPrice->product->price->price;
                                 $i++;
                             }
                         }
+                    } else {
+                        $roomTypeDays = [];
+                        foreach (range(0, 999) as $number) {
+                            $roomTypeDays[] = [
+                                'avail' => 5,
+                                'no_ota' => 1
+                            ];
+                        }
+
+                        $roomdays[] = [
+                            'id' => $roomType->ref_id,
+                            'days' => $roomTypeDays
+                        ];
                     }
                 }
-                return $prices;
+                return ['price' => $prices, 'roomDays' => $roomdays];
             });
             
             if(!$hotel->plan_id)
@@ -133,7 +147,15 @@ class SyncWuBook extends Command
                 $hotel->save();    
             }
 
-            $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $prices);
+            if(array_key_exists('price', $priceRoomDays)) {
+                $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $priceRoomDays['price']);
+            }
+ 
+            //print_r($priceRoomDays['roomDays']);
+            if(array_key_exists('roomDays', $priceRoomDays)) {
+                $result = WuBook::availability($token, $hotel->l_code)->update_avail($priceRoomDays['roomDays'], $dfromdmY);
+            }
+            dd($result);
         } 
         
         

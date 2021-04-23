@@ -94,10 +94,14 @@ class WuBookManager
      * @param string $token
      * @return Wubook\Wired\Api\WuBookAvailability
      */
-    public function availability($token = null)
+    public function availability($token = null, $lcode = null)
     {
         // Setup client
         $client = new Client(self::ENDPOINT, null, new NativeParser(), new NativeSerializer());
+        
+        if($lcode) {
+            $this->config['lcode'] = $lcode;
+        }
 
         return new WuBookAvailability($this->config, $this->cache, $client, $token);
     }
