@@ -139,6 +139,43 @@ class SyncWuBook extends Command
                 return ['price' => $prices, 'roomDays' => $roomdays];
             });
             
+            DB::transaction(function() use ($token, $companyId ,$hotel ,$fromDateYmd , $toDate) {
+                if($hotel->noRefIdRoomTypes) {
+                    foreach($hotel->noRefIdRoomTypes as $roomType) {
+                        $data = [
+                            0,
+                            $roomType->roomTypeDetail->name,
+                            $roomType->max_people,
+                            9999,
+                            0,
+                            substr($roomType->roomTypeDetail->name, 0, 4),
+                            'nb',
+                        ];
+
+                        $rid = WuBook::rooms($token, $hotel->l_code)->new_room($data);
+                        $rid = $rid['data'];
+
+                        if($roomType->noRefRateTypes){
+                            foreach($roomType->noRefRateTypes as $rateType) {
+                                $data = [
+                                    0,
+                                    $rateType->details->name,
+                                    $rateType->number_of_people,
+                                    9999,
+                                    0,
+                                    substr($rateType->details->name, 0, 4),
+                                    'nb',
+                                ];
+
+                                $rid = WuBook::rooms($token, $hotel->l_code)->new_room($data, true);
+                                $rid = $rid['data'];
+
+                            }
+                        }
+                    }
+                }
+            });
+
             if(!$hotel->plan_id)
             {
                 $plan = WuBook::prices($token)->add_pricing_plan('daily' . '_'. $hotel->name, 1);        
@@ -155,7 +192,7 @@ class SyncWuBook extends Command
             if(array_key_exists('roomDays', $priceRoomDays)) {
                 $result = WuBook::availability($token, $hotel->l_code)->update_avail($priceRoomDays['roomDays'], $dfromdmY);
             }
-            dd($result);
+           // dd($result);
         } 
         
         

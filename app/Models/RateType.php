@@ -19,6 +19,8 @@ class RateType extends Model
         'rate_type_price'
     ];
 
+    public $rateDate;
+
     public function detail() {
         $language = Language::where(['is_default' => 1])->first();
         return $this->hasOne(RateTypeDetail::class)->where('language_id', $language->id);
@@ -39,6 +41,11 @@ class RateType extends Model
         return $this->belongsTo(RateType::class);
     }
 
+    public function rateTypes() {
+
+        return $this->hasMany(RateType::class);
+    }
+
     public function getRateTypePriceAttribute() {
 
         if($this->rate_type_id) {
@@ -57,4 +64,8 @@ class RateType extends Model
 
 		return $this->belongsToMany(Booking::class, 'booking_room');
 	}
+
+    public function dailyPrice() {
+        return $this->hasOne(DailyPrice::class)->where('date', $this->rateDate);
+    }
 }

@@ -17,6 +17,8 @@ use Wubook\Wired\Facades\WuBook;
 
 class DailyRatesController extends Controller
 {
+	private $recurtionCount = 0;
+
 	public function index(Request $request, $id) : JsonResponse
 	{
 		$user = auth()->user();	   
@@ -174,29 +176,8 @@ class DailyRatesController extends Controller
 
 		if(array_key_exists('price',  $postData))
 		{
-			$product = $dailyPrice->product;
-			$product->createPrice($postData['price']);
-			$prices = [];
-			if($dailyPrice->rateType->ref_id)
-			{
-				$token = WuBook::auth()->acquire_token();
-
-				$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');
-
-				$roomId = $dailyPrice->rateType->ref_id;
-				$prices["$roomId "] = [(int)$postData['price']];	
-
-				$hotel = $dailyPrice->rateType->roomType->hotel;
-				
-				if(!$hotel->plan_id)
-				{
-					$plan = WuBook::prices($token)->add_pricing_plan('daily' . '_'. $hotel->name, 1);
-					$hotel->plan_id = $plan['data'];
-					$hotel->save();
-				}
-
-				$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $prices);							
-			}
+			
+			$this->applyPriceRecursively($dailyPrice, $postData['price'], $dailyPrice->date);
 		}
 
 		if(array_key_exists('checkin_closed',  $postData))
@@ -219,5 +200,69 @@ class DailyRatesController extends Controller
 
 		return response()->json(array('message' => ' Record updated successfully.'));
     }
+
+
+	public function applyPriceRecursively($dailyPrice, $price, $rateDate) {
+		
+		$rateType = $dailyPrice->rateType;
+
+		if(0 == $this->recurtionCount && $rateType->rateType) {
+			$rateType->amount_to_add = 0;
+			$rateType->percent_to_add = 0;
+			$dailyPrice->force_price_update = 1;
+			$dailyPrice->save();
+		}
+
+		if($rateType->amount_to_add) {
+			$price = $price+$rateType->amount_to_add;
+		} elseif($rateType->percent_to_add) {
+			$amountToAdd = $rateType->percent_to_add/100*$price;
+			$price = $price+$amountToAdd;
+		}
+		
+		if(0 == $this->recurtionCount) {
+			$product = $dailyPrice->product;
+			$product->createPrice($price);
+		} elseif(0 < $this->recurtionCount && !$dailyPrice->force_price_update) {
+			$product = $dailyPrice->product;
+			$product->createPrice($price);
+		}
+		
+		$prices = [];
+
+		if($rateType->ref_id)
+		{
+			$token = WuBook::auth()->acquire_token();
+
+			$dfromdmY = Carbon::parse($dailyPrice->date)->format('d/m/Y');
+
+			$roomId = $dailyPrice->rateType->ref_id;
+			$prices["$roomId "] = [(int)$price];
+
+			$hotel = $dailyPrice->rateType->roomType->hotel;
+			
+			if(!$hotel->plan_id)
+			{
+				$plan = WuBook::prices($token)->add_pricing_plan('daily' . '_'. $hotel->name, 1);
+				$hotel->plan_id = $plan['data'];
+				$hotel->save();
+			}
+
+			$result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $prices);							
+		}
+
+		$this->recurtionCount++;
+
+		if($rateType->rateTypes) {
+			foreach($rateType->rateTypes as $childRateType) {
+				
+				$rateTypeChild = $childRateType;
+				$rateTypeChild->rateDate = $rateDate;
+				$dailyPriceChild = $rateTypeChild->dailyPrice;
+
+				return $this->applyPriceRecursively($dailyPriceChild, $dailyPrice->product->price->price, $rateDate);
+			}
+		}
+	}
 }
 

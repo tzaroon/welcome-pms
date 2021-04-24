@@ -16,4 +16,9 @@ class Hotel extends Model
 
         return $this->hasMany(RoomType::class);
     }
+    
+    public function noRefIdRoomTypes() {
+
+        return $this->hasMany(RoomType::class)->whereNull('ref_id');
+    }
 }

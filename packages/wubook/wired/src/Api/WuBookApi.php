@@ -134,9 +134,7 @@ abstract class WuBookApi
         try {
             // Retrieve response
             $response = $this->client->call($method, $data);
-if($method == 'new_room') {
-    dd($response);
-}
+
             return [
                 'has_error' => $response[0] != 0,
                 'data' => $response[1]
