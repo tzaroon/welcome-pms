@@ -37,4 +37,9 @@ class RoomType extends Model
 
         return $this->hasMany(RateType::class)->with('detail');
     }
+   
+    public function noRefRateTypes() {
+
+        return $this->hasMany(RateType::class)->whereNull('ref_id')->with('detail');
+    }
 }

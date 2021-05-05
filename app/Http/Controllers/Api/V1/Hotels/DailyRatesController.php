@@ -230,7 +230,7 @@ class DailyRatesController extends Controller
 		
 		$prices = [];
 
-		if($rateType->ref_id)
+		if($rateType->ref_id && (0 == $this->recurtionCount || (0 < $this->recurtionCount && !$dailyPrice->force_price_update)))
 		{
 			$token = WuBook::auth()->acquire_token();
 
