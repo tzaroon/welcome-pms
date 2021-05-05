@@ -55,6 +55,7 @@ class SyncWuBook extends Command
         $dfrom =  Carbon::now();    
         
         $fromDateYmd = $dfrom->format('Y-m-d');   
+        $fromDate = $dfrom;   
 
         $dfromdmY = $dfrom->format('d/m/Y');  
         
@@ -140,7 +141,7 @@ class SyncWuBook extends Command
                 return ['price' => $prices, 'roomDays' => $roomdays];
             });
             
-            $fromPmsRooms = DB::transaction(function() use ($token, $companyId ,$hotel ,$fromDateYmd , $toDate, $dfrom) {
+            $fromPmsRooms = DB::transaction(function() use ($token, $companyId ,$hotel ,$fromDateYmd , $toDate, $dfrom, $fromDate) {
 
                 $prices = [];
                 $roomdays = [];
@@ -172,7 +173,7 @@ class SyncWuBook extends Command
 
                         
                         foreach (range(0, 999) as $number) {
-                            $result = $room->avaliability($roomType->id , $dfrom->format('Y-m-d'));
+                            $result = $room->avaliability($roomType->id , $fromDate);
                             $bookedCount = 0;
                             if(isset($result) && 0 < sizeof($result)) {
 
@@ -183,7 +184,7 @@ class SyncWuBook extends Command
                                 'avail' => $totalRooms - $bookedCount,
                                 'no_ota' => 1
                             ];
-                            $dfrom->addDay(1);
+                            $fromDate->addDay(1);
                         }
 
                         $roomdays[] = [
