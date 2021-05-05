@@ -53,16 +53,15 @@ class SyncWuBook extends Command
         $hotels = Hotel::where('company_id', $companyId)->whereNotNull('l_code')->get();
 
         $dfrom =  Carbon::now();    
-        
+        $fromDate = Carbon::now();
+
         $fromDateYmd = $dfrom->format('Y-m-d');   
-        $fromDate = $dfrom;   
+ 
 
         $dfromdmY = $dfrom->format('d/m/Y');  
         
         $toDate = $dfrom->add('day', 999);                
         $toDate = $toDate->format('Y-m-d');
-
-       
 
         foreach($hotels as $hotel)
         {
@@ -140,7 +139,7 @@ class SyncWuBook extends Command
                 }
                 return ['price' => $prices, 'roomDays' => $roomdays];
             });
-            
+           
             $fromPmsRooms = DB::transaction(function() use ($token, $companyId ,$hotel ,$fromDateYmd , $toDate, $dfrom, $fromDate) {
 
                 $prices = [];
@@ -173,7 +172,8 @@ class SyncWuBook extends Command
 
                         
                         foreach (range(0, 999) as $number) {
-                            $result = $room->avaliability($roomType->id , $fromDate);
+                            $result = $room->avaliability($roomType->id , $fromDate->format('Y-m-d'));
+
                             $bookedCount = 0;
                             if(isset($result) && 0 < sizeof($result)) {
 
