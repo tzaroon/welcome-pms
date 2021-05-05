@@ -25,7 +25,7 @@ class PushNotificationController extends Controller
     {
         $token = WuBook::auth()->acquire_token(); 
         
-        $bookings = WuBook::reservations($token, $_POST['lcode'])->fetch_new_bookings(1, 0);
+        $bookings = WuBook::reservations($token, $_POST['lcode'])->fetch_new_bookings(1);
         
         $hotel = Hotel::where('l_code', $_POST['lcode'])->first();
        
@@ -114,6 +114,7 @@ class PushNotificationController extends Controller
 
                         foreach($booking['booked_rooms'] as $bookedRoom){
                             $rateType = RateType::where('ref_id', $bookedRoom['room_id'])->first();
+
                             if($rateType) {
                                 $bookingRoom = new BookingHasRoom([
                                     'booking_id' => $pmsBooking->id,
@@ -127,9 +128,11 @@ class PushNotificationController extends Controller
                                 if(array_key_exists('roomdays', $bookedRoom)) {
                                     
                                     foreach($bookedRoom['roomdays'] as $roomDay) {
-
-                                        $dailyPrice = DailyPrice::where('company_id', $hotel->company_id)->where('rate_type_id', $rateType->id)->first();
+					
+					                    $date = date('Y-m-d', strtotime(str_replace('/', '-', $roomDay['day'])));
+                                        $dailyPrice = DailyPrice::where('company_id', $hotel->company_id)->where('rate_type_id', $rateType->id)->where('date',$date)->first();
                                         $product = $dailyPrice->product;
+
                                         $productPrice = $product->getPriceByAmount($roomDay['price']);
 
                                         $priceIds[$i]['product_price_id'] = $productPrice->id;
