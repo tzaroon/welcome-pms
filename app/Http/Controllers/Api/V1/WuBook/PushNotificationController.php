@@ -25,7 +25,7 @@ class PushNotificationController extends Controller
     {
         $token = WuBook::auth()->acquire_token(); 
         
-        $bookings = WuBook::reservations($token, $_POST['lcode'])->fetch_new_bookings(1);
+        $bookings = WuBook::reservations($token, $_POST['lcode'])->fetch_new_bookings(1, 0);
         
         $hotel = Hotel::where('l_code', $_POST['lcode'])->first();
        
