@@ -37,7 +37,6 @@ class Room extends Model
 			FROM `booking_room` as `br`
 			JOIN `rate_types` as `rt` ON `rt`.`id` = `br`.`rate_type_id`
 			JOIN `room_types` as `rmt` ON `rmt`.`id` = `rt`.`room_type_id`
-			JOIN `room_type_details` as `rtd` ON `rmt`.`id` = `rtd`.`room_type_id` AND `rtd`.`language_id` = \'en\'
 			LEFT JOIN `bookings` as `b` ON `b`.`id` = `br`.`booking_id`
 			WHERE 
 				`b`.`reservation_from` <= \''.$date.'\'
