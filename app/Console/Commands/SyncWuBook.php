@@ -154,7 +154,7 @@ class SyncWuBook extends Command
                             $roomType->max_people,
                             9999,
                             0,
-                            substr(rand(1111,9999), 0, 4),
+                            substr($roomType->roomTypeDetail->short_name, 0, 4),
                             'nb',
                         ];
 
@@ -188,7 +188,7 @@ class SyncWuBook extends Command
                                     $rateType->number_of_people,
                                     0,
                                     9999,
-                                    substr(rand(1111,9999), 0, 4),
+                                    substr($rateType->detail->short_name, 0, 4),
                                     'nb',
                                 ];
 
