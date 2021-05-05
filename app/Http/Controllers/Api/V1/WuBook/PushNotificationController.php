@@ -25,7 +25,8 @@ class PushNotificationController extends Controller
     {
         $token = WuBook::auth()->acquire_token(); 
         
-        $bookings = WuBook::reservations($token, $_POST['lcode'])->fetch_new_bookings(1,0);
+        $bookings = WuBook::reservations($token, $_POST['lcode'])->fetch_new_bookings(1);
+        
         $hotel = Hotel::where('l_code', $_POST['lcode'])->first();
        
         if($hotel && $bookings && array_key_exists('data', $bookings) && $bookings['data']) {
@@ -54,11 +55,12 @@ class PushNotificationController extends Controller
                     }
                     //TODO: Add other details from API
                     $user->save();
+                    
                     $booker = Booker::firstOrNew(['company_id' => $hotel->company_id, 'user_id' => $user->id]);
                     $booker->company_id = $hotel->company_id;
                     $booker->user_id = $user->id;
                     $booker->save();
-
+                    
                     $arrival = 'N/A';
                     if(array_key_exists('date_arrival', $booking)) {
                         $arrival = Carbon::createFromFormat('d/m/Y', $booking['date_arrival']);
@@ -105,7 +107,7 @@ class PushNotificationController extends Controller
                         //TODO: Add pending info that we can get from API related to this table
                     ]);
                     $pmsBooking->save();
-
+                    
                     $priceIds = [];
                     $i = 0;
                     if(array_key_exists('booked_rooms', $booking)) {
