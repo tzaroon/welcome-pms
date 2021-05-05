@@ -202,7 +202,7 @@ class DailyRatesController extends Controller
 
 		$token = WuBook::auth()->acquire_token();
 		$values = [
-			$dailyPrice->rateType->ref_id => [
+			$dailyPrice->rateType->ref_id . ' ' => [
 				[
 					'min_stay' => $dailyPrice->maximum_stay,
 					'max_stay' => $dailyPrice->maximum_stay,
