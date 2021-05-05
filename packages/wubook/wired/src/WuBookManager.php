@@ -202,11 +202,15 @@ class WuBookManager
      * @param string $token
      * @return Wubook\Wired\Api\WuBookRestrictions
      */
-    public function restrictions($token = null)
+    public function restrictions($token = null, $lcode = null)
     {
         // Setup client
         $client = new Client(self::ENDPOINT, null, new NativeParser(), new NativeSerializer());
 
+        if($lcode) {
+            $this->config['lcode'] = $lcode;
+        }
+        
         return new WuBookRestrictions($this->config, $this->cache, $client, $token);
     }
 

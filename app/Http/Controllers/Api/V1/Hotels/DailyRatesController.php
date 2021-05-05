@@ -174,6 +174,8 @@ class DailyRatesController extends Controller
 
 		$dailyPrice = DailyPrice::find($id);
 
+		$hotel = $dailyPrice->rateType->roomType->hotel;
+
 		if(array_key_exists('price',  $postData))
 		{
 			
@@ -197,6 +199,19 @@ class DailyRatesController extends Controller
 			$dailyPrice->maximum_stay = $postData['maximum_stay'];
 		}
 		$dailyPrice->save();
+
+		$token = WuBook::auth()->acquire_token();
+		$values = [
+			$dailyPrice->rateType->ref_id => [
+				[
+					'min_stay' => $dailyPrice->maximum_stay,
+					'max_stay' => $dailyPrice->maximum_stay,
+					'closed_arrival' => $dailyPrice->checkin_closed ? 1 : 0,
+					'closed_departure' => $dailyPrice->exit_closed ? 1 : 0
+				]
+			]
+		];
+		$restriction = WuBook::restrictions($token, $hotel->l_code)->rplan_update_rplan_values(0, date('d/m/Y', strtotime($dailyPrice->date)), $values);
 
 		return response()->json(array('message' => ' Record updated successfully.'));
     }
