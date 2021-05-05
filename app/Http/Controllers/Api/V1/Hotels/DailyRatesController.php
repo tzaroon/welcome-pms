@@ -204,7 +204,7 @@ class DailyRatesController extends Controller
 		$values = [
 			$dailyPrice->rateType->ref_id . ' ' => [
 				[
-					'min_stay' => $dailyPrice->maximum_stay,
+					'min_stay' => $dailyPrice->minimum_stay,
 					'max_stay' => $dailyPrice->maximum_stay,
 					'closed_arrival' => $dailyPrice->checkin_closed ? 1 : 0,
 					'closed_departure' => $dailyPrice->exit_closed ? 1 : 0
