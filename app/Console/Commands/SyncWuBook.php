@@ -166,9 +166,21 @@ class SyncWuBook extends Command
 
                         $roomTypeDays = [];
                         $room = new Room();
+                        $totalRooms = Room::where('room_type_id', $roomType->id)
+                            ->where('company_id', 1)
+                            ->get()->count();
+
+                        
                         foreach (range(0, 999) as $number) {
+                            $result = $room->avaliability($roomType->id , $dfrom->format('Y-m-d'));
+                            $bookedCount = 0;
+                            if(isset($result) && 0 < sizeof($result)) {
+
+                                $bookedCount = $result[0]->count;
+                            }
+
                             $roomTypeDays[] = [
-                                'avail' => $room->avaliability($roomType->id , $dfrom->format('Y-m-d')),
+                                'avail' => $totalRooms - $bookedCount,
                                 'no_ota' => 1
                             ];
                             $dfrom->addDay(1);
@@ -218,6 +230,7 @@ class SyncWuBook extends Command
                         }
                     }
                 }
+            
                 return ['price' => $prices, 'roomDays' => $roomdays];
             });
 
