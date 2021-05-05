@@ -229,20 +229,22 @@ class SyncWuBook extends Command
                 $hotel->save();    
             }
 
-            if(array_key_exists('price', $priceRoomDays)) {
+            if(array_key_exists('price', $priceRoomDays) && $priceRoomDays['price']) {
                 $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $priceRoomDays['price']);
             }
  
-            if(array_key_exists('roomDays', $priceRoomDays)) {
+            if(array_key_exists('roomDays', $priceRoomDays) && $priceRoomDays['roomDays']) {
                 $result = WuBook::availability($token, $hotel->l_code)->update_avail($priceRoomDays['roomDays'], $dfromdmY);
             }
             
-            if(array_key_exists('price', $fromPmsRooms)) {
+            if(array_key_exists('price', $fromPmsRooms) && $fromPmsRooms['price']) {
                 $result = WuBook::prices($token, $hotel->l_code)->update_plan_prices($hotel->plan_id, $dfromdmY, $fromPmsRooms['price']);
+                print_r($result);
             }
- 
-            if(array_key_exists('roomDays', $fromPmsRooms)) {
+            echo "\n";
+            if(array_key_exists('roomDays', $fromPmsRooms) && $fromPmsRooms['roomDays']) {
                 $result = WuBook::availability($token, $hotel->l_code)->update_avail($fromPmsRooms['roomDays'], $dfromdmY);
+                print_r($result);
             }
         } 
         
