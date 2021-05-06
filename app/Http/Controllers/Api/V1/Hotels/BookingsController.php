@@ -371,7 +371,7 @@ class BookingsController extends Controller
         }
         $responseArray['rooms'] = $rooms;
         $responseArray['price'] = $booking->price['price'];
-        $responseArray['total_price'] = $booking->price['total'];
+        $responseArray['total_price'] = $booking->price['total']-$booking->discount;
         $responseArray['total_tax'] = $booking->price['tax'] + $booking->price['vat'];
         $responseArray['price_breakdown'] = $booking->price['price_breakdown'];
         
