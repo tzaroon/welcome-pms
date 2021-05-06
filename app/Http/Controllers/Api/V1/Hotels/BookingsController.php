@@ -371,7 +371,7 @@ class BookingsController extends Controller
         }
         $responseArray['rooms'] = $rooms;
         $responseArray['price'] = $booking->price['price'];
-        $responseArray['total_price'] = $booking->price['total']-$booking->discount;
+        $responseArray['total_price'] = $booking->price['total'];
         $responseArray['total_tax'] = $booking->price['tax'] + $booking->price['vat'];
         $responseArray['price_breakdown'] = $booking->price['price_breakdown'];
         
@@ -380,9 +380,9 @@ class BookingsController extends Controller
         $responseArray['accessories_price'] = $booking->getAccessoriesPrice();
         $responseArray['city_tax'] = $booking->getCityTax()+$booking->getChildrenCityTax();
         $responseArray['vat'] = $booking->getVat();
-        $responseArray['total_booking_price'] = number_format($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'], 2, ',', '.');
+        $responseArray['total_booking_price'] = number_format(($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'])-$booking->discount, 2, ',', '.');
         $responseArray['total_paid'] = $booking->totalPaid;
-        $responseArray['amount_to_pay'] = number_format($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat']-$responseArray['total_paid'], 2, ',', '.');
+        $responseArray['amount_to_pay'] = number_format(($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat']-$responseArray['total_paid'])-$booking->discount, 2, ',', '.');
 
         $responseArray['price'] = number_format($responseArray['price'], 2, ',', '.');
         $responseArray['total_price'] = number_format($responseArray['total_price'], 2, ',', '.');
