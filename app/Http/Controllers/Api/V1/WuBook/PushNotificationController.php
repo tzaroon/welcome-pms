@@ -18,6 +18,7 @@ use Validator;
 use DB;
 use App\Models\Country;
 use App\Models\Language;
+use App\Models\RoomType;
 
 class PushNotificationController extends Controller
 {
@@ -116,6 +117,8 @@ class PushNotificationController extends Controller
                         foreach($booking['booked_rooms'] as $bookedRoom){
                             $rateType = RateType::where('ref_id', $bookedRoom['room_id'])->first();
 
+                            $roomType = $rateType->roomType;
+
                             if($rateType) {
                                 $bookingRoom = new BookingHasRoom([
                                     'booking_id' => $pmsBooking->id,
@@ -131,6 +134,13 @@ class PushNotificationController extends Controller
                                     foreach($bookedRoom['roomdays'] as $roomDay) {
 					
 					                    $date = date('Y-m-d', strtotime(str_replace('/', '-', $roomDay['day'])));
+                                        $room = $roomType->getAvailableRoom($date);
+
+                                        if($room) {
+                                            $bookingRoom->room_id = $room->id;
+                                            $bookingRoom->save();
+                                        }
+
                                         $dailyPrice = DailyPrice::where('company_id', $hotel->company_id)->where('rate_type_id', $rateType->id)->where('date',$date)->first();
                                         $product = $dailyPrice->product;
 
