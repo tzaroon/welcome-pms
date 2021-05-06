@@ -456,7 +456,7 @@ class Booking extends Model
             }
         }
 
-        $totalCityTax = $totalCityTax*$this->getAdultGuestCount();
+        $totalCityTax = $totalCityTax*$this->getAdultGuestCount()*$this->numberOfDays;
         return round($totalCityTax, 2);
     }
     
@@ -476,7 +476,7 @@ class Booking extends Model
             }
         }
 
-        $totalChildrenCityTax = $totalChildrenCityTax*$this->getChildrenGuestsCount();
+        $totalChildrenCityTax = $totalChildrenCityTax*$this->getChildrenGuestsCount()*$this->numberOfDays;
         return round($totalChildrenCityTax, 2);
     }
   
