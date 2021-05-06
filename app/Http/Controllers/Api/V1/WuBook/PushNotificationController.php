@@ -135,6 +135,10 @@ class PushNotificationController extends Controller
 
                                         $productPrice = $product->getPriceByAmount($roomDay['price']);
 
+                                        if(!$productPrice || !$productPrice->id) {
+                                            $productPrice = $product->createPrice($roomDay['price']);
+                                        }
+
                                         $priceIds[$i]['product_price_id'] = $productPrice->id;
                                         $priceIds[$i]['booking_has_room_id'] = $bookingRoom->id;
                                         $i++;
