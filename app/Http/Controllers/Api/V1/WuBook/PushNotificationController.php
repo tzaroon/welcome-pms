@@ -110,6 +110,7 @@ class PushNotificationController extends Controller
                     
                     $priceIds = [];
                     $i = 0;
+                    $totalPrice = 0;
                     if(array_key_exists('booked_rooms', $booking)) {
 
                         foreach($booking['booked_rooms'] as $bookedRoom){
@@ -138,7 +139,7 @@ class PushNotificationController extends Controller
                                         if(!$productPrice || !$productPrice->id) {
                                             $productPrice = $product->createPrice($roomDay['price']);
                                         }
-
+                                        $totalPrice += $roomDay['price'];
                                         $priceIds[$i]['product_price_id'] = $productPrice->id;
                                         $priceIds[$i]['booking_has_room_id'] = $bookingRoom->id;
                                         $i++;
@@ -148,6 +149,9 @@ class PushNotificationController extends Controller
                         }
                     }
 
+                    $pmsBooking->discount = $totalPrice-$booking['orig_amount'];
+                    $pmsBooking->save();
+                    
                     if($priceIds) {
                         $pmsBooking->productPrice()->sync($priceIds);
                     }
