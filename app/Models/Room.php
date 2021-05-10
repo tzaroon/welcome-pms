@@ -47,7 +47,7 @@ class Room extends Model
 			' GROUP BY `rmt`.`id`');
 	}
 
-	public function booking($id , $date) {
+	public function booking($id , $date, $todate) {
 		
 		return DB::select('SELECT 
 				`b`.*,
@@ -56,12 +56,12 @@ class Room extends Model
 				`br`.`rate_type_id`,
 				`br`.`first_guest_name`
 			FROM `booking_room` as `br`
-			JOIN `rate_types` as `rt` ON `rt`.`id` = `br`.`rate_type_id`
-			JOIN `room_types` as `rmt` ON `rmt`.`id` = `rt`.`room_type_id`
-			JOIN `rooms` as `rm` ON `rmt`.`id` = `rm`.`room_type_id`
-			LEFT JOIN `bookings` as `b` ON `b`.`id` = `br`.`booking_id`
+			JOIN `rooms` as `rm` ON `rm`.`id` = `br`.`room_id`
+			JOIN `bookings` as `b` ON `b`.`id` = `br`.`booking_id`
 			WHERE 
-				`b`.`reservation_from` = \''.$date.'\'
+				`b`.`reservation_from` >= \''.$date.'\'
+			AND
+				`b`.`reservation_from` <= \''.$todate.'\'
 			AND
 				`rm`.`id` = ' . (int)$id
 		);
