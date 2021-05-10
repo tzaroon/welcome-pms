@@ -35,7 +35,19 @@ class BookingsController extends Controller
 
         $postData = $request->getContent();
 
-        $postData = json_decode($postData, true);
+        $postData = $postData ? json_decode($postData, true) : [];
+
+        $validator = Validator::make($postData, [
+            'start_date' => 'required',
+            'months' => 'required'
+        ], [], [
+            'start_date' => 'Start Date',
+            'months' => 'Number of months'
+        ]);
+
+        if (!$validator->passes()) {
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
 
         $processedData = [];
         $count = 0;
