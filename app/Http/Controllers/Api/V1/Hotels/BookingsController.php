@@ -73,10 +73,15 @@ class BookingsController extends Controller
                                 for($i=0; $i <= $days; $i++) {
                                     
                                     $booking = $room->booking($room->id, $calendarStartDate->format('Y-m-d'));
+                                    $booking = $booking ? $booking[0] : null;
+                                    $objBooking = new Booking;
+                                    $objBooking->fill((array)$booking);
                                     
+                                    $objBooking->booker ? $objBooking->booker->user : null;
+
                                     $bookings[] = [
                                         'date' => $calendarStartDate->format('Y-m-d'),
-                                        'booking' => $booking ? $booking[0] : null
+                                        'booking' => $booking ? $objBooking : null
                                     ];
 
                                     $calendarStartDate->addDay();
