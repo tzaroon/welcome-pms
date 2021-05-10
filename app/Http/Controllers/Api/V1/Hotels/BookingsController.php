@@ -65,6 +65,7 @@ class BookingsController extends Controller
                             foreach($roomType->rooms as $room) {
                                 $hotelRooms[$hotelRoomCount] = [
                                     'id' => $room->id,
+                                    'type' => 'room',
                                     'name' => $room->name,
                                     'room_number' => $room->room_number
                                 ];
@@ -197,6 +198,7 @@ class BookingsController extends Controller
                             }
                             $hotelRooms[$hotelRoomCount] = [
                                 'id' => $roomType->id,
+                                'type' => 'sand_box',
                                 'name' => 'Sand box'
                             ];
                             $hotelRooms[$hotelRoomCount]['bookings'] = $bookings;
