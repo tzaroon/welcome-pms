@@ -63,7 +63,7 @@ class Room extends Model
 			AND
 				`b`.`reservation_from` <= \''.$todate.'\'
 			AND
-				`rm`.`id` = ' . (int)$id
+				`br`.`room_id` = ' . (int)$id
 		);
 	}
 }

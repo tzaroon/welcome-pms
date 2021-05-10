@@ -131,11 +131,81 @@ class BookingsController extends Controller
                                 $hotelRooms[$hotelRoomCount]['bookings'] = $bookings;
                                 $hotelRoomCount++;
                             }
+
+                            $calendarStartDate = Carbon::parse($postData['start_date']);
+                            $roomBookings = $roomType->booking($roomType->id, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
+                            
+                            $keyedRoomBookings = [];
+                            if($roomBookings) {
+                                foreach($roomBookings as $roomBooking) {
+                                    $keyedRoomBookings[$roomBooking->reservation_from][] = $roomBooking;
+                                }
+                            }
+
+                            $bookings =[];
+                            for($i=0; $i <= $days; $i++) {
+                                    
+                                $bookingss = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;
+
+                                $arrBooking = [];
+                                if($bookingss) {
+                                    foreach($bookingss as $booking)
+                                    {    
+                                        if($booking) {
+                                            $objBooking = new Booking;
+                                            $objBooking->fill((array)$booking);
+                                            $objBooking->id = $booking ? $booking->id : null;
+    
+                                            $objBooking->booker ? $objBooking->booker->user : null;
+    
+                                            $bookingHasRoom = new BookingHasRoom;
+                                            $bookingHasRoom->fill((array)$booking);
+                                            $bookingHasRoom->id = $booking ? $booking->booking_room_id : null;
+    
+                                            $associatedRooms = [];
+    
+                                            $paymentStatus = [
+                                                'not-paid', 'partially-paid', 'payed'
+                                            ];
+                                            shuffle($paymentStatus);
+    
+                                            $arrBooking[] = [
+                                                'id' => $objBooking->id,
+                                                'booking_room_id' => $bookingHasRoom ? $bookingHasRoom->id : null,
+                                                'reservation_from' => $objBooking->reservation_from,
+                                                'reservation_to' => $objBooking->reservation_to,
+                                                'time_start' => $objBooking->time_start,
+                                                'status' => $objBooking->status,
+                                                'roomCount' => $objBooking->roomCount,
+                                                'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                                'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
+                                                'numberOfDays' => $objBooking->numberOfDays,
+                                                'booker' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
+                                                'rooms' => $associatedRooms,
+                                                'total_price' => $objBooking->price,
+                                                'payment_atatus' => $paymentStatus[0],
+                                                'addons' => $objBooking->accessories
+                                            ];
+                                        }
+                                    }
+                                }
+                                $bookings[] = [
+                                    'date' => $calendarStartDate->format('Y-m-d'),
+                                    'booking' => $booking ? $arrBooking : null
+                                ];
+                                $calendarStartDate->addDay();
+                            }
+                            $hotelRooms[$hotelRoomCount] = [
+                                'id' => $roomType->id,
+                                'name' => 'Sand box'
+                            ];
+                            $hotelRooms[$hotelRoomCount]['bookings'] = $bookings;
                         }
                         $hotelRoomTypes[$roomTypeCount]['rooms'] = $hotelRooms;
 
                         $roomTypeCount++;
                     }
+                    
                 }
                 $processedData[$count]['room_types'] = $hotelRoomTypes;
                 $count++;
