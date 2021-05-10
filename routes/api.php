@@ -63,7 +63,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('room-list-by-ids', 'RoomsController@listRoomsByIds')->name('room_list_by_ids');
                 Route::get('{hotel}/room-types', 'RoomTypesController@list')->name('room_types_list');
                 Route::get('{hotel}/rooms', 'RoomsController@index')->name('rooms_list');
-                Route::resource('{hotel}/bookings', 'BookingsController');
+                Route::resource('bookings', 'BookingsController');
                 Route::resource('bookings', 'BookingsController');
                 Route::resource('daily-rates', 'DailyRatesController');
                 Route::post('daily-rates/{id}', 'DailyRatesController@index');

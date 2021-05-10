@@ -46,4 +46,20 @@ class Room extends Model
 				`rmt`.`id` = ' . (int)$roomTypeId .
 			' GROUP BY `rmt`.`id`');
 	}
+
+	public function booking($id , $date) {
+		
+		return DB::select('SELECT 
+				`b`.* 
+			FROM `booking_room` as `br`
+			JOIN `rate_types` as `rt` ON `rt`.`id` = `br`.`rate_type_id`
+			JOIN `room_types` as `rmt` ON `rmt`.`id` = `rt`.`room_type_id`
+			JOIN `rooms` as `rm` ON `rmt`.`id` = `rm`.`room_type_id`
+			LEFT JOIN `bookings` as `b` ON `b`.`id` = `br`.`booking_id`
+			WHERE 
+				`b`.`reservation_from` = \''.$date.'\'
+			AND
+				`rm`.`id` = ' . (int)$id
+		);
+	}
 }

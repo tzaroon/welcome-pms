@@ -9,6 +9,7 @@ use App\Models\BookingRoomGuest;
 use App\Models\BookingsHasProductPrice;
 use App\Models\DailyPrice;
 use App\Models\Guest;
+use App\Models\Hotel;
 use App\Models\Payment;
 use App\Models\ProductPrice;
 use App\Models\RateType;
@@ -27,7 +28,76 @@ class BookingsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $id)
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+        $hotels = Hotel::where('company_id', $user->company_id)->get();
+
+        $postData = $request->getContent();
+
+        $postData = json_decode($postData, true);
+
+        $processedData = [];
+        $count = 0;
+
+        $startDate = Carbon::parse($postData['start_date']);
+        $endDate = Carbon::parse($postData['start_date'])->addMonths($postData['months']);
+
+        $days = $endDate->diffInDays($startDate);
+
+        if($hotels) {
+            foreach($hotels as $hotel) {
+                $processedData[$count] = [
+                    'id' => $hotel->id,
+                    'name' => $hotel->property
+                ];
+                $hotelRoomTypes = [];
+                $roomTypeCount = 0;
+                if($hotel->roomTypes) {
+                    foreach($hotel->roomTypes as $roomType) {
+                        $hotelRoomTypes[$roomTypeCount] = [
+                            'id' => $roomType->id,
+                            'name' => $roomType->roomTypeDetail->name
+                        ];
+                        $hotelRooms = [];
+                        $hotelRoomCount = 0;
+                        if($roomType->rooms) {
+                            foreach($roomType->rooms as $room) {
+                                $hotelRooms[$hotelRoomCount] = [
+                                    'id' => $room->id,
+                                    'name' => $room->name,
+                                    'room_number' => $room->room_number
+                                ];
+                                $bookings = [];
+                                $calendarStartDate = Carbon::parse($postData['start_date']);
+                                for($i=0; $i <= $days; $i++) {
+                                    
+                                    $booking = $room->booking($room->id, $calendarStartDate->format('Y-m-d'));
+                                    
+                                    $bookings[] = [
+                                        'date' => $calendarStartDate->format('Y-m-d'),
+                                        'booking' => $booking ? $booking[0] : null
+                                    ];
+
+                                    $calendarStartDate->addDay();
+                                }
+                                $hotelRooms[$hotelRoomCount]['bookings'] = $bookings;
+                                $hotelRoomCount++;
+                            }
+                        }
+                        $hotelRoomTypes[$roomTypeCount]['rooms'] = $hotelRooms;
+
+                        $roomTypeCount++;
+                    }
+                }
+                $processedData[$count]['room_types'] = $hotelRoomTypes;
+                $count++;
+            }
+        }
+        return response()->json($processedData);
+    }
+
+    public function indexxxx(Request $request, $id)
     {
         $date = $request->input('date') ? : date('Y-m-d');
         $roomType = $request->input('room-type') ? : null;
@@ -45,7 +115,9 @@ class BookingsController extends Controller
                 }
             ]
         )->whereHas('roomType', function($q) use ($id, $roomType){
-            $q->where('hotel_id', $id);
+            if($id) {
+                $q->where('hotel_id', $id);
+            }
             if($roomType) {
                 $q->where('id', $roomType);
             }
