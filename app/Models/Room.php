@@ -50,7 +50,11 @@ class Room extends Model
 	public function booking($id , $date) {
 		
 		return DB::select('SELECT 
-				`b`.* 
+				`b`.*,
+				`br`.`id` as `booking_room_id`,
+				`br`.`room_id`,
+				`br`.`rate_type_id`,
+				`br`.`first_guest_name`
 			FROM `booking_room` as `br`
 			JOIN `rate_types` as `rt` ON `rt`.`id` = `br`.`rate_type_id`
 			JOIN `room_types` as `rmt` ON `rmt`.`id` = `rt`.`room_type_id`

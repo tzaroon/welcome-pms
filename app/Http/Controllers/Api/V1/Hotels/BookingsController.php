@@ -76,12 +76,41 @@ class BookingsController extends Controller
                                     $booking = $booking ? $booking[0] : null;
                                     $objBooking = new Booking;
                                     $objBooking->fill((array)$booking);
+                                    $objBooking->id = $booking ? $booking->id : null;
                                     
                                     $objBooking->booker ? $objBooking->booker->user : null;
 
+                                    $bookingHasRoom = new BookingHasRoom;
+                                    $bookingHasRoom->fill((array)$booking);
+                                    $bookingHasRoom->id = $booking ? $booking->booking_room_id : null;
+
+                                    $associatedRooms = [];
+
+                                    $paymentStatus = [
+                                        'not-paid', 'partially-paid', 'payed'
+                                    ];
+                                    shuffle($paymentStatus);
+
+                                    $arrBooking = [
+                                        'id' => $objBooking->id,
+                                        'booking_room_id' => $bookingHasRoom ? $bookingHasRoom->id : null,
+                                        'reservation_from' => $objBooking->reservation_from,
+                                        'reservation_to' => $objBooking->reservation_to,
+                                        'time_start' => $objBooking->time_start,
+                                        'status' => $objBooking->status,
+                                        'roomCount' => $objBooking->roomCount,
+                                        'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                        'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
+                                        'numberOfDays' => $objBooking->numberOfDays,
+                                        'booker' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
+                                        'rooms' => $associatedRooms,
+                                        'total_price' => $objBooking->price,
+                                        'payment_atatus' => $paymentStatus[0],
+                                        'addons' => $objBooking->accessories
+                                    ];
                                     $bookings[] = [
                                         'date' => $calendarStartDate->format('Y-m-d'),
-                                        'booking' => $booking ? $objBooking : null
+                                        'booking' => $booking ? $arrBooking : null
                                     ];
 
                                     $calendarStartDate->addDay();
