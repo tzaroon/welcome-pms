@@ -67,10 +67,45 @@ class BookingsController extends Controller
                 $roomTypeCount = 0;
                 if($hotel->roomTypes) {
                     foreach($hotel->roomTypes as $roomType) {
+                        $countJ = 0;			
+ 
+                        $totalRooms = Room::where('room_type_id', $roomType->id)
+                            ->where('company_id', $user->company_id)
+                            ->get()->count();
+
+                        $calendarStartDate = Carbon::parse($postData['start_date']);
+
+                        $availabilityData = [];
+
+                        $objRoom = new Room;
+                        for($i=0; $i <= $days; $i++)
+                        {
+                            $bookedCount = 0;
+                            $rateDate = $calendarStartDate->format('Y-m-d');
+                            $result = $objRoom->avaliability($roomType->id , $rateDate);  
+
+                            if(isset($result) && 0 < sizeof($result)) {
+
+                                $bookedCount = $result[0]->count;
+                            }
+                        
+                            $avaliableRooms = $totalRooms - $bookedCount;
+
+                            $dailyPrice = new DailyPrice();
+                            $availabilityData[$countJ] = [
+                                'date' => $rateDate,
+                                'available' => $avaliableRooms
+                            ];
+                            $countJ++;
+                            $calendarStartDate = $calendarStartDate->addDay();
+                        }
+
                         $hotelRoomTypes[$roomTypeCount] = [
                             'id' => $roomType->id,
-                            'name' => $roomType->roomTypeDetail->name
+                            'name' => $roomType->roomTypeDetail->name,
+                            'availability' =>  $availabilityData
                         ];
+
                         $hotelRooms = [];
                         $hotelRoomCount = 0;
                         if($roomType->rooms) {
