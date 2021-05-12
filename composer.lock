@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "057e4d80427f4504889becbd20611890",
+    "content-hash": "a4ab00f739b67ea146b188dfd516484b",
     "packages": [
         {
             "name": "brick/math",
@@ -1090,6 +1090,55 @@
                 "source": "https://github.com/guzzle/psr7/tree/1.8.1"
             },
             "time": "2021-03-21T16:25:00+00:00"
+        },
+        {
+            "name": "hanwenbo/ttlock",
+            "version": "v1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hanwenbo/TTLock-php-sdk.git",
+                "reference": "43b66df85c985d6af4d1c8de426bcfa474385691"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hanwenbo/TTLock-php-sdk/zipball/43b66df85c985d6af4d1c8de426bcfa474385691",
+                "reference": "43b66df85c985d6af4d1c8de426bcfa474385691",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.2",
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "eaglewu/swoole-ide-helper": "dev-master",
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ttlock\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "韩文博",
+                    "email": "9476400@qq.com"
+                }
+            ],
+            "description": "debug",
+            "keywords": [
+                "fashop",
+                "ttlock"
+            ],
+            "support": {
+                "issues": "https://github.com/hanwenbo/TTLock-php-sdk/issues",
+                "source": "https://github.com/hanwenbo/TTLock-php-sdk/tree/master"
+            },
+            "time": "2018-11-21T05:51:01+00:00"
         },
         {
             "name": "laravel/framework",

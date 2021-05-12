@@ -28,7 +28,7 @@ class BookingsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function indexsss(Request $request)
     {
         $user = auth()->user();
         $hotels = Hotel::where('company_id', $user->company_id)->get();
@@ -263,7 +263,7 @@ class BookingsController extends Controller
         return response()->json($processedData);
     }
 
-    public function indexxxx(Request $request, $id)
+    public function index(Request $request, $id)
     {
         $date = $request->input('date') ? : date('Y-m-d');
         $roomType = $request->input('room-type') ? : null;
