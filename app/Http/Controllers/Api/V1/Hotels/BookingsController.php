@@ -64,6 +64,7 @@ class BookingsController extends Controller
         if($hotels) {
             foreach($hotels as $hotel) {
                 $processedData[] = [
+                    'hotel_id' => $hotel->id,
                     'id' => $hotel->id,
                     'row_type' => 'hotelname',
                     'hotelname' => $hotel->property
@@ -71,7 +72,7 @@ class BookingsController extends Controller
 
                 $calendarStartDate = Carbon::parse($postData['start_date']);
                 
-                for($i=0; $i <= $days; $i++)
+                for($i=0; $i < $days; $i++)
                 {
                     $processedData[$count]['total_availability'][$i] = [
                         'date' => $calendarStartDate->format('Y-m-d'),
@@ -96,7 +97,7 @@ class BookingsController extends Controller
                         $availabilityData = [];
 
                         $objRoom = new Room;
-                        for($i=0; $i <= $days; $i++)
+                        for($i=0; $i < $days; $i++)
                         {
                             $bookedCount = 0;
                             $rateDate = $calendarStartDate->format('Y-m-d');
@@ -163,7 +164,7 @@ class BookingsController extends Controller
                                     }
                                 }
 
-                                for($i=0; $i <= $days; $i++) {
+                                for($i=0; $i < $days; $i++) {
                                     
                                     $booking = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;
 
@@ -227,7 +228,7 @@ class BookingsController extends Controller
                             }
 
                             $bookings =[];
-                            for($i=0; $i <= $days; $i++) {
+                            for($i=0; $i < $days; $i++) {
                                     
                                 $bookingss = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;
 
@@ -301,7 +302,7 @@ class BookingsController extends Controller
                     
                 }
                // $processedData[$count]['room_types'] = $hotelRoomTypes;
-                $count++;
+                //$count++;
             }
         }
         
