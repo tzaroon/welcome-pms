@@ -30,6 +30,10 @@ class BookingsController extends Controller
      */
     public function indexsss(Request $request)
     {
+/*         $room = new Room;
+        $room->getLockPasscode();
+        exit;
+ */
         $user = auth()->user();
         $hotels = Hotel::where('company_id', $user->company_id)->get();
 
@@ -61,10 +65,24 @@ class BookingsController extends Controller
             foreach($hotels as $hotel) {
                 $processedData[$count] = [
                     'id' => $hotel->id,
-                    'name' => $hotel->property
+                    'row_type' => 'hotelname',
+                    'hotelname' => $hotel->property
                 ];
+
+                $calendarStartDate = Carbon::parse($postData['start_date']);
+                
+                for($i=0; $i <= $days; $i++)
+                {
+                    $processedData[$count]['total_availability'][$i] = [
+                        'date' => $calendarStartDate->format('Y-m-d'),
+                        'available' => 6
+                    ];
+                    $calendarStartDate->addDay();
+                }
+                
                 $hotelRoomTypes = [];
                 $roomTypeCount = 0;
+                $count++;
                 if($hotel->roomTypes) {
                     foreach($hotel->roomTypes as $roomType) {
                         $countJ = 0;			
@@ -100,20 +118,37 @@ class BookingsController extends Controller
                             $calendarStartDate = $calendarStartDate->addDay();
                         }
 
-                        $hotelRoomTypes[$roomTypeCount] = [
+                        /* $hotelRoomTypes[$roomTypeCount] = [
                             'id' => $roomType->id,
                             'name' => $roomType->roomTypeDetail->name,
                             'availability' =>  $availabilityData
+                        ]; */
+                        $processedData[$count] = [
+                            'hotel_id' => $hotel->id,
+                            'roomtype_id' => $roomType->id,
+                            'row_type' => 'roomtype',
+                            'roomtype_name' => $roomType->roomTypeDetail->name,
+                            'availability' =>  $availabilityData
                         ];
+                        $count++;
 
                         $hotelRooms = [];
                         $hotelRoomCount = 0;
                         if($roomType->rooms) {
                             foreach($roomType->rooms as $room) {
-                                $hotelRooms[$hotelRoomCount] = [
+                                /* $hotelRooms[$hotelRoomCount] = [
                                     'id' => $room->id,
                                     'type' => 'room',
                                     'name' => $room->name,
+                                    'room_number' => $room->room_number
+                                ]; */
+                                $processedData[$count] = [
+                                    'hotel_id' => $hotel->id,
+                                    'roomtype_id' => $roomType->id,
+                                    'room_id' => $room->id,
+                                    'row_type' => 'rooms',
+                                    'type' => 'room',
+                                    'room_name' => $room->name,
                                     'room_number' => $room->room_number
                                 ];
                                 $bookings = [];
@@ -176,10 +211,11 @@ class BookingsController extends Controller
                                     ];
                                     $calendarStartDate->addDay();
                                 }
-                                $hotelRooms[$hotelRoomCount]['bookings'] = $bookings;
+                                $processedData[$count]['bookings'] = $bookings;
                                 $hotelRoomCount++;
+                                $count++;
                             }
-
+                            
                             $calendarStartDate = Carbon::parse($postData['start_date']);
                             $roomBookings = $roomType->booking($roomType->id, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
                             
@@ -243,20 +279,28 @@ class BookingsController extends Controller
                                 ];
                                 $calendarStartDate->addDay();
                             }
-                            $hotelRooms[$hotelRoomCount] = [
+                           /*  $hotelRooms[$hotelRoomCount] = [
                                 'id' => $roomType->id,
                                 'type' => 'sand_box',
                                 'name' => 'Sand box'
+                            ]; */
+                            $processedData[$count] = [
+                                'hotel_id' => $hotel->id,
+                                'roomtype_id' => $roomType->id,
+                                'row_type' => 'rooms',
+                                'type' => 'sand_box',
+                                'room_name' => 'Sand Box'
                             ];
-                            $hotelRooms[$hotelRoomCount]['bookings'] = $bookings;
+                            $processedData[$count]['bookings'] = $bookings;
+                            $count++;
                         }
-                        $hotelRoomTypes[$roomTypeCount]['rooms'] = $hotelRooms;
+                        //$hotelRoomTypes[$roomTypeCount]['rooms'] = $hotelRooms;
 
                         $roomTypeCount++;
                     }
                     
                 }
-                $processedData[$count]['room_types'] = $hotelRoomTypes;
+               // $processedData[$count]['room_types'] = $hotelRoomTypes;
                 $count++;
             }
         }
@@ -266,7 +310,6 @@ class BookingsController extends Controller
     public function index(Request $request, $id)
     {
         $date = $request->input('date') ? : date('Y-m-d');
-        $roomType = $request->input('room-type') ? : null;
 
         $user = auth()->user();
 
