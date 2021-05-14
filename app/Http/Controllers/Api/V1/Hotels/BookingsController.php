@@ -53,7 +53,7 @@ class BookingsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $processedData = [];
+        $processedData = array();
         $count = 0;
 
         $startDate = Carbon::parse($postData['start_date']);
@@ -63,7 +63,7 @@ class BookingsController extends Controller
 
         if($hotels) {
             foreach($hotels as $hotel) {
-                $processedData[$count] = [
+                $processedData[] = [
                     'id' => $hotel->id,
                     'row_type' => 'hotelname',
                     'hotelname' => $hotel->property
@@ -215,7 +215,7 @@ class BookingsController extends Controller
                                 $hotelRoomCount++;
                                 $count++;
                             }
-                            
+
                             $calendarStartDate = Carbon::parse($postData['start_date']);
                             $roomBookings = $roomType->booking($roomType->id, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
                             
@@ -304,12 +304,14 @@ class BookingsController extends Controller
                 $count++;
             }
         }
+        
         return response()->json($processedData);
     }
 
     public function index(Request $request, $id)
     {
         $date = $request->input('date') ? : date('Y-m-d');
+        $roomType = 0;
 
         $user = auth()->user();
 
