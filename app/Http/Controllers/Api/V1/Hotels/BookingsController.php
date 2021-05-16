@@ -230,6 +230,8 @@ class BookingsController extends Controller
                             }
 
                             $bookings =[];
+                            $maxBookingCount = 0;
+
                             for($i=0; $i < $days; $i++) {
                                     
                                 $bookingss = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;
@@ -278,6 +280,9 @@ class BookingsController extends Controller
                                         }
                                     }
                                 }
+                                if(sizeof($arrBooking) > $maxBookingCount) {
+                                    $maxBookingCount = sizeof($arrBooking);
+                                }
                                 $bookings[] = [
                                     'date' => $calendarStartDate->format('Y-m-d'),
                                     'booking' => $booking ? $arrBooking : null
@@ -289,17 +294,33 @@ class BookingsController extends Controller
                                 'type' => 'sand_box',
                                 'name' => 'Sand box'
                             ]; */
-                            $processedData[$count] = [
-                                'hotel_id' => $hotel->id,
-                                'roomtype_id' => $roomType->id,
-                                'row_type' => 'rooms',
-                                'type' => 'sand_box',
-                                'room_name' => 'Sand Box'
-                            ];
-                            $processedData[$count]['bookings'] = $bookings;
-                            $count++;
+                            $addedBookings = [];
+                            for($i=0; $i<$maxBookingCount; $i++) {
+
+                                $processedData[$count] = [
+                                    'hotel_id' => $hotel->id,
+                                    'roomtype_id' => $roomType->id,
+                                    'row_type' => 'rooms',
+                                    'type' => 'sand_box',
+                                    'room_name' => 'Sand Box',
+                                    'merge' => $i==0 ? $maxBookingCount : 0
+                                ];
+                                $processedBookings = [];
+                                foreach($bookings as $bookingRow) {
+
+                                    $processedBookings[] = [
+                                        'date' => $bookingRow['date'],
+                                        'booking' => $bookingRow['booking'] && array_key_exists($i, $bookingRow['booking']) && !in_array($bookingRow['booking'][$i]['id'], $addedBookings) ? $bookingRow['booking'][$i] : null
+                                    ];
+                                    if($bookingRow['booking'] && array_key_exists($i, $bookingRow['booking'])) {
+                                        $addedBookings[] = $bookingRow['booking'][$i]['id'];
+                                    }
+                                }
+
+                                $processedData[$count]['bookings'] = $processedBookings;
+                                $count++;
+                            }
                         }
-                        //$hotelRoomTypes[$roomTypeCount]['rooms'] = $hotelRooms;
 
                         $roomTypeCount++;
                     }
