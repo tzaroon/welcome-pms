@@ -549,4 +549,8 @@ class Booking extends Model
 
         return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->whereNull('booking_has_room_id')->withPivot(['booking_has_room_id', 'extras_count', 'extras_pricing', 'extras_date']);
     }
+
+    public function notes() {
+        return $this->hasMany(BookingNote::class);
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Hotels;
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
 use App\Models\Room;
+use App\Models\TemporaryClosure;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -178,5 +179,32 @@ class RoomsController extends Controller
         $rooms = Room::whereIn('id', $postData['room_ids'])->with('roomType.rateTypes.detail')->get();
         
         return response()->json($rooms);
+    }
+
+    public function temporaryClosure(Request $request) {
+        
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'room_id' => 'required',
+            'from_date' => 'required',
+            'to_date' => 'required'
+        ], [], [
+            'room_id' => 'Room',
+            'from_date' => 'From Date',
+            'to_date' => 'To Date'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $temporaryClosure = new TemporaryClosure;
+        $temporaryClosure->fill($postData);
+        $temporaryClosure->save();
+        return response()->json($temporaryClosure);
     }
 }

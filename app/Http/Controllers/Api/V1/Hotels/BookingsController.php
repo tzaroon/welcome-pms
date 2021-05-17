@@ -640,6 +640,7 @@ class BookingsController extends Controller
 
         $rooms = [];
 
+        $allPrices = [];
         if($booking->bookingRooms) {
             $i = 0;
             foreach($booking->bookingRooms as $room) {
@@ -671,19 +672,53 @@ class BookingsController extends Controller
                 }
                 $rooms[$i]['room_id'] = $room->room_id;
                 $rooms[$i]['rate_type_id'] = $room->rate_type_id;
-                $rooms[$i]['price'] = $room->productPriceByBookingId($booking->id);
-                $rooms[$i]['rate_types'] = $room->room->roomType->rateTypes;
+                $prices = $room->productPriceByBookingId($booking->id);
+                $allPrices[] = $prices;
+                $rooms[$i]['prices'] = $prices;
+                //$rooms[$i]['rate_types'] = $room->room->roomType->rateTypes;
                 $rooms[$i]['guests'] = $keyedGuests;
-                $rooms[$i]['room'] = $room->room;
+                $rooms[$i]['room_name'] = $room->room->name;
+                $rooms[$i]['room_number'] = $room->room->room_number;
                 $i++;
             }
         }
+
+        $priceBreakDown = [];
+
+        if($allPrices) {
+            foreach($allPrices as $roomPrices) {
+
+                if($roomPrices) {
+                    foreach($roomPrices as $roomPrice) {
+                        if(array_key_exists($roomPrice['date'], $priceBreakDown)) {
+                            $priceBreakDown[$roomPrice['date']] += $roomPrice['price'];
+                        } else {
+                            $priceBreakDown[$roomPrice['date']] = $roomPrice['price'];
+                        }
+                    }
+                }
+                
+            }
+        }
+
+        $finalBreakDown = [];
+        $totalPrice = 0;
+        if($priceBreakDown) {
+            foreach($priceBreakDown as $date=>$breakDown) {
+                $finalBreakDown[] = [
+                    'date' => $date,
+                    'price' => number_format($breakDown, 2, ',', '.')
+                ];
+                $totalPrice += $breakDown;
+            }
+        }
+
         $responseArray['rooms'] = $rooms;
         $responseArray['price'] = $booking->price['price'];
         $responseArray['total_price'] = $booking->price['total'];
         $responseArray['total_tax'] = $booking->price['tax'] + $booking->price['vat'];
-        $responseArray['price_breakdown'] = $booking->price['price_breakdown'];
-        
+        //$responseArray['price_breakdown_old'] = $booking->price['price_breakdown'];
+        $responseArray['price_breakdown'] = ['daily_prices' => $finalBreakDown, 'total_price' => number_format($totalPrice, 2, ',', '.')];
         
         $responseArray['accommodation_price'] = $booking->getAccomudationPrice();
         $responseArray['accessories_price'] = $booking->getAccessoriesPrice();
