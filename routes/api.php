@@ -68,6 +68,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('booking-calendar', 'BookingsController@indexsss');
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
+                Route::post('{booking}/change-cleaning-status', 'BookingsController@changeCleaningStatus');
                 Route::resource('daily-rates', 'DailyRatesController');
                 Route::post('daily-rates/{id}', 'DailyRatesController@index');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');

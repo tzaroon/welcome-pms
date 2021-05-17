@@ -529,7 +529,7 @@ class BookingsController extends Controller
                             ->where('company_id', $user->company_id)
                             ->where('rate_type_id', $bookingHasRoom->rate_type_id)
                             ->first();
-                            
+
                         $priceIds[$room['room_id'].$i]['product_price_id'] = $dailyPrice->product->price->id;
                         $priceIds[$room['room_id'].$i]['booking_has_room_id'] =  $bookingHasRoom->id;
 
@@ -615,9 +615,14 @@ class BookingsController extends Controller
         $responseArray['comment'] = $booking->comment;
         $responseArray['tourist_tax'] = $booking->tourist_tax;
         $responseArray['discount'] = $booking->discount;
+        $responseArray['received'] = $booking->created_at;
         
         $booking->booker->user;
         
+        $responseArray['booker_name'] = $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name;
+        $responseArray['booker_email'] = $booking->booker->user->email;
+        $responseArray['phone_number'] = $booking->booker->user->phone_number;
+
         $responseArray['booker'] = $booking->booker;
 
         $accessories = [];
@@ -641,6 +646,9 @@ class BookingsController extends Controller
         $rooms = [];
 
         $allPrices = [];
+        $adultCount = 0;
+        $childrenCount = 0;
+
         if($booking->bookingRooms) {
             $i = 0;
             foreach($booking->bookingRooms as $room) {
@@ -668,6 +676,12 @@ class BookingsController extends Controller
                         $keyedGuests[$j]['id_issue_date'] = $guest->id_issue_date;
                         $keyedGuests[$j]['id_expiry_date'] = $guest->id_expiry_date;
                         $j++;
+
+                        if(Guest::GUEST_TYPE_ADULT == $guest->guest_type) {
+                            $adultCount++;
+                        } else {
+                            $childrenCount++;
+                        }
                     }
                 }
                 $rooms[$i]['room_id'] = $room->room_id;
@@ -680,9 +694,16 @@ class BookingsController extends Controller
                 $rooms[$i]['room_name'] = $room->room->name;
                 $rooms[$i]['room_number'] = $room->room->room_number;
                 $i++;
+
+                if(!array_key_exists('primary_room', $responseArray)) {
+                    $responseArray['primary_room'] = $room->room->name . ' ' . $room->room->room_number;
+                }
             }
         }
 
+        $responseArray['total_adults'] = $adultCount;
+        $responseArray['total_children'] = $childrenCount;
+         
         $priceBreakDown = [];
 
         if($allPrices) {
@@ -972,5 +993,22 @@ class BookingsController extends Controller
         $bookingRoom->updatePrices();
 
         return response()->json(array('message' => 'Room changed successfully.'));
+    }
+
+    public function changeCleaningStatus(Request $request, Booking $booking) {
+
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'cleaning_status' => 'required'
+        ], [], [
+            'cleaning_status' => 'Cleaning Status'
+        ]);
+
+        $booking->cleaning_status = $postData['cleaning_status'];
+        $booking->save();
+
+        return response()->json(array('message' => 'Cleaning status changed successfully.'));
     }
 }
