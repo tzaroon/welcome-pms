@@ -25,8 +25,8 @@ class WhatsAppService implements Service
 	public function __construct($client = null, string $verification_sid = null)
 	{
 		if ($client === null) {
-			$sid = "AC156c58822542f100be3a6e9d8330c239"; 
-			$token = "3b71e0aeb773695b1e9d3e923b39da85";
+			$sid = "ACe42d04d14d4a6522f18a3c7ee736ad15"; 
+			$token = "e2dfdd189e28d8bf08e6a956b9c1cf5c";
 			$client = new Client($sid, $token);
 		}
 		$this->client = $client;
@@ -39,7 +39,7 @@ class WhatsAppService implements Service
 		->create($to, 
 				 array( 
 					 "from" => "whatsapp:+14155238886",	
-					 "body" => $body 
+					 "body" => $body
 				 ) 
 		);
 	}
