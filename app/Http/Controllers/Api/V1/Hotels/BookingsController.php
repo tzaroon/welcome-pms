@@ -14,6 +14,7 @@ use App\Models\Payment;
 use App\Models\ProductPrice;
 use App\Models\RateType;
 use App\Models\Room;
+use App\Models\RoomType;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -30,10 +31,6 @@ class BookingsController extends Controller
      */
     public function indexsss(Request $request)
     {
-/*         $room = new Room;
-        $room->getLockPasscode();
-        exit;
- */
         $user = auth()->user();
         $hotels = Hotel::where('company_id', $user->company_id)->get();
 
@@ -72,11 +69,39 @@ class BookingsController extends Controller
 
                 $calendarStartDate = Carbon::parse($postData['start_date']);
                 
+                $hotelBookings = $hotel->booking($hotel->id, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
+
+                $keyedRoomBookings = [];
+                if($hotelBookings) {
+                    foreach($hotelBookings as $hotelBooking) {
+                        $keyedRoomBookings[$hotelBooking->reservation_from][] = $hotelBooking;
+                        
+                        $reservationStartDate = Carbon::parse($hotelBooking->reservation_from);
+                       
+                        $daysCount = $reservationStartDate->diffInDays(Carbon::parse($hotelBooking->reservation_to))-1;
+
+                        if($daysCount > 1) {
+                            for($i=0; $i < $daysCount; $i++) {
+                                $reservationStartDate->addDay();
+                                $keyedRoomBookings[$reservationStartDate->format('Y-m-d')][] = $hotelBooking;
+                            }
+                        }
+                    }
+                }
+
+                $hotelSandBox = [];
                 for($i=0; $i < $days; $i++)
                 {
                     $processedData[$count]['total_availability'][$i] = [
                         'date' => $calendarStartDate->format('Y-m-d'),
                         'available' => 6
+                    ];
+
+                    $bookingss = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : [];
+
+                    $hotelSandBox[$i] = [
+                        'date' => $calendarStartDate->format('Y-m-d'),
+                        'bookings_count' => sizeof($bookingss)
                     ];
                     $calendarStartDate->addDay();
                 }
@@ -119,11 +144,6 @@ class BookingsController extends Controller
                             $calendarStartDate = $calendarStartDate->addDay();
                         }
 
-                        /* $hotelRoomTypes[$roomTypeCount] = [
-                            'id' => $roomType->id,
-                            'name' => $roomType->roomTypeDetail->name,
-                            'availability' =>  $availabilityData
-                        ]; */
                         $processedData[$count] = [
                             'hotel_id' => $hotel->id,
                             'roomtype_id' => $roomType->id,
@@ -137,12 +157,7 @@ class BookingsController extends Controller
                         $hotelRoomCount = 0;
                         if($roomType->rooms) {
                             foreach($roomType->rooms as $room) {
-                                /* $hotelRooms[$hotelRoomCount] = [
-                                    'id' => $room->id,
-                                    'type' => 'room',
-                                    'name' => $room->name,
-                                    'room_number' => $room->room_number
-                                ]; */
+
                                 $processedData[$count] = [
                                     'hotel_id' => $hotel->id,
                                     'roomtype_id' => $roomType->id,
@@ -220,7 +235,7 @@ class BookingsController extends Controller
                             }
 
                             $calendarStartDate = Carbon::parse($postData['start_date']);
-                            $roomBookings = $roomType->booking($roomType->id, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
+                            
                             
                             $keyedRoomBookings = [];
                             if($roomBookings) {
@@ -289,45 +304,20 @@ class BookingsController extends Controller
                                 ];
                                 $calendarStartDate->addDay();
                             }
-                           /*  $hotelRooms[$hotelRoomCount] = [
-                                'id' => $roomType->id,
-                                'type' => 'sand_box',
-                                'name' => 'Sand box'
-                            ]; */
-                            $addedBookings = [];
-                            for($i=0; $i<$maxBookingCount; $i++) {
-
-                                $processedData[$count] = [
-                                    'hotel_id' => $hotel->id,
-                                    'roomtype_id' => $roomType->id,
-                                    'row_type' => 'rooms',
-                                    'type' => 'sand_box',
-                                    'room_name' => 'Sand Box',
-                                    'merge' => $i==0 ? $maxBookingCount : 0
-                                ];
-                                $processedBookings = [];
-                                foreach($bookings as $bookingRow) {
-
-                                    $processedBookings[] = [
-                                        'date' => $bookingRow['date'],
-                                        'booking' => $bookingRow['booking'] && array_key_exists($i, $bookingRow['booking']) && !in_array($bookingRow['booking'][$i]['id'], $addedBookings) ? $bookingRow['booking'][$i] : null
-                                    ];
-                                    if($bookingRow['booking'] && array_key_exists($i, $bookingRow['booking'])) {
-                                        $addedBookings[] = $bookingRow['booking'][$i]['id'];
-                                    }
-                                }
-
-                                $processedData[$count]['bookings'] = $processedBookings;
-                                $count++;
-                            }
                         }
 
                         $roomTypeCount++;
                     }
                     
                 }
-               // $processedData[$count]['room_types'] = $hotelRoomTypes;
-                //$count++;
+                $processedData[$count] = [
+                    'hotel_id' => $hotel->id,
+                    'row_type' => 'rooms',
+                    'type' => 'sand_box',
+                    'room_name' => 'Sand Box'
+                ];
+                $processedData[$count]['bookings'] = $hotelSandBox;
+                $count++;
             }
         }
         
@@ -1006,9 +996,67 @@ class BookingsController extends Controller
             'cleaning_status' => 'Cleaning Status'
         ]);
 
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
         $booking->cleaning_status = $postData['cleaning_status'];
         $booking->save();
 
         return response()->json(array('message' => 'Cleaning status changed successfully.'));
+    }
+
+    public function getSandBoxBookings(Request $request) {
+
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'date' => 'required',
+            'hotel_id' => 'required'
+        ], [], [
+            'date' => 'Booking date',
+            'hotel_id' => 'Hotel'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $sandBoxBookings = Hotel::sandBoxbookings($postData['hotel_id'], $postData['date']);
+
+        $processedBookings = [];
+
+        if($sandBoxBookings) {
+            foreach($sandBoxBookings as $sandBoxBooking) {
+                $booking = Booking::find($sandBoxBooking->id);
+                $roomType = RoomType::find($sandBoxBooking->room_type_id);
+
+                $rooms = $roomType->getAvailableRooms($booking->reservation_from);
+
+                $processedRooms = [];
+                if($rooms) {
+                    foreach($rooms as $objRoom) {
+                        $processedRooms[] = [
+                            'id' => $objRoom->id,
+                            'name' => $objRoom->name . '-' . $objRoom->room_number,
+                        ];
+                    }
+                }
+
+                $processedBookings[] = [
+                    'room_type_id' => $sandBoxBooking->room_type_id,
+                    'room_type_name' => $sandBoxBooking->room_type_name,
+                    'booking_guest' => $sandBoxBooking->first_guest_name,
+                    'adult_count' => $booking->getAdultGuestCount(),
+                    'children_count' => $booking->getChildrenGuestsCount(),
+                    'price' => $booking->price['total'],
+                    'room_options' => $processedRooms
+                ]; 
+            }
+        }
+        return response()->json($processedBookings);
     }
 }

@@ -67,6 +67,26 @@ class RoomType extends Model
         }
         return null;
     }
+    public function getAvailableRooms($date) {
+
+        $availableRooms = [];
+        foreach($this->rooms as $room) {
+            $booked = DB::select('SELECT
+                    COUNT(*) as `count` 
+                FROM `booking_room` as `br`
+                LEFT JOIN `bookings` as `b` ON `b`.`id` = `br`.`booking_id`
+                WHERE 
+                    `b`.`reservation_from` <= \''.$date.'\'
+                AND
+                    `b`.`reservation_to` > \''.$date.'\'
+                AND
+                    `br`.`room_id` = ' . (int)$room->id);
+            if($booked && $booked[0]->count == 0) {
+                $availableRooms[] = $room;
+            }
+        }
+        return $availableRooms;
+    }
 
     public function booking($id , $date, $todate) {
 		
