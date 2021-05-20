@@ -51,6 +51,8 @@ class Hotel extends Model
 		
 		return DB::select('SELECT 
 				`b`.`id`,
+				`b`.`reservation_from`,
+				`b`.`reservation_to`,
 				`br`.`id` as `booking_room_id`,
 				`br`.`rate_type_id`,
                 `rmt`.`id` AS `room_type_id`,

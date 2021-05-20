@@ -1034,29 +1034,74 @@ class BookingsController extends Controller
                 $booking = Booking::find($sandBoxBooking->id);
                 $roomType = RoomType::find($sandBoxBooking->room_type_id);
 
-                $rooms = $roomType->getAvailableRooms($booking->reservation_from);
-
-                $processedRooms = [];
-                if($rooms) {
-                    foreach($rooms as $objRoom) {
-                        $processedRooms[] = [
-                            'id' => $objRoom->id,
-                            'name' => $objRoom->name . '-' . $objRoom->room_number,
-                        ];
+                if(array_key_exists('auto_assign', $postData) && 1 == $postData['auto_assign']) {
+                    $room = $roomType->getAvailableRoom($booking->reservation_from);
+                    $bookingRoom = BookingHasRoom::find($sandBoxBooking->booking_room_id);
+                    if($room && $room->id) {
+                        $bookingRoom->room_id = $room->id;
+                        $bookingRoom->save();
                     }
                 }
+                else
+                {
+                    $rooms = $roomType->getAvailableRooms($booking->reservation_from);
 
-                $processedBookings[] = [
-                    'room_type_id' => $sandBoxBooking->room_type_id,
-                    'room_type_name' => $sandBoxBooking->room_type_name,
-                    'booking_guest' => $sandBoxBooking->first_guest_name,
-                    'adult_count' => $booking->getAdultGuestCount(),
-                    'children_count' => $booking->getChildrenGuestsCount(),
-                    'price' => $booking->price['total'],
-                    'room_options' => $processedRooms
-                ]; 
+                    $processedRooms = [];
+                    if($rooms) {
+                        foreach($rooms as $objRoom) {
+                            $processedRooms[] = [
+                                'id' => $objRoom->id,
+                                'name' => $objRoom->name . '-' . $objRoom->room_number,
+                            ];
+                        }
+                    }
+    
+                    $processedBookings[] = [
+                        'booking_room_id' => $sandBoxBooking->booking_room_id,
+                        'reservation_from' => $sandBoxBooking->reservation_from,
+                        'reservation_to' => $sandBoxBooking->reservation_to,
+                        'room_type_id' => $sandBoxBooking->room_type_id,
+                        'room_type_name' => $sandBoxBooking->room_type_name,
+                        'booking_guest' => $sandBoxBooking->first_guest_name,
+                        'adult_count' => $booking->getAdultGuestCount(),
+                        'children_count' => $booking->getChildrenGuestsCount(),
+                        'price' => $booking->price['total'],
+                        'room_options' => $processedRooms
+                    ]; 
+                }
+                
             }
         }
-        return response()->json($processedBookings);
+        if(array_key_exists('auto_assign', $postData) && 1 == $postData['auto_assign']) 
+        {
+            return response()->json(array('message' => 'Rooms assigned successfully.'));
+        }
+        else
+        {
+            return response()->json($processedBookings);
+        }
+    }
+
+    public function sandBoxBookingAssignRoom(Request $request, BookingHasRoom $bookingRoom) {
+
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'room_id' => 'required'
+        ], [], [
+            'room_id' => 'Room'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $bookingRoom->room_id = $postData['room_id'];
+
+        $bookingRoom->save();
+
+        return response()->json(array('message' => 'Room assigned successfully.'));
     }
 }

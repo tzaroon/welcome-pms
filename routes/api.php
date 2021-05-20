@@ -67,6 +67,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('{hotel}/bookings', 'BookingsController');
                 Route::post('booking-calendar', 'BookingsController@indexsss');
                 Route::post('sand-box-bookings', 'BookingsController@getSandBoxBookings');
+                Route::post('sand-box-bookings/assign-room/{bookingRoom}', 'BookingsController@sandBoxBookingAssignRoom');
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
                 Route::post('{booking}/change-cleaning-status', 'BookingsController@changeCleaningStatus');
