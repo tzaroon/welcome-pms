@@ -46,6 +46,28 @@ class Room extends Model
 				`rmt`.`id` = ' . (int)$roomTypeId .
 			' GROUP BY `rmt`.`id`');
 	}
+	
+	public function isAvailable($roomId , $date) {
+		
+		$return = DB::select('SELECT
+				COUNT(*) as `count` 
+			FROM `booking_room` as `br`
+			JOIN `rate_types` as `rt` ON `rt`.`id` = `br`.`rate_type_id`
+			JOIN `room_types` as `rmt` ON `rmt`.`id` = `rt`.`room_type_id`
+			LEFT JOIN `bookings` as `b` ON `b`.`id` = `br`.`booking_id`
+			WHERE 
+				`b`.`reservation_from` <= \''.$date.'\'
+			AND
+				`b`.`reservation_to` > \''.$date.'\'
+			AND
+				`br`.`room_id` = ' . (int)$roomId .
+			' GROUP BY `rmt`.`id`');
+
+		if($return && $return[0] && $return[0]->count > 0) {
+			return false;
+		}
+		return true;
+	}
 
 	public function booking($id , $date, $todate) {
 		

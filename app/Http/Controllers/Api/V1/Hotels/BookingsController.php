@@ -948,8 +948,14 @@ class BookingsController extends Controller
             return response()->json(array('rate_types' => $rateTypes, 'existing_price' => $bookingRoom->price));
         } else {
 
-            $bookingRoom->updateRoom($newRoom->id);
-            $bookingRoom->updatePrices();
+            if($bookingRoom->updateRoom($newRoom->id)) {
+                $bookingRoom->updatePrices();
+                return response()->json(array('message' => 'Room changed successfully.'));
+            }
+            else
+            {
+                return response()->json(array('errors' => ['room'=>'Room cannot be changed.']), 422);
+            }
         }
 
         return response()->json(array('message' => 'Room changed successfully.'));

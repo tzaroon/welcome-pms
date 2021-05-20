@@ -36,14 +36,23 @@ class BookingHasRoom extends Model
 
     public function updateRoom($roomId) {
         
-        $affected = DB::table('booking_room_guests')
-              ->where('booking_id', $this->booking_id)
-              ->where('room_id', $this->room_id)
-              ->update(['room_id' => $roomId]);
-            
-        $this->room_id = $roomId;
-        $this->save();
-        return $affected;
+        $room = new Room;
+        $booking = Booking::find($this->booking_id);
+
+        $isAvailable = $room->isAvailable($roomId, $booking->reservation_from);
+
+        if($isAvailable) {
+            $affected = DB::table('booking_room_guests')
+                ->where('booking_id', $this->booking_id)
+                ->where('room_id', $this->room_id)
+                ->update(['room_id' => $roomId]);
+          
+            $this->room_id = $roomId;
+            $this->save();
+            return true;
+        }
+        
+        return false;
     }
 
     public function updatePrices() {
