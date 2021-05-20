@@ -1088,26 +1088,39 @@ class BookingsController extends Controller
         }
     }
 
-    public function sandBoxBookingAssignRoom(Request $request, BookingHasRoom $bookingRoom) {
+    public function sandBoxBookingAssignRoom(Request $request) {
 
         $postData = $request->getContent();
         $postData = json_decode($postData, true);
 
-        $validator = Validator::make($postData, [
-            'room_id' => 'required'
-        ], [], [
-            'room_id' => 'Room'
-        ]);
+        DB::beginTransaction();
 
-        if (!$validator->passes()) {
+        if($postData) {
+            foreach($postData as $data) {
+                $bookingRoom = BookingHasRoom::find($data['booking_id']);
 
-            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+                $booking =  $bookingRoom->booking;
+
+                if($data['room_id']) {
+
+                    $bookingRoom->room_id = $data['room_id'];
+
+                    $room = Room::find($bookingRoom->room_id);
+                    
+                    if($room->isAvailable($bookingRoom->room_id, $booking->reservation_from)) {
+                        $bookingRoom->save();
+                    }
+                    else
+                    {
+                        DB::rollback();
+                        return response()->json(['errors' => ['rooms' => $room->name . ' ' . $room->room_number . ' cannot be assigned as already occupied.']], 422);
+                    }
+                }
+            }
         }
 
-        $bookingRoom->room_id = $postData['room_id'];
-
-        $bookingRoom->save();
-
+        DB::commit();
+        
         return response()->json(array('message' => 'Room assigned successfully.'));
     }
 }
