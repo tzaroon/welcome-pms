@@ -1035,6 +1035,7 @@ class BookingsController extends Controller
 
         $processedBookings = [];
 
+        $lastRoomType = null;
         if($sandBoxBookings) {
             foreach($sandBoxBookings as $sandBoxBooking) {
                 $booking = Booking::find($sandBoxBooking->id);
@@ -1067,15 +1068,15 @@ class BookingsController extends Controller
                         'reservation_from' => $sandBoxBooking->reservation_from,
                         'reservation_to' => $sandBoxBooking->reservation_to,
                         'room_type_id' => $sandBoxBooking->room_type_id,
-                        'room_type_name' => $sandBoxBooking->room_type_name,
+                        'room_type_name' => $lastRoomType != $sandBoxBooking->room_type_name ? $sandBoxBooking->room_type_name : '',
                         'booking_guest' => $sandBoxBooking->first_guest_name,
                         'adult_count' => $booking->getAdultGuestCount(),
                         'children_count' => $booking->getChildrenGuestsCount(),
                         'price' => $booking->price['total'],
                         'room_options' => $processedRooms
                     ]; 
+                    $lastRoomType = $sandBoxBooking->room_type_name;
                 }
-                
             }
         }
         if(array_key_exists('auto_assign', $postData) && 1 == $postData['auto_assign']) 
