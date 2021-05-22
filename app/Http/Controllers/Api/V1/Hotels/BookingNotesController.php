@@ -12,6 +12,10 @@ class BookingNotesController extends Controller
 {
     public function index(Request $request, Booking $booking) {
 
+        if(!$booking->notes) {
+            return response()->json(['message' => 'no data found'], 201);
+        }
+
         return response()->json($booking->notes);
     }
 
