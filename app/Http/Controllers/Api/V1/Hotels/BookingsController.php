@@ -606,6 +606,7 @@ class BookingsController extends Controller
         $responseArray['tourist_tax'] = $booking->tourist_tax;
         $responseArray['discount'] = $booking->discount;
         $responseArray['received'] = $booking->created_at;
+        $responseArray['nights'] = $booking->numberOfDays;
         
         $booking->booker->user;
         
