@@ -86,7 +86,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                     Route::get('invoices/{invoice}/edit', 'InvoicesController@edit')->name('booking_invoices');
                     Route::get('invoices/{booking}/{proforma}', 'InvoicesController@index')->name('booking_invoices');
                     Route::put('invoices/{invoice}', 'InvoicesController@update')->name('booking_invoice_update');
-                    Route::resource('{booking}/invoices/{proforma}', 'InvoicesController', ['except' => ['create', 'index']]);
+                    Route::resource('{booking}/invoices', 'InvoicesController', ['except' => ['create', 'index']]);
                 });
             });
         });

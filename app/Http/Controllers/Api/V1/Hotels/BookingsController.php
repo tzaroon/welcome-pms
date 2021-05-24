@@ -39,11 +39,9 @@ class BookingsController extends Controller
         $postData = $postData ? json_decode($postData, true) : [];
 
         $validator = Validator::make($postData, [
-            'start_date' => 'required',
-            'months' => 'required'
+            'start_date' => 'required'
         ], [], [
-            'start_date' => 'Start Date',
-            'months' => 'Number of months'
+            'start_date' => 'Start Date'
         ]);
 
         if (!$validator->passes()) {
@@ -54,8 +52,12 @@ class BookingsController extends Controller
         $count = 0;
 
         $startDate = Carbon::parse($postData['start_date']);
-        $endDate = Carbon::parse($postData['start_date'])->addMonths($postData['months']);
-
+        if(array_key_exists('weeks', $postData)) {
+            $endDate = Carbon::parse($postData['start_date'])->addWeeks($postData['weeks']);
+        } else {
+            $endDate = Carbon::parse($postData['start_date'])->addMonths($postData['months']);
+        }
+        
         $days = $endDate->diffInDays($startDate);
 
         if($hotels) {
