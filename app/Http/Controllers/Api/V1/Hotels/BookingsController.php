@@ -951,7 +951,11 @@ class BookingsController extends Controller
 
             if($bookingRoom->updateRoom($newRoom->id)) {
                 $bookingRoom->updatePrices();
-                return response()->json(array('message' => 'Room changed successfully.'));
+                $bookingRoom->refresh();
+                return response()->json([
+                    'message' => 'Room changed successfully.',
+                    'booking' => $bookingRoom->booking
+                ]);
             }
             else
             {
@@ -959,7 +963,10 @@ class BookingsController extends Controller
             }
         }
 
-        return response()->json(array('message' => 'Room changed successfully.'));
+        return response()->json([
+            'message' => 'Room changed successfully.',
+            'booking' => $bookingRoom->booking
+        ]);
     }
     
     public function changeRoomAndRate(Request $request, BookingHasRoom $bookingRoom) {
@@ -994,8 +1001,11 @@ class BookingsController extends Controller
             return response()->json(array('errors' => ['room'=>'Room cannot be changed.']), 422);
         }
         
-
-        return response()->json(array('message' => 'Room changed successfully.'));
+        $bookingRoom->refresh();
+        return response()->json([
+            'message' => 'Room changed successfully.',
+            'booking' => $bookingRoom->booking
+        ]);
     }
 
     public function changeCleaningStatus(Request $request, Booking $booking) {
