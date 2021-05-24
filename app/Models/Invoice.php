@@ -20,7 +20,8 @@ class Invoice extends Model
         'country',
         'observations',
         'notes',
-        'apply_tourist_tax'
+        'apply_tourist_tax',
+        'is_proforma'
     ];
 
     public function productPrices() {
