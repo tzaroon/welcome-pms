@@ -70,6 +70,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('sand-box-bookings/assign-room', 'BookingsController@sandBoxBookingAssignRoom');
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
+                Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
                 Route::post('{booking}/change-cleaning-status', 'BookingsController@changeCleaningStatus');
                 Route::resource('daily-rates', 'DailyRatesController');
                 Route::post('daily-rates/{id}', 'DailyRatesController@index');
@@ -81,6 +82,11 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('{hotel}/extras', 'ExtrasController@index', ['except' => ['create']]);
                 Route::resource('extras', 'ExtrasController', ['except' => ['create', 'index']]);
                 Route::get('{hotel}/extras/autocomplete/{keyword}', 'ExtrasController@autocomplete', ['except' => ['create', 'index']]);
+                Route::namespace('Booking')->name('booking.')->prefix('booking')->group(function () {
+                    Route::get('invoices/{booking}/{proforma}', 'InvoicesController@index')->name('booking_invoices');
+                    Route::resource('invoices', 'InvoicesController', ['except' => ['create', 'index']]);
+                    
+                });
             });
         });
     });

@@ -1131,4 +1131,45 @@ class BookingsController extends Controller
         
         return response()->json(array('message' => 'Room assigned successfully.'));
     }
+
+    public function loadProductPrices(Request $request, Booking $booking) {
+
+        $booking->productPrice;
+        $booking->bookingRooms;
+        //return response()->json($booking);
+        $processedArray = [];
+
+        $arrRooms = [];
+        $totalGuests = 0;
+        foreach($booking->bookingRooms as $bookingRoom) {
+            $arrRooms[] = [
+                'id' => $bookingRoom->room->id,
+                'name' => $bookingRoom->room->roomType->roomTypeDetail->name,
+                'guest_count' => $bookingRoom->guests()->count()
+            ];
+            $totalGuests += $bookingRoom->guests()->count();
+        }
+        $cityTax['title'] = ($totalGuests*$booking->numberOfDays) . ' x ' . 'Tourist tax';
+        $cityTax['amount'] = $totalGuests*$booking->numberOfDays*$booking->price['tax'];
+
+        $roomNightPrices = [];
+        foreach($booking->price['price_breakdown']['daily_prices'] as $dailyPrice) {
+            $roomNightPrices[] = $dailyPrice;
+        }
+        $productPrices = [];
+        foreach($booking->productPrice as $productPrice) {
+            $productPrices[] = $productPrice->id;
+        }
+
+        $processedArray['rooms'] = $arrRooms;
+        $processedArray['room_nights'] = Carbon::parse($booking->reservation_from)->format('d/m/Y') . ' to ' . Carbon::parse($booking->reservation_to)->format('d/m/Y');
+        $processedArray['room_night_prices'] = $roomNightPrices;
+        $processedArray['discount'] = $booking->discount;
+        $processedArray['total_price'] = $booking->price['price_breakdown']['total_price'];
+
+        $processedArray['product_price_ids'] = $productPrices;
+        $processedArray['city_tax'] = $cityTax;
+
+        return response()->json($processedArray);
+    }
 }

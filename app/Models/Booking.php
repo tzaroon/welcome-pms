@@ -254,7 +254,12 @@ class Booking extends Model
                             }
                         }
                     }
-                    $dailyPrices[$priceDate] = $totalDayPrice;
+                    if(array_key_exists($priceDate, $dailyPrices)) {
+                        $dailyPrices[$priceDate] += $totalDayPrice;
+                    } else {
+                        $dailyPrices[$priceDate] = $totalDayPrice;
+                    }
+                    
                 }    
             }
             
