@@ -983,11 +983,17 @@ class BookingsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $bookingRoom->updateRoom($postData['room_id']);
-        $bookingRoom->rate_type_id = $postData['rate_type_id'];
-        $bookingRoom->save();
+        if($bookingRoom->updateRoom($postData['room_id'])){
+            $bookingRoom->rate_type_id = $postData['rate_type_id'];
+            $bookingRoom->save();
+            
+            $bookingRoom->updatePrices();
+        }
+        else
+        {
+            return response()->json(array('errors' => ['room'=>'Room cannot be changed.']), 422);
+        }
         
-        $bookingRoom->updatePrices();
 
         return response()->json(array('message' => 'Room changed successfully.'));
     }
