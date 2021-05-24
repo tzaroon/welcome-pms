@@ -83,9 +83,10 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('extras', 'ExtrasController', ['except' => ['create', 'index']]);
                 Route::get('{hotel}/extras/autocomplete/{keyword}', 'ExtrasController@autocomplete', ['except' => ['create', 'index']]);
                 Route::namespace('Booking')->name('booking.')->prefix('booking')->group(function () {
+                    Route::get('invoices/{invoice}/edit', 'InvoicesController@edit')->name('booking_invoices');
                     Route::get('invoices/{booking}/{proforma}', 'InvoicesController@index')->name('booking_invoices');
-                    Route::resource('invoices', 'InvoicesController', ['except' => ['create', 'index']]);
-                    
+                    Route::put('invoices/{invoice}', 'InvoicesController@update')->name('booking_invoice_update');
+                    Route::resource('{booking}/invoices/{proforma}', 'InvoicesController', ['except' => ['create', 'index']]);
                 });
             });
         });

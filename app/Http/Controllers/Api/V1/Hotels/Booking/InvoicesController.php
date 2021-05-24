@@ -51,4 +51,45 @@ class InvoicesController extends Controller
 
         return response()->json(array('message' => 'Invoice added successfully.'));
     }
+
+    public function edit(Request $request, Invoice $invoice) {
+
+        $productPriceIds = [];
+        if($invoice->productPrices) {
+            foreach($invoice->productPrices as $price) {
+                $productPriceIds[] = $price->id;
+            }
+        }
+        $invoice->productPriceIds = $productPriceIds;
+        return response()->json($invoice);
+    }
+
+    public function update(Request $request, Invoice $invoice) {
+
+        $user = auth()->user();
+        
+        $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'booking_id' => 'required',
+            'issue_date' => 'required',
+            'address' => 'required',
+        ], [], [
+            'booking_id' => 'Booking',
+            'issue_date' => 'Issue date',
+            'address' => 'Address'
+        ]);
+
+        $invoice->fill($postData);
+        $invoice->save();
+
+        if(array_key_exists('product_price_ids', $postData) && $postData['product_price_ids']) {
+
+            $invoice->productPrices()->sync($postData['product_price_ids']);
+        }
+
+        return response()->json(array('message' => 'Invoice added successfully.'));
+    }
 }
