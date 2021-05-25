@@ -81,7 +81,7 @@ class Room extends Model
 			JOIN `rooms` as `rm` ON `rm`.`id` = `br`.`room_id`
 			JOIN `bookings` as `b` ON `b`.`id` = `br`.`booking_id`
 			WHERE 
-				`b`.`reservation_from` >= \''.$date.'\'
+				(`b`.`reservation_from` >= \''.$date.'\' OR (`b`.`reservation_from` < \''.$date.'\' AND `b`.`reservation_to` >= \''.$date.'\'))
 			AND
 				`b`.`reservation_from` <= \''.$todate.'\'
 			AND

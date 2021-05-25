@@ -175,12 +175,22 @@ class BookingsController extends Controller
                                 $roomBookings = $room->booking($room->id, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
                                 //$roomBookings= [];
                                 $keyedRoomBookings = [];
+                                $hasPreviousBooking = false;
+                                $reservationFromFirstDay = null;
+                                $reservationToFirstDay = null;
                                 if($roomBookings) {
                                     foreach($roomBookings as $roomBooking) {
+                                        if(!$reservationFromFirstDay) {
+                                            $reservationFromFirstDay = $roomBooking->reservation_from;
+                                            $reservationToFirstDay = $roomBooking->reservation_to;
+                                        }
                                         $keyedRoomBookings[$roomBooking->reservation_from] = $roomBooking;
                                     }
                                 }
 
+                                if($reservationFromFirstDay < $calendarStartDate->format('Y-m-d')) {
+                                    $hasPreviousBooking = true;
+                                }
                                 for($i=0; $i < $days; $i++) {
                                     
                                     $booking = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;
@@ -225,9 +235,14 @@ class BookingsController extends Controller
                                         
 
                                     }
+                                    $previousBooking = false;
+                                    if($hasPreviousBooking && $reservationToFirstDay >= $calendarStartDate->format('Y-m-d')) {
+                                        $previousBooking = true;
+                                    }
                                     $bookings[] = [
                                         'date' => $calendarStartDate->format('Y-m-d'),
-                                        'booking' => $booking ? $arrBooking : null
+                                        'booking' => $booking ? $arrBooking : null,
+                                        'previous_booking' => $previousBooking
                                     ];
                                     $calendarStartDate->addDay();
                                 }
