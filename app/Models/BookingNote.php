@@ -8,6 +8,8 @@ class BookingNote extends Model
 {
     protected $fillable = [
         'booking_id',
-        'note'
+        'note',
+        'start',
+        'end'
     ];
 }
