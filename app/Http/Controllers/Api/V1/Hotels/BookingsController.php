@@ -325,7 +325,6 @@ class BookingsController extends Controller
 
                         $roomTypeCount++;
                     }
-                    
                 }
                 $processedData[$count] = [
                     'hotel_id' => $hotel->id,
@@ -946,38 +945,52 @@ class BookingsController extends Controller
         
         $postData = json_decode($postData, true);
 
-        $validator = Validator::make($postData, [
-            'room_id' => 'required'
-        ], [], [
-            'room_id' => 'Room'
-        ]);
+        if(array_key_exists('room_id', $postData) && $postData['room_id']) {
+            $room = Room::find($bookingRoom->room_id);
+            $newRoom = Room::find($postData['room_id']);
+            if($room && $room->room_type_id != $newRoom->room_type_id && (!array_key_exists('force', $postData) || !$postData['force'])) {
 
-        if (!$validator->passes()) {
+                $rateTypes = RateType::where('room_type_id', $newRoom->room_type_id)->with(['detail'])->get();
+                
+                return response()->json(array('rate_types' => $rateTypes, 'existing_price' => $bookingRoom->price));
+            } else {
 
-            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+                if($bookingRoom->updateRoom($newRoom->id)) {
+                    $bookingRoom->updatePrices();
+                    $bookingRoom->refresh();
+                    return response()->json([
+                        'message' => 'Room changed successfully.',
+                        'booking' => $bookingRoom->booking
+                    ]);
+                }
+                else
+                {
+                    return response()->json(array('errors' => ['room'=>'Room cannot be changed.']), 422);
+                }
+            }
         }
 
-        $room = Room::find($bookingRoom->room_id);
-        $newRoom = Room::find($postData['room_id']);
-        if($room->room_type_id != $newRoom->room_type_id && (!array_key_exists('force', $postData) || !$postData['force'])) {
+        if(array_key_exists('room_type_id', $postData) && $postData['room_type_id']) {
 
-            $rateTypes = RateType::where('room_type_id', $newRoom->room_type_id)->with(['detail'])->get();
-            
-            return response()->json(array('rate_types' => $rateTypes, 'existing_price' => $bookingRoom->price));
-        } else {
+            $rateType = RateType::where('room_type_id', $postData['room_type_id'])->first();
 
-            if($bookingRoom->updateRoom($newRoom->id)) {
-                $bookingRoom->updatePrices();
-                $bookingRoom->refresh();
-                return response()->json([
-                    'message' => 'Room changed successfully.',
-                    'booking' => $bookingRoom->booking
+            if(!$rateType) {
+                $rateType = RateType::create([
+                    'room_type_id' => $postData['room_type_id'],
+                    'company_id' => 1,
+                    'price' => 0,
+                    'number_of_people' => 0,
+                    'advance' => 0
                 ]);
             }
-            else
-            {
-                return response()->json(array('errors' => ['room'=>'Room cannot be changed.']), 422);
-            }
+
+            $bookingRoom->rate_type_id = $rateType->id;
+            $bookingRoom->room_id = null;
+            $bookingRoom->save();
+
+            return response()->json([
+                'message' => 'Room added to sandbox.'
+            ]);
         }
 
         return response()->json([

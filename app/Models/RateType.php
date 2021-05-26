@@ -12,7 +12,9 @@ class RateType extends Model
     protected $fillable = [
         'room_type_id',
         'company_id',
-        'price'
+        'price',
+        'number_of_people',
+        'advance'
     ];
     
     protected $appandes = [
