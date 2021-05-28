@@ -96,6 +96,7 @@ class BookingsController extends Controller
                 {
                     $processedData[$count]['total_availability'][$i] = [
                         'date' => $calendarStartDate->format('Y-m-d'),
+                        'day' => date('w', strtotime($calendarStartDate->format('Y-m-d'))),
                         'available' => 6
                     ];
 
