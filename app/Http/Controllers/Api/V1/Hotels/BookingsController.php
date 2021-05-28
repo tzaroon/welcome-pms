@@ -701,8 +701,8 @@ class BookingsController extends Controller
                 $rooms[$i]['prices'] = $prices;
                 //$rooms[$i]['rate_types'] = $room->room->roomType->rateTypes;
                 $rooms[$i]['guests'] = $keyedGuests;
-                $rooms[$i]['room_name'] = $room->room->name;
-                $rooms[$i]['room_number'] = $room->room->room_number;
+                $rooms[$i]['room_name'] = $room->room ? $room->room->name : null;
+                $rooms[$i]['room_number'] = $room->room ? $room->room->room_number : null;
                 $i++;
 
                 if(!array_key_exists('primary_room', $responseArray)) {
@@ -1185,8 +1185,9 @@ class BookingsController extends Controller
         $arrRooms = [];
         $totalGuests = 0;
         foreach($booking->bookingRooms as $bookingRoom) {
+
             $arrRooms[] = [
-                'id' => $bookingRoom->room->id,
+                'id' => $bookingRoom->room ? $bookingRoom->room->id : null,
                 'name' => $bookingRoom->room->roomType->roomTypeDetail->name,
                 'guest_count' => $bookingRoom->guests()->count()
             ];
