@@ -140,6 +140,7 @@ class BookingsController extends Controller
                             $dailyPrice = new DailyPrice();
                             $availabilityData[$countJ] = [
                                 'date' => $rateDate,
+                                'day' => date('w', strtotime($rateDate)),
                                 'available' => $avaliableRooms
                             ];
                             $countJ++;
@@ -241,6 +242,7 @@ class BookingsController extends Controller
                                     }
                                     $bookings[] = [
                                         'date' => $calendarStartDate->format('Y-m-d'),
+                                        'day' => date('w', strtotime($calendarStartDate->format('Y-m-d'))),
                                         'booking' => $booking ? $arrBooking : null,
                                         'previous_booking' => $previousBooking
                                     ];
