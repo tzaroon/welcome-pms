@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1\Hotels;
 
+use App\Dto\BookingQuery;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
+use App\Models\RateType;
 use App\Models\RoomType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -196,5 +198,45 @@ class HotelsController extends Controller
        }
        
        return response()->json($keyedRoomTypes);
+    }
+
+    public function loadRateTypesWithRateCalculated(Request $request) {
+
+        $user = auth()->user();
+        
+        $postData = $request->getContent();
+
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'hotel_id' => 'required',
+            'adult_count' => 'required',
+            'nights' => 'required',
+            'reservation_from' => 'required',
+            'reservation_to' => 'required'
+        ], [], [
+            'reservation_from' => 'Reservation from',
+            'reservation_to' => 'Reservation to'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $rateTypes = RateType::whereHas('roomType', function($q) use($postData){
+            $q->where('hotel_id', $postData['hotel_id']);
+        })->get();
+
+        $bookingQuery = BookingQuery::fromRequest($postData);
+
+        $roomTypes = [];
+        if($rateTypes->count()) {
+            foreach($rateTypes as $rate) {
+                $roomTypes[] = $rate->calculateRate($bookingQuery);
+            }
+        }
+
+        return response()->json($roomTypes);
     }
 }

@@ -503,7 +503,7 @@ class BookingsController extends Controller
                 'reservation_from' => array_key_exists('reservation_from', $postData) ? $postData['reservation_from'] : null,
                 'reservation_to' => array_key_exists('reservation_to', $postData) ? $postData['reservation_to'] : null,
                 'time_start' => array_key_exists('time_start', $postData) ? $postData['time_start'] : null,
-                'status' => array_key_exists('status', $postData) ? $postData['status'] : null,
+                'status' => array_key_exists('status', $postData) ? $postData['status'] : Booking::STATUS_CONFIRMED,
                 'source' => array_key_exists('source', $postData) ? $postData['source'] : null,
                 'comment' => array_key_exists('comment', $postData) ? $postData['comment'] : null,
                 'tourist_tax' => array_key_exists('tourist_tax', $postData) ? $postData['tourist_tax'] : null,

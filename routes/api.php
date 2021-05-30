@@ -57,6 +57,7 @@ Route::namespace('Api')->name('api.')->group(function () {
             
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
+                Route::post('load-rate-types-rate-calculated', 'HotelsController@loadRateTypesWithRateCalculated')->name('load-rate-types-rate-calculated');
                 Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
                 Route::resource('rate-types', 'RateTypesController', ['except' => ['create']]);
                 Route::resource('rooms', 'RoomsController', ['except' => ['index', 'create']]);
