@@ -75,9 +75,12 @@ class RateType extends Model
 
     public function calculateRate(BookingQuery $bookingQuery) {
 
-        $dailyPrices = DailyPrice::where('rate_type_id', $this->id)->where('date', '>=',$bookingQuery->reservationFrom)->where('date', '<',$bookingQuery->reservationTo)->get();
+        $dailyPrices = DailyPrice::where('rate_type_id', $this->id)->where('date', '>=', $bookingQuery->reservationFrom)->where('date', '<', $bookingQuery->reservationTo)->get();
         $price = 0;
         $calculatedPrices = [];
+
+        $availableRoomCounts = [];
+
         if($dailyPrices->count()) {
             $taxesArr = [
                 Tax::CITY_TAX => 0,
@@ -100,12 +103,23 @@ class RateType extends Model
                         }
                     }
                 }
+                $roomType = $this->roomType;
+
+                $availableRooms = $roomType->getAvailableRooms($dailyPrice->date);
+
+                $availableRoomCounts[$dailyPrice->date] = sizeof($availableRooms);
             }
-            if($price > 0) {
+
+            $minRoomCount = min($availableRoomCounts);
+
+            if($price > 0 && $minRoomCount > 0) {
+
                 $calculatedPrices = [
                     'id' => $this->id,
+                    'room_type_id' => $this->roomType->id,
                     'room_type' => $this->roomType->roomTypeDetail->name,
                     'rate_type' => $this->detail->name,
+                    'room_count' => $minRoomCount,
                     'price_without_vat' => $price-(10/100*$price),
                     'price_with_vat' => $price,
                     'city_tax' => $taxesArr[Tax::CITY_TAX]*$bookingQuery->numberOfAdults,
