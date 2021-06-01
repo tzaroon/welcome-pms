@@ -70,4 +70,9 @@ class EnumsController extends Controller
     {
         return response()->json(Payment::$__types_array);
     }
+
+    public function segments(Request $request) : JsonResponse
+    {
+        return response()->json(Booking::$__segments_array);
+    }
 }

@@ -43,6 +43,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('genders', 'EnumsController@genders')->name('genders');
                 Route::get('extras-pricing', 'EnumsController@extrasPricing')->name('extras-pricing');
                 Route::get('payment-methods', 'EnumsController@paymentMethods')->name('payment-methods');
+                Route::get('booking-segments', 'EnumsController@segments')->name('booking-segments');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);

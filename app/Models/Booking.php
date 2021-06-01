@@ -102,6 +102,32 @@ class Booking extends Model
         ]
     ];
 
+	const SEGMENT_FAMILY = 'family';
+	const SEGMENT_WORK_TRIP = 'work_trip';
+	const SEGMENT_PARTY_TRIP = 'party_trip';
+
+	static $__segments = [
+		self::SEGMENT_FAMILY => 'family',
+        self::SEGMENT_WORK_TRIP => 'work_trip',
+        self::SEGMENT_PARTY_TRIP => 'party_trip'        
+	];
+
+	static $__segments_array = [
+		[
+			'value' => self::SEGMENT_FAMILY,
+            'name' => 'Family'
+        ],
+        [
+            'value' => self::SEGMENT_WORK_TRIP,
+            'name' => 'Work Trip'
+        ],
+        [
+            'value' => self::SEGMENT_PARTY_TRIP,
+            'name' => 'Party Trip'
+        ]
+    ];
+    
+
     public function rooms() {
         
         return $this->belongsToMany(Room::class);
