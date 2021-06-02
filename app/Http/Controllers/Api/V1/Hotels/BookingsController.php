@@ -22,7 +22,7 @@ use Illuminate\Http\JsonResponse;
 use Validator;
 use DB;
 use App\Models\Booker;
-use App\Models\language;
+use App\Models\Language;
 
 class BookingsController extends Controller
 {
