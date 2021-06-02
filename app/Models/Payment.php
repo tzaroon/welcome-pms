@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     protected $fillable = [
+        'booking_id',
         'payment_method',
         'initials',
         'payment_date',
-        'amount'
+        'amount',
+        'operation_code',
+        'payment_on_account',
+        'send_receipt',
+        'notes'
     ];
 
     const TYPE_BANKCARD = 'bankcard';

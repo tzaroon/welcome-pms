@@ -583,5 +583,5 @@ class Booking extends Model
 
     public function notes() {
         return $this->hasMany(BookingNote::class);
-    }
+    }   
 }

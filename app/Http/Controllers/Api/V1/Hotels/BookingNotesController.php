@@ -15,7 +15,6 @@ class BookingNotesController extends Controller
         if(0 == $booking->notes->count()) {
             return response()->json(['message' => 'no data found'], 201);
         }
-
         return response()->json($booking->notes);
     }
 
@@ -52,7 +51,7 @@ class BookingNotesController extends Controller
 
         $postData = $request->getContent();
         
-        $postData = json_decode($postData, true);
+        $postData = json_decode($postData, true);        
 
         $validator = Validator::make($postData, [
             'note' => 'required'
