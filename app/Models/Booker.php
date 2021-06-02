@@ -10,6 +10,9 @@ class Booker extends Model
     protected $fillable = [
         'company',
         'cif',
+        'company_id',
+        'user_id',
+        'doc',
         'additional_information',
         'sent_auto_emails',
         'identification',

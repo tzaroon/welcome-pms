@@ -21,6 +21,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Validator;
 use DB;
+use App\Models\Booker;
+use App\Models\language;
 
 class BookingsController extends Controller
 {
@@ -475,7 +477,7 @@ class BookingsController extends Controller
      *
      * @return Illuminate\Http\JsonResponse
      */
-    public function store(Request $request, $hotel) : JsonResponse
+    public function storeold(Request $request, $hotel) : JsonResponse
     {
         $user = auth()->user();
         
@@ -607,6 +609,96 @@ class BookingsController extends Controller
             $booking->productPrice()->sync($priceIds);
 
             return $booking;
+        });
+
+        return response()->json(['booking' => $booking]);
+    }
+
+    public function store(Request $request, $hotel) : JsonResponse
+    {
+        
+        $user = auth()->user();   
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);     
+
+        $validator = Validator::make($postData, [
+            'arrivel_date' => 'required',
+            'departure_date' => 'required'
+        ], [], [
+            'arrivel_date' => 'Reservation from',
+            'departure_date' => 'Reservation to'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }      
+        
+        $booking = DB::transaction(function() use ($user, $postData) {
+            $booking = Booking::create([
+                'company_id' => $user->company_id,               
+                'reservation_from' => array_key_exists('arrivel_date', $postData) ? $postData['arrivel_date'] : null,
+                'reservation_to' => array_key_exists('departure_date', $postData) ? $postData['departure_date'] : null,
+                'time_start' => array_key_exists('arrival_time', $postData) ? $postData['arrival_time'] : null,
+                'adult_count' => array_key_exists('adults_count', $postData) ? $postData['adults_count'] : null,
+                'children_count' => array_key_exists('children_count', $postData) ? $postData['children_count'] : null,
+                'status' => array_key_exists('status', $postData) ? $postData['status'] : Booking::STATUS_CONFIRMED,
+                'source' => array_key_exists('source', $postData) ? $postData['source'] : null,          
+                'total_price' => array_key_exists('total_amount', $postData) ? $postData['total_amount'] : null,                
+                'discount' => array_key_exists('total_discount', $postData) ? $postData['total_discount'] : null,
+                'segment' => array_key_exists('segment', $postData) ? $postData['segment'] : null,
+                'is_buisness_booking' => array_key_exists('buisness_booking', $postData) ? $postData['buisness_booking'] : null,
+                'is_expiration_booking' => array_key_exists('expiration_booking', $postData) ? $postData['expiration_booking'] : null,
+                'send_email' => array_key_exists('issend_email', $postData) ? $postData['issend_email'] : null,
+                'comment' => array_key_exists('advanced', $postData) ? $postData['advanced'] : null
+            ]);           
+            
+            if(array_key_exists('language', $postData)){
+            $language = language::where('id' , $postData['language'])->first();
+        }
+
+            $bUser = User::create([
+                'company_id' => $user->company_id,
+                'first_name' => array_key_exists('user_name', $postData) ? $postData['user_name'] : null,
+                'last_name' => array_key_exists('user_sarname', $postData) ? $postData['user_sarname'] : null,                
+                'phone_number' => array_key_exists('phone_number', $postData) ? $postData['phone_number'] : null,
+                'street' => array_key_exists('user_address', $postData) ? $postData['user_address'] : null,                
+                'city' => array_key_exists('user_city', $postData) ? $postData['user_city'] : null,
+                'postal_code' => array_key_exists('zip_code', $postData) ? $postData['zip_code'] : null,
+                'country_id' => array_key_exists('user_country', $postData) ? $postData['user_country'] : null,
+                'state_id' => array_key_exists('user_province_state', $postData) ? $postData['user_province_state'] : null,    
+                'email' => array_key_exists('email', $postData) ? $postData['email'] : null,
+                'language_id' => $language ? $language->id : null                              
+            ]);          
+
+            $booker = Booker::create([
+                'company_id' => $user->company_id,
+                'user_id' =>  $bUser->id,
+                'doc' =>  array_key_exists('document_type', $postData) ? $postData['document_type'] : null,
+                'identification_number' =>  array_key_exists('user_ID', $postData) ? $postData['user_ID'] : null,
+                'visible_notes' =>  array_key_exists('visible_notes', $postData) ? $postData['visible_notes'] : null,
+                'private_notes' =>  array_key_exists('private_notes', $postData) ? $postData['private_notes'] : null,
+                'customer_notes' =>  array_key_exists('customer_notes', $postData) ? $postData['customer_notes'] : null,
+            ]);             
+
+            $booking->booker_id = $booker->id;
+            $booking->save();
+            $roomId = array_key_exists('default_room_id', $postData) ? $postData['default_room_id'] : null;
+            $rateTypes = array_key_exists('selected_roomtypedata', $postData) ? $postData['selected_roomtypedata'] : [];         
+            
+            if($roomId)  {   
+                    $room = Room::where('id', $roomId)->first();
+                    $rateType =  $room->roomType->rateTypes;
+                    if($rateType){
+                    $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id ,'room_id' => $postData['default_room_id']  , 'rate_type_id' => $rateType[0]->id]);                   
+                    $bookingHasRoom->save();}}
+
+            if($rateTypes){
+                foreach($rateTypes as $rateType){
+                    $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id, 'room_id' => $roomId  , 'rate_type_id' => $rateType['id'] ,'first_guest_name' => $bUser->first_name, 'units' => $rateType['number_of_rooms']]);                   
+                    $bookingHasRoom->save();}}           
+            return $booking;
+
         });
 
         return response()->json(['booking' => $booking]);
