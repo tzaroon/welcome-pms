@@ -654,7 +654,7 @@ class BookingsController extends Controller
             ]);           
             
             if(array_key_exists('language', $postData)){
-            $language = language::where('id' , $postData['language'])->first();
+            $language = Language::where('id' , $postData['language'])->first();
         }
 
             $bUser = User::create([
@@ -669,7 +669,7 @@ class BookingsController extends Controller
                 'state_id' => array_key_exists('user_province_state', $postData) ? $postData['user_province_state'] : null,    
                 'email' => array_key_exists('email', $postData) ? $postData['email'] : null,
                 'language_id' => $language ? $language->id : null                              
-            ]);          
+            ]);         
 
             $booker = Booker::create([
                 'company_id' => $user->company_id,
