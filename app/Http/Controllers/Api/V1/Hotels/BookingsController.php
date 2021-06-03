@@ -925,6 +925,7 @@ class BookingsController extends Controller
         $responseArray['vat'] = number_format($responseArray['vat'], 2, ',', '.');
         $responseArray['total_paid'] =  number_format($responseArray['total_paid'], 2, ',', '.');
 
+
         return response()->json($responseArray);
     }
 

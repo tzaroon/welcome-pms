@@ -12,8 +12,6 @@ class Booking extends Model
         'company_id',
         'booker_id',
         'reservation_from',
-        'adult_count',
-        'children_count',
         'reservation_to',
         'time_start',
         'status',
@@ -488,8 +486,7 @@ class Booking extends Model
                 }
             }
         }
-
-        $totalCityTax = $totalCityTax*$this->getAdultGuestCount()*$this->numberOfDays;
+        $totalCityTax = $totalCityTax*$this->getAdultGuestCount()*$this->numberOfDays;        
         return round($totalCityTax, 2);
     }
     
@@ -556,11 +553,11 @@ class Booking extends Model
     }
 
     public function getAdultGuestCount() {
-        return $this->adultGuests->count();
+        return $this->adult_count;
     }
     
     public function getChildrenGuestsCount() {
-        return $this->childrenGuests->count();
+        return $this->children_count;
     }
 
     public function adultGuests() {
