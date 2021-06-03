@@ -485,11 +485,12 @@ class Booking extends Model
                     if($price->cityTax->percentage) {
                         $taxAmont = $price->cityTax->percentage/100*$price->price;
                     }
-                    $totalCityTax += $taxAmont;
+                   // $totalCityTax += $taxAmont;
+                   $totalCityTax = $taxAmont;
                 }
             }
         }
-        $totalCityTax = $totalCityTax*$this->getAdultGuestCount()*$this->numberOfDays;
+        $totalCityTax = $totalCityTax*$this->getAdultGuestCount()*$this->numberOfDays;        
         return round($totalCityTax, 2);
     }
     
