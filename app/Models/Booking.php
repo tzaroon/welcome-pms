@@ -12,6 +12,8 @@ class Booking extends Model
         'company_id',
         'booker_id',
         'reservation_from',
+        'adult_count',
+        'children_count',
         'reservation_to',
         'time_start',
         'status',

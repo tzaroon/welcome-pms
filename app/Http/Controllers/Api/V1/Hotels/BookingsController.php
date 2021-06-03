@@ -652,6 +652,7 @@ class BookingsController extends Controller
                 'send_email' => array_key_exists('issend_email', $postData) ? $postData['issend_email'] : null,
                 'comment' => array_key_exists('advanced', $postData) ? $postData['advanced'] : null
             ]);
+           
         
          if(array_key_exists('language', $postData)){
             $language = Language::where('id' , $postData['language'])->first();
