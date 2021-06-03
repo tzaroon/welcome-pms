@@ -14,6 +14,8 @@ class Booking extends Model
         'reservation_from',
         'reservation_to',
         'time_start',
+        'adult_count',
+        'children_count',
         'status',
         'wubook_response',
         'source',
@@ -380,7 +382,8 @@ class Booking extends Model
         $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
 
         $prices['price'] = round($acuualPrice*90/100, 2);
-        $prices['tax'] =  round($acuualTax*90/100, 2);
+       // $prices['tax'] =  round($acuualTax*90/100, 2);
+        $prices['tax'] =  $this->getCityTax()+$this->getChildrenCityTax();
         $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
 
         $prices['total'] = array_key_exists('total', $prices) ? round(($prices['total'] + $this->tourist_tax - $this->discount) - $this->totalPaid, 2) : 0;
@@ -486,7 +489,7 @@ class Booking extends Model
                 }
             }
         }
-        $totalCityTax = $totalCityTax*$this->getAdultGuestCount()*$this->numberOfDays;        
+        $totalCityTax = $totalCityTax*$this->getAdultGuestCount()*$this->numberOfDays;
         return round($totalCityTax, 2);
     }
     

@@ -197,8 +197,7 @@ class BookingsController extends Controller
                                 }
                                 for($i=0; $i < $days; $i++) {
                                     
-                                    $booking = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;
-
+                                    $booking = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;                                    
                                     if($booking) {
                                         $objBooking = new Booking;
                                         $objBooking->fill((array)$booking);
@@ -216,7 +215,6 @@ class BookingsController extends Controller
                                             'not-paid', 'partially-paid', 'payed'
                                         ];
                                         shuffle($paymentStatus);
-
                                         $arrBooking = [
                                             'id' => $objBooking->id,
                                             'booking_room_id' => $bookingHasRoom ? $bookingHasRoom->id : null,
@@ -272,7 +270,6 @@ class BookingsController extends Controller
                             for($i=0; $i < $days; $i++) {
                                     
                                 $bookingss = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;
-
                                 $arrBooking = [];
                                 if($bookingss) {
                                     foreach($bookingss as $booking)
