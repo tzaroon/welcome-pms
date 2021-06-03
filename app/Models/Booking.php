@@ -383,10 +383,10 @@ class Booking extends Model
 
         $prices['price'] = round($acuualPrice*90/100, 2);
        // $prices['tax'] =  round($acuualTax*90/100, 2);
-        $prices['tax'] =  $this->getCityTax()+$this->getChildrenCityTax();
+        $tax = $this->getCityTax()+$this->getChildrenCityTax();
+        $prices['tax'] = $tax; 
         $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
-
-        $prices['total'] = array_key_exists('total', $prices) ? round(($prices['total'] + $this->tourist_tax - $this->discount) - $this->totalPaid, 2) : 0;
+        $prices['total'] = array_key_exists('total', $prices) ? round(($prices['total'] + $tax + $this->tourist_tax - $this->discount) - $this->totalPaid, 2) : 0;
 
         if(isset($accessoryVat)) {
             $prices['vat'] += round($accessoryVat, 2);
