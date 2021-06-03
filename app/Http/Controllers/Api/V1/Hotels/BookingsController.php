@@ -651,12 +651,11 @@ class BookingsController extends Controller
                 'is_expiration_booking' => array_key_exists('expiration_booking', $postData) ? $postData['expiration_booking'] : null,
                 'send_email' => array_key_exists('issend_email', $postData) ? $postData['issend_email'] : null,
                 'comment' => array_key_exists('advanced', $postData) ? $postData['advanced'] : null
-            ]);           
-            
-            if(array_key_exists('language', $postData)){
+            ]);
+        
+         if(array_key_exists('language', $postData)){
             $language = Language::where('id' , $postData['language'])->first();
         }
-
             $bUser = User::create([
                 'company_id' => $user->company_id,
                 'first_name' => array_key_exists('user_name', $postData) ? $postData['user_name'] : null,
@@ -669,7 +668,7 @@ class BookingsController extends Controller
                 'state_id' => array_key_exists('user_province_state', $postData) ? $postData['user_province_state'] : null,    
                 'email' => array_key_exists('email', $postData) ? $postData['email'] : null,
                 'language_id' => $language ? $language->id : null                              
-            ]);         
+            ]);
 
             $booker = Booker::create([
                 'company_id' => $user->company_id,
@@ -684,19 +683,84 @@ class BookingsController extends Controller
             $booking->booker_id = $booker->id;
             $booking->save();
             $roomId = array_key_exists('default_room_id', $postData) ? $postData['default_room_id'] : null;
-            $rateTypes = array_key_exists('selected_roomtypedata', $postData) ? $postData['selected_roomtypedata'] : [];         
-            
-            if($roomId)  {   
-                    $room = Room::where('id', $roomId)->first();
-                    $rateType =  $room->roomType->rateTypes;
-                    if($rateType){
-                    $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id ,'room_id' => $postData['default_room_id']  , 'rate_type_id' => $rateType[0]->id]);                   
-                    $bookingHasRoom->save();}}
+            $rateTypes = array_key_exists('selected_roomtypedata', $postData) ? $postData['selected_roomtypedata'] : []; 
 
-            if($rateTypes){
-                foreach($rateTypes as $rateType){
-                    $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id, 'room_id' => $roomId  , 'rate_type_id' => $rateType['id'] ,'first_guest_name' => $bUser->first_name, 'units' => $rateType['number_of_rooms']]);                   
-                    $bookingHasRoom->save();}}           
+            $start = Carbon::parse($postData['arrivel_date']);
+            $end =  Carbon::parse($postData['departure_date']);
+            $days = $end->diffInDays($start);
+            $date = $start;
+            $productprices = [];
+            $k =0;
+                   
+            
+            if($roomId){
+                $room = Room::where('id', $roomId)->first();
+                $rateType =  $room->roomType->rateTypes;
+
+                if($rateType)
+                {
+                    $bookingHasRoom = BookingHasRoom::create(['booking_id' => $booking->id ,'first_guest_name' => $bUser->first_name,'room_id' => $postData['default_room_id'] ,'rate_type_id' => $rateType[0]->id]);                   
+                    $bookingHasRoom->save();                    
+                    
+                    for($i = 0; $i < $days ; $i++)
+                    {
+                        $rateDate = $date->format('Y-m-d');
+                        $dailyPrice = new DailyPrice();
+                        $dailyPrice = $dailyPrice->where('date', $rateDate)
+                            ->where('company_id', $user->company_id)
+                            ->where('rate_type_id', $bookingHasRoom->rate_type_id)
+                            ->first();                                                                                 
+
+                        $productprices[$k]['booking_id'] = $booking->id;
+                        $productprices[$k]['product_price_id'] = $dailyPrice->product->price->id;
+                        $productprices[$k]['booking_has_room_id'] =  $bookingHasRoom->id;
+
+                        $date = $date->addDay();
+                        $k++;
+                    }
+                   // $booking->productPrice()->sync($productprices); 
+                }
+            }
+                
+            
+            $date = $start;
+
+            if($rateTypes)
+            {
+                foreach($rateTypes as $rateType)
+                {
+
+                    $units = $rateType['number_of_rooms'];
+
+                    for($j = 0 ; $j < $units; $j++)
+                    {
+
+                        $bookingHasRoom = BookingHasRoom::create(['booking_id' => $booking->id , 'rate_type_id' => $rateType['id'] ,'first_guest_name' => $bUser->first_name]);                   
+                        $bookingHasRoom->save();
+                        //$productprices = [];
+                        for($i = 0; $i < $days ; $i++)
+                        {
+                            $rateDate = $date->format('Y-m-d');
+                            $dailyPrice = new DailyPrice();
+                            $dailyPrice = $dailyPrice->where('date', $rateDate)
+                                ->where('company_id', $user->company_id)
+                                ->where('rate_type_id', $bookingHasRoom->rate_type_id)
+                                ->first();                              
+
+                            $productprices[$k]['booking_id'] = $booking->id;
+                            $productprices[$k]['product_price_id'] = $dailyPrice->product->price->id;
+                            $productprices[$k]['booking_has_room_id'] =  $bookingHasRoom->id;
+
+                            $date = $date->addDay();
+                            $k++;
+                            
+                        }
+                       // $booking->productPrice()->sync($productprices);
+                    }
+                }
+            } 
+
+            $booking->productPrice()->sync($productprices);
             return $booking;
 
         });
