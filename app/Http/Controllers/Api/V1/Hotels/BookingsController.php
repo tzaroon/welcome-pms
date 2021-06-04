@@ -23,6 +23,8 @@ use Validator;
 use DB;
 use App\Models\Booker;
 use App\Models\Language;
+use ttlock\TTLock;
+use App\Models\Lock;
 
 class BookingsController extends Controller
 {
@@ -1343,7 +1345,7 @@ class BookingsController extends Controller
 
             $arrRooms[] = [
                 'id' => $bookingRoom->room ? $bookingRoom->room->id : null,
-                'name' => $bookingRoom->room->roomType->roomTypeDetail->name,
+                'name' => $bookingRoom->room ? $bookingRoom->room->roomType->roomTypeDetail->name : null,
                 'guest_count' => $bookingRoom->guests()->count()
             ];
             $totalGuests += $bookingRoom->guests()->count();
@@ -1370,5 +1372,74 @@ class BookingsController extends Controller
         $processedArray['city_tax'] = $cityTax;
 
         return response()->json($processedArray);
+    }
+
+    public function changeStatus(Request $request, Booking $booking , $status) {
+
+        if($status){
+        $booking->status = $status;
+        $booking->save();
+        }
+        return response()->json(array('message' => 'status changed successfully.'));
+    }
+
+    public function generateLock(Request $request) {
+        
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
+
+        $validator = Validator::make($postData, [
+            'booking_room_id' => 'required',
+            'reservation_from_dt' => 'required',
+            'reservation_to_dt' => 'required'
+        ], [], [
+            'booking_room_id' => 'Door',
+            'reservation_from_dt' => 'Reservation from',
+            'reservation_to_dt' => 'Reservation to'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }        
+
+        if(array_key_exists('booking_room_id', $postData)){
+
+            $bookingRoom = BookingHasRoom::where('id' , $postData['booking_room_id'] )->first();
+            $ttlock = new \ttlock\TTLock('384e4f2af4204245b9b81188c2ff5412','cc7fd08994b9f233241308d6a7cb82c6');
+            $token = $ttlock->oauth2->token('+34615967283','h1251664','');
+            $ttlock->passcode->setAccessToken($token['access_token']);
+            $bookerUser = $bookingRoom->booking->booker->user;
+            $hotel = $bookingRoom->rateType->roomType->hotel;
+            if($bookingRoom->room->lock_id){
+                $ttLock = Lock::find($bookingRoom->room->lock_id);
+                $code = rand(1000,9999);
+                $ttlock->passcode->add($ttLock->lock_id, $code, strtotime($postData['reservation_from_dt']), strtotime($postData['reservation_to_dt']), 1, time().'000' );
+                $bookingRoom->ttlock_pin = $code;
+                $bookingRoom->save();
+
+                if(array_key_exists('send_key_via_whatsApp', $postData)){
+
+                    //
+                }
+                if(array_key_exists('send_key_via_sms', $postData)){
+
+                    //
+                }
+                if(array_key_exists('send_key_via_email', $postData)){
+
+                    //
+                }
+                
+            } else {
+
+                return response()->json(array('errors' => ['lock' => 'Room does not have lock associated']), 422); 
+            }
+
+            //$this->whatsApp->sendMessage('whatsapp:+917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code '.$code.'. The address is '.$hotel->address.', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance '.$hotel->image_url.'. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
+
+        }
+
+        return response()->json(array('message' => 'Lock generated successfully.'));
     }
 }

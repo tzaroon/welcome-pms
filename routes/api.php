@@ -59,7 +59,8 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
                 Route::post('load-rate-types-rate-calculated', 'HotelsController@loadRateTypesWithRateCalculated')->name('load-rate-types-rate-calculated');
-                Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
+                Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);                
+                Route::get('bookings/{booking}/status/{status}', 'BookingsController@changeStatus');
                 Route::resource('rate-types', 'RateTypesController', ['except' => ['create']]);
                 Route::resource('rooms', 'RoomsController', ['except' => ['index', 'create']]);
                 Route::post('room-list-by-ids', 'RoomsController@listRoomsByIds')->name('room_list_by_ids');
@@ -72,6 +73,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('sand-box-bookings/assign-room', 'BookingsController@sandBoxBookingAssignRoom');
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
+                Route::post('generate-lock', 'BookingsController@generateLock');
                 Route::resource('booking-payments', 'PaymentsController');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
