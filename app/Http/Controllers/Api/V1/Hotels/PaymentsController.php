@@ -40,16 +40,15 @@ class PaymentsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, Booking $booking) {
-
-        
-        $postData = $request->getContent();        
-        $postData = json_decode($postData, true);     
+       
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
 
         $validator = Validator::make($postData, [
             'payment_date' => 'required',
             'amount' => 'required',
             'payment_method' => 'required',
-            'operation_code' => 'required'            
+            'operation_code' => 'required'
             
         ], [], [
             'payment_date' => 'Payment Date',
@@ -64,7 +63,7 @@ class PaymentsController extends Controller
         }      
 
         $payment = Payment::create([            
-            'booking_id' =>  $booking->id,
+            'booking_id' =>  array_key_exists('booking_id', $postData) ? $postData['booking_id'] : null,
             'payment_date' => array_key_exists('payment_date', $postData) ? $postData['payment_date'] : null,
             'amount' => array_key_exists('amount', $postData) ? $postData['amount'] : null,
             'payment_method' => array_key_exists('payment_method', $postData) ? $postData['payment_method'] : null,
@@ -72,7 +71,7 @@ class PaymentsController extends Controller
             'payment_on_account' => array_key_exists('payment_on_account', $postData) ? $postData['payment_on_account'] : null,
             'operation_code' => array_key_exists('operation_code', $postData) ? $postData['operation_code'] : null,
             'notes' => array_key_exists('notes', $postData) ? $postData['notes'] : null,            
-            'send_receipt' => array_key_exists('send_receipt', $postData) ? $postData['send_receipt'] : null            
+            'send_receipt' => array_key_exists('send_receipt', $postData) ? $postData['send_receipt'] : null
         ]);          
 
         return response()->json($payment);
