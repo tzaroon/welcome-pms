@@ -38,18 +38,18 @@ class RestrictionsController extends Controller
      */
     public function store(Request $request)
     {
-        $postData = $request->getContent();             
-        $postData = json_decode($postData, true);              
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
 
         $validator = Validator::make($postData, [
             'arrival' => 'required',
             'departure' => 'required',
-            'actions' => 'required'                      
+            'actions' => 'required'
             
         ], [], [
             'arrival' => 'Arrival Date',
             'departure' => 'Departure Date',
-            'actions' => 'Actions'            
+            'actions' => 'Actions'
         ]);
 
         if (!$validator->passes()) {
@@ -72,7 +72,7 @@ class RestrictionsController extends Controller
             'actions' => array_key_exists('actions', $postData) ? $postData['actions'] : null,
             'days' => array_key_exists('days', $postData) ? $postData['days'] : null,
             'cancellation_policies' => $cancellationPolicies,
-            'release' => array_key_exists('release', $postData) ? $postData['release'] : null                      
+            'release' => array_key_exists('release', $postData) ? $postData['release'] : null
         ]);          
 
         return response()->json($restriction);
