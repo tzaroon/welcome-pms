@@ -1492,8 +1492,7 @@ class BookingsController extends Controller
                     'booking_room_id' => $bookingRoom->id,
                     'name' => $bookingRoom->room->name
                 ];
-        }
-        }
+        }}
 
         return response()->json($processedData);
         
