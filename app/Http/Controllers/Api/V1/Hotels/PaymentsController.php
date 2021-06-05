@@ -15,8 +15,7 @@ class PaymentsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, Booking $booking) {
-
+    public function index(Request $request, Booking $booking) {        
         if(0 == $booking->payments->count()) {
             return response()->json(['message' => 'no data found'], 201);
         }

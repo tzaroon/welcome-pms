@@ -128,6 +128,55 @@ class Booking extends Model
             'name' => 'Party Trip'
         ]
     ];
+
+    const CANCELLATION_REASON_BOOKED_ELSEWHERE = 'booked_elsewhere';
+	const CANCELLATION_REASON_FORCE_MAJEURE = 'force_majeure';
+	const CANCELLATION_REASON_GUEST_COMPLAINT = 'guest_complaint';
+    const CANCELLATION_REASON_NO_SHOW = 'no_show';
+    const CANCELLATION_REASON_PRICE_TOO_HIGH = 'price_too_high';
+    const CANCELLATION_REASON_INVALID_PAYMENT = 'invalid_payment';
+    const CANCELLATION_REASON_PANDEMIC = 'pandemic';
+
+	static $__cancellation_reasons = [
+		self::CANCELLATION_REASON_BOOKED_ELSEWHERE => 'booked_elsewhere',
+        self::CANCELLATION_REASON_FORCE_MAJEURE => 'force_majeure',
+        self::CANCELLATION_REASON_GUEST_COMPLAINT => 'guest_complaint',
+        self::CANCELLATION_REASON_NO_SHOW => 'no_show',
+        self::CANCELLATION_REASON_PRICE_TOO_HIGH => 'price_too_high',
+        self::CANCELLATION_REASON_INVALID_PAYMENT => 'invalid_payment',
+        self::CANCELLATION_REASON_PANDEMIC => 'pandemic',        
+	];
+
+	static $__cancellation_reasons_array = [
+		[
+			'value' => self::CANCELLATION_REASON_BOOKED_ELSEWHERE,
+            'name' => 'Booked elsewhere'
+        ],
+        [
+            'value' => self::CANCELLATION_REASON_FORCE_MAJEURE,
+            'name' => 'Force majeure'
+        ],
+        [
+            'value' => self::CANCELLATION_REASON_GUEST_COMPLAINT,
+            'name' => 'Guest complaint'
+        ],
+        [
+			'value' => self::CANCELLATION_REASON_NO_SHOW,
+            'name' => 'No show'
+        ],
+        [
+			'value' => self::CANCELLATION_REASON_PRICE_TOO_HIGH,
+            'name' => 'Price too high'
+        ],
+        [
+			'value' => self::CANCELLATION_REASON_INVALID_PAYMENT,
+            'name' => 'Invalid payment'
+        ],
+        [
+			'value' => self::CANCELLATION_REASON_PANDEMIC,
+            'name' => 'Pandemic'
+        ]
+    ];
     
 
     public function rooms() {

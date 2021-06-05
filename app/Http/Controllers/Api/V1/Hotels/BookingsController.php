@@ -1442,4 +1442,35 @@ class BookingsController extends Controller
 
         return response()->json(array('message' => 'Lock generated successfully.'));
     }
+
+    public function cancel(Request $request) {
+        
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
+       
+        
+        if(array_key_exists('booking_id', $postData)){
+
+            $booking =  Booking::where ('id', $postData['booking_id'])->first();
+            if($booking){
+
+                $booking->status = 'cancelled';
+                $booking->reason = array_key_exists('reason', $postData) ? $postData['reason'] : null;
+                $booking->save();
+            }
+
+            $bookingRooms  = array_key_exists('booking_room', $postData) ? $postData['booking_room'] : null;           
+
+            foreach($bookingRooms as $bookingRoom )
+            {
+               $bookingRoom = BookingHasRoom::find($bookingRoom);
+               $bookingRoom->status = 'canceled';
+               $bookingRoom->save();
+            }
+
+            return response()->json(array('message' => 'Booking canceled successfully.'));
+
+        }
+        
+    }   
 }

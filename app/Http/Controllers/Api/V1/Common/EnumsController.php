@@ -75,4 +75,8 @@ class EnumsController extends Controller
     {
         return response()->json(Booking::$__segments_array);
     }
+    public function cancelReasons(Request $request) : JsonResponse
+    {
+        return response()->json(Booking::$__cancellation_reasons_array);
+    }
 }

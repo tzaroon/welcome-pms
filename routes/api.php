@@ -44,6 +44,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('extras-pricing', 'EnumsController@extrasPricing')->name('extras-pricing');
                 Route::get('payment-methods', 'EnumsController@paymentMethods')->name('payment-methods');
                 Route::get('booking-segments', 'EnumsController@segments')->name('booking-segments');
+                Route::get('booking-cancel-reasons', 'EnumsController@cancelReasons');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);
@@ -74,10 +75,12 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
                 Route::post('generate-lock', 'BookingsController@generateLock');
-                Route::resource('booking-payments', 'PaymentsController');
+                Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
                 Route::post('{booking}/change-cleaning-status', 'BookingsController@changeCleaningStatus');
+                Route::post('booking-cancel', 'BookingsController@cancel');  
+                Route::post('check-avalibility', 'RelocateReservationController@checkAvalibility');              
                 Route::resource('daily-rates', 'DailyRatesController');
                 Route::post('daily-rates/{id}', 'DailyRatesController@index');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
