@@ -115,6 +115,11 @@ class PaymentsController extends Controller
 
         $payment =  Payment::where('id', $payment)->first();
 
+        if (!$payment) {
+
+            return response()->json(array('errors' => ['payment' => 'Invalid payment id']), 422);
+        }
+
         $validator = Validator::make($postData, [
             'payment_date' => 'required',
             'amount' => 'required',
