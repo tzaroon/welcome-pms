@@ -851,6 +851,7 @@ class BookingsController extends Controller
                     }
                 }
                 $rooms[$i]['room_id'] = $room->room_id;
+                $rooms[$i]['booking_room_id'] = $room->id;
                 $rooms[$i]['rate_type_id'] = $room->rate_type_id;
                 $prices = $room->productPriceByBookingId($booking->id);
                 $allPrices[] = $prices;
@@ -1472,5 +1473,29 @@ class BookingsController extends Controller
 
         }
         
-    }   
+    }
+    
+    public function loadRooms(Request $request , Booking $booking){
+
+        if (!$booking) {
+
+            return response()->json(array('errors' => ['payment' => 'Booking not found']), 422);
+        }
+
+        $bookingHasRooms = $booking->bookingRooms;
+        $processedData = [];
+
+        foreach($bookingHasRooms as $bookingRoom){
+            if($bookingRoom->room){
+                $processedData [] = [
+
+                    'booking_room_id' => $bookingRoom->id,
+                    'name' => $bookingRoom->room->name
+                ];
+        }
+        }
+
+        return response()->json($processedData);
+        
+    }
 }

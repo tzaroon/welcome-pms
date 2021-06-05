@@ -78,9 +78,11 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
+                Route::get('bookings/{booking}/load-rooms', 'BookingsController@loadRooms');
                 Route::post('{booking}/change-cleaning-status', 'BookingsController@changeCleaningStatus');
                 Route::post('booking-cancel', 'BookingsController@cancel');  
-                Route::post('check-avalibility', 'RelocateReservationController@checkAvalibility');              
+                Route::post('rooms/check-avalibility', 'RelocateReservationController@checkAvalibility');
+                Route::post('rooms/load-rate-types', 'RelocateReservationController@loadRateTypes');
                 Route::resource('daily-rates', 'DailyRatesController');
                 Route::post('daily-rates/{id}', 'DailyRatesController@index');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
