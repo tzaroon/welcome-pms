@@ -76,7 +76,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
                 Route::post('generate-lock', 'BookingsController@generateLock');
                 Route::post('booking/payment/downloadReceipt', 'BookingsController@downloadReceipt');
-                Route::post('booking/room/{bookingHasRoom}/old-Price', 'BookingsController@getOldPrice');
+                Route::get('booking/room/{bookingHasRoom}/old-Price', 'BookingsController@getOldPrice');
                 Route::post('booking/save-relocation', 'BookingsController@saveRelocation');
                 Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
                 Route::resource('booking-restrictions', 'RestrictionsController');
