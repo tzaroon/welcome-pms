@@ -1511,8 +1511,11 @@ class BookingsController extends Controller
             return response()->json(array('errors' => ['room' => 'Room not found']), 422);
         }
 
-        $bookingRoom  = BookingHasRoom::find($bookingRoom);        
-        return response()->json($bookingRoom->price);    
+        $value = 40;
+
+       // $bookingRoom  = BookingHasRoom::find($bookingRoom);        
+       // return response()->json($bookingRoom->price); 
+       return response()->json($value);   
         
      }
 
