@@ -10,7 +10,9 @@ use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\DailyPrice;
 use App\Dto\BookingQuery;
+use App\Models\BookingHasRoom;
 use Validator;
+use App\Models\Booking;
 
 class RelocateReservationController extends Controller
 {
@@ -147,4 +149,56 @@ class RelocateReservationController extends Controller
 
 
     }
+
+    public function relocateBooking(Request $request , Booking $booking)
+    {
+        $postData = $request->getContent();
+       
+        $postData = json_decode($postData, true);       
+       
+
+        $startDate = Carbon::parse($postData['arrivel_date']);
+        $endDate = Carbon::parse($postData['departure_date']);       
+        $days = $endDate->diffInDays($startDate);
+        $date = $startDate;
+        $priceIds = [];
+
+        $roomId = array_key_exists('room_id', $postData) ? $postData['room_id'] : null;
+        $rateTypeId = array_key_exists('rate_type_id', $postData) ? $postData['rate_type_id'] : null;
+        $discount = array_key_exists('discount', $postData) ? $postData['discount'] : null;
+        $dailyPrices = array_key_exists('daily_price', $postData) ? $postData['daily_price'] : null;
+
+       $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id, 'room_id' => $roomId]);
+
+       $bookingHasRoom->rate_type_id = array_key_exists('rate_type_id', $postData) ? $postData['rate_type_id'] : null;
+       $bookingHasRoom->save();
+
+
+
+       if($dailyPrices)
+        {
+            foreach($dailyPrices as $dailyPrice)
+                {
+                    for($i=0; $i < $days; $i++) 
+                        {
+                            $rateDate = $date->format('Y-m-d');
+                            $dailyPrice = new DailyPrice();
+                            $dailyPrice = $dailyPrice->where('date', $rateDate)            
+                                ->where('rate_type_id', $rateTypeId)
+                                ->first();
+
+                            $priceIds[$i]['product_price_id'] = $dailyPrice->product->price->id;
+                            $priceIds[$i]['booking_has_room_id'] =  $bookingHasRoom->id;
+                            $date = $date->addDay();
+                        }
+                }  
+        }
+
+        //$bookingHasRoom->booking
+        $bookingHasRoom->booking->productPrice()->sync($priceIds);        
+        //return response()->json($bookingHasRoom);
+
+        return response()->json(array('message' => 'Booking relocated successfully.'));
+
+       }
 }

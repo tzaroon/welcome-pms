@@ -75,6 +75,9 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
                 Route::post('generate-lock', 'BookingsController@generateLock');
+                Route::post('booking/payment/downloadReceipt', 'BookingsController@downloadReceipt');
+                Route::post('booking/room/{bookingHasRoom}/old-Price', 'BookingsController@getOldPrice');
+                Route::post('booking/save-relocation', 'BookingsController@saveRelocation');
                 Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
@@ -83,6 +86,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('booking-cancel', 'BookingsController@cancel');  
                 Route::post('rooms/check-avalibility', 'RelocateReservationController@checkAvalibility');
                 Route::post('rooms/load-rate-types', 'RelocateReservationController@loadRateTypes');
+                Route::post('booking/{booking}/relocateBooking', 'RelocateReservationController@relocateBooking');
                 Route::resource('daily-rates', 'DailyRatesController');
                 Route::post('daily-rates/{id}', 'DailyRatesController@index');
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');

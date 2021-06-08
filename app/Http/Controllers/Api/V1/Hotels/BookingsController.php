@@ -1497,4 +1497,22 @@ class BookingsController extends Controller
         return response()->json($processedData);
         
     }
+
+    public function downloadReceipt(Request $request , Booking $booking){            
+       
+       $receipt = public_path().DIRECTORY_SEPARATOR."payment-voucher.pdf";
+       return  $receipt;      
+    }
+
+    public function getOldPrice(Request $request, $bookingRoom){            
+       
+        if (!$bookingRoom) {
+
+            return response()->json(array('errors' => ['room' => 'Room not found']), 422);
+        }
+
+        $bookingRoom  = BookingHasRoom::find($bookingRoom);        
+        return response()->json($bookingRoom->price);    
+        
+     }
 }
