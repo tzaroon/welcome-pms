@@ -86,6 +86,11 @@ class BookingHasRoom extends Model
     public function productPrice() {
         return $this->belongsToMany(ProductPrice::class, 'bookings_has_product_prices')->withPivot(['booking_id', 'product_price_id']);
     }
+
+    public function roomPrice() {
+
+        return $this->belongsTo(BookingsHasProductPrice::class);
+    }
     
     public function guests() {
         return DB::table('booking_room_guests')
