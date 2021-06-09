@@ -154,7 +154,7 @@ class RelocateReservationController extends Controller
     {
         $postData = $request->getContent();
        
-        $postData = json_decode($postData, true);       
+        $postData = json_decode($postData, true);
        
 
         $startDate = Carbon::parse($postData['arrivel_date']);
@@ -163,17 +163,31 @@ class RelocateReservationController extends Controller
         $date = $startDate;
         $priceIds = [];
 
+        $oldRoomId = array_key_exists('old_room_id', $postData) ? $postData['old_room_id'] : null;
         $roomId = array_key_exists('room_id', $postData) ? $postData['room_id'] : null;
         $rateTypeId = array_key_exists('rate_type_id', $postData) ? $postData['rate_type_id'] : null;
         $discount = array_key_exists('discount', $postData) ? $postData['discount'] : null;
         $dailyPrices = array_key_exists('daily_price', $postData) ? $postData['daily_price'] : null;
 
-       $bookingHasRoom = BookingHasRoom::firstOrNew(['booking_id' => $booking->id, 'room_id' => $roomId]);
+        $oldBookingHasRoom = BookingHasRoom::where('booking_id', $booking->id)
+                                        ->where('room_id', $oldRoomId)->get()->first();
+       
 
-       $bookingHasRoom->rate_type_id = array_key_exists('rate_type_id', $postData) ? $postData['rate_type_id'] : null;
-       $bookingHasRoom->save();
+        $bookingHasRoom = BookingHasRoom::create(
+           ['booking_id' => $booking->id,
+            'room_id' => $roomId,
+            'rate_type_id' => $rateTypeId,
+            'first_guest_name' => $oldBookingHasRoom ? $oldBookingHasRoom->first_guest_name : null 
+            ]);
 
-
+    //    $bookingHasRoom->rate_type_id = array_key_exists('rate_type_id', $postData) ? $postData['rate_type_id'] : null;
+    //    $bookingHasRoom->save();
+       
+       if($oldBookingHasRoom)
+            {
+                $oldBookingHasRoom->delete();
+            }
+       
 
        if($dailyPrices)
         {
@@ -183,7 +197,7 @@ class RelocateReservationController extends Controller
                         {
                             $rateDate = $date->format('Y-m-d');
                             $dailyPrice = new DailyPrice();
-                            $dailyPrice = $dailyPrice->where('date', $rateDate)            
+                            $dailyPrice = $dailyPrice->where('date', $rateDate)
                                 ->where('rate_type_id', $rateTypeId)
                                 ->first();
 
@@ -195,10 +209,10 @@ class RelocateReservationController extends Controller
         }
 
         //$bookingHasRoom->booking
-        $bookingHasRoom->booking->productPrice()->sync($priceIds);        
-        //return response()->json($bookingHasRoom);
+        $bookingHasRoom->booking->productPrice()->sync($priceIds);
+        return response()->json($bookingHasRoom);
 
-        return response()->json(array('message' => 'Booking relocated successfully.'));
+       // return response()->json(array('message' => 'Booking relocated successfully.'));
 
        }
 }
