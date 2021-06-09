@@ -936,7 +936,7 @@ class BookingsController extends Controller
      *
      * @return Illuminate\Http\JsonResponse
      */
-    public function updateold(Request $request, $hotel, Booking $booking) : JsonResponse
+    public function update(Request $request, $hotel, Booking $booking) : JsonResponse
     {
         $user = auth()->user();
         
@@ -1522,42 +1522,39 @@ class BookingsController extends Controller
 
 
 
-     public function update(Request $request, $hotel, Booking $booking)
+     public function updateBooking(Request $request, Booking $booking)
      {
+        
         $user = auth()->user();
         
         $postData = $request->getContent();
+        
+        $postData = json_decode($postData, true);       
 
-        $postData = json_decode($postData, true);
+        // $validator = Validator::make($postData, [
+        //     'reservation_from' => 'required',
+        //     'reservation_to' => 'required'
+        // ], [], [
+        //     'reservation_from' => 'Reservation from',
+        //     'reservation_to' => 'Reservation to'
+        // ]);
 
-        $validator = Validator::make($postData, [
-            'reservation_from' => 'required',
-            'reservation_to' => 'required'
-        ], [], [
-            'reservation_from' => 'Reservation from',
-            'reservation_to' => 'Reservation to'
-        ]);
+        // if (!$validator->passes()) {
 
-        if (!$validator->passes()) {
-
-            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
-        }
+        //     return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        // }
 
         DB::transaction(function() use ($booking, $user, $postData){
 
             $booking->fill($postData);
             $booking->save();       
-        });
+        });       
 
-        $guests = array_key_exists('guests', $postData) ? $postData['guests'] : [];
+        $guests = array_key_exists('guests', $postData) ? $postData['guests'] : [];      
+
                     if($guests) {
-                        foreach($guests as $guestData) {
+                        foreach($guests as $guestData) {                            
                             
-                            if(!$bookingHasRoom->first_guest_name) {
-
-                                $bookingHasRoom->first_guest_name = (array_key_exists('first_name', $guestData) ? $guestData['first_name'] : '') . ' ' . (array_key_exists('last_name', $guestData) ? $guestData['last_name'] : '');
-                                $bookingHasRoom->save();
-                            }
                             
                             if(array_key_exists('id', $guestData)) {
                                 $guest = Guest::find($guestData['id']);
@@ -1589,12 +1586,12 @@ class BookingsController extends Controller
                                 ]);
                             }
                             
-                            $bookingRoomGuest = BookingRoomGuest::firstOrNew(['room_id' => $bookingHasRoom->room_id, 'booking_id' => $booking->id, 'guest_id' => $guest->id]);
-                            $bookingRoomGuest->save();
+                           // $bookingRoomGuest = BookingRoomGuest::firstOrNew(['room_id' => $bookingHasRoom->room_id, 'booking_id' => $booking->id, 'guest_id' => $guest->id]);
+                           // $bookingRoomGuest->save();
                         }
                     }
-
-        
+                    
+        return response()->json($booking);                    
 
      }
 
