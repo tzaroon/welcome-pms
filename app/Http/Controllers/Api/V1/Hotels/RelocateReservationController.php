@@ -102,7 +102,6 @@ class RelocateReservationController extends Controller
         $startDate = Carbon::parse($postData['arrivel_date']);
         $endDate = Carbon::parse($postData['departure_date']);
         $days = $endDate->diffInDays($startDate);
-        $date = $startDate;
 
 
         $room = Room::find($postData['room_id']);
@@ -114,6 +113,7 @@ class RelocateReservationController extends Controller
         foreach($rateTypes as $rateType){
             $totalprice = 0;
             $arrDailyPrice = [];
+            $date = Carbon::parse($postData['arrivel_date']);
             for($i= 0 ; $i< $days ; $i++ )
             {
 
