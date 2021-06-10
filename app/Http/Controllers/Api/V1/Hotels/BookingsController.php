@@ -1504,23 +1504,31 @@ class BookingsController extends Controller
        return  $receipt;      
     }
 
-    public function getOldPrice(Request $request, $bookingRoom){            
+    public function getOldPrice(Request $request, Booking $booking, Room $room){            
        
-        if (!$bookingRoom) {
+        $bookingRoom = BookingHasRoom::where('booking_id', $booking->id)
+            ->where('room_id', $room->id)->first();
 
+        if (!$bookingRoom) {
             return response()->json(array('errors' => ['room' => 'Room not found']), 422);
         }
 
-        $value = 40;
+        $productPrices = $bookingRoom->productPrice;
 
-       // $bookingRoom  = BookingHasRoom::find($bookingRoom);        
-       // return response()->json($bookingRoom->price); 
-       return response()->json($value);   
-        
-     }
+        $dailyCosting = [];
+        if($productPrices) {
+            foreach($productPrices as $productPrice) {
 
+                $dailyPrice = DailyPrice::where('product_id', $productPrice->product_id)->first();
+                $dailyCosting[] = [
+                    'date' => $dailyPrice->date,
+                    'price' => $productPrice->price
+                ];
+            }
+        }
 
-
+        return response()->json($dailyCosting);        
+    }
 
      public function updateBooking(Request $request, Booking $booking)
      {
