@@ -61,7 +61,7 @@ class PaymentsController extends Controller
             'booking_id' =>  array_key_exists('booking_id', $postData) ? $postData['booking_id'] : null,
             'payment_date' => array_key_exists('payment_date', $postData) ? $postData['payment_date'] : date('Y-m-d'),
             'amount' => array_key_exists('amount', $postData) ? $postData['amount'] : null,
-            'payment_method' => array_key_exists('payment_method', $postData) ? $postData['payment_method'] : Payment::TYPE_CASH,
+            'payment_method' => array_key_exists('payment_method', $postData) && $postData['payment_method'] ? $postData['payment_method'] : Payment::TYPE_CASH,
             'initials' => array_key_exists('initials', $postData) ? $postData['initials'] : null,
             'payment_on_account' => array_key_exists('payment_on_account', $postData) ? $postData['payment_on_account'] : null,
             'operation_code' => array_key_exists('operation_code', $postData) ? $postData['operation_code'] : null,
