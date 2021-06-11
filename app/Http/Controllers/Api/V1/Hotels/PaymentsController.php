@@ -161,4 +161,10 @@ class PaymentsController extends Controller
         $payment->delete();        
         return response()->json(['message' => 'Deleted Successfully']);
     }
+
+    public function showReceipt(Request $request , Payment $payment) {
+
+        $receipt = "payment-voucher.pdf";
+        return response()->json(['file' => $receipt]);
+    }
 }

@@ -1497,11 +1497,11 @@ class BookingsController extends Controller
         return response()->json($processedData);
         
     }
-
-    public function downloadReceipt(Request $request , Booking $booking){            
+    
+    public function showVoucher(Request $request , Booking $booking){            
        
-       $receipt = public_path().DIRECTORY_SEPARATOR."payment-voucher.pdf";
-       return  $receipt;      
+        $receipt = "payment-voucher.pdf";
+        return response()->json(['file' => $receipt]);     
     }
 
     public function getOldPrice(Request $request, Booking $booking, Room $room){            
