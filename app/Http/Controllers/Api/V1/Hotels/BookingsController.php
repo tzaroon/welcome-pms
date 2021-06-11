@@ -1610,4 +1610,44 @@ class BookingsController extends Controller
 
         return response()->json($booking);
      } 
+
+     public function editBooking(Request $request, Booking $booking)
+     {
+        $guests = $booking->guestsWithUsers;
+        $booker = $booking->booker;
+        $bookerUser = $booking->booker->user;
+
+        $arrBooking = [
+            'id' => $booking->id,
+            'booker_id' => $booking->booker_id,
+            'time_start' => $booking->time_start,
+            'status' => $booking->status,
+            'source' => $booking->source,
+            'adult_count' => $booking->adult_count,
+            'children_count' => $booking->children_count,
+            'first_name' => $bookerUser->first_name,
+            'last_name' => $bookerUser->last_name,
+            'gender' => $bookerUser->gender,
+            'email' => $bookerUser->email,
+            'phone_number' => $bookerUser->phone_number,
+            'identification' => $booker->identification,
+            'language_id' => $bookerUser->language_id,
+            'segment' => $booking->segment,
+            'is_buisness_booking' => $booking->is_buisness_booking,
+            'overwrite_client' => $booking->overwrite_client,
+        ];
+
+        if($guests) {
+
+            foreach($guests as $guest) {
+                $arrBooking['guests'][] = [
+                    'id' => $guest->id,
+                    'first_name' => $guest->user->first_name,
+                    'last_name' => $guest->user->last_name,
+                    'email' => $guest->user->email
+                ];
+            }
+        }
+        return response()->json($arrBooking);
+     }
 }
