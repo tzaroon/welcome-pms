@@ -1601,9 +1601,12 @@ class BookingsController extends Controller
                     ]);
                 }
 
-                $arrGuests[$i]['room_id'] = $guestData['room_id'];
-                $arrGuests[$i]['guest_id'] =  $guest->id;
-                $i++;
+
+                if(array_key_exists('room_id', $guestData)) {
+                    $arrGuests[$i]['room_id'] = $guestData['room_id'];
+                    $arrGuests[$i]['guest_id'] =  $guest->id;
+                    $i++;
+                }
             }
 
             $booking->guests()->sync($arrGuests);
