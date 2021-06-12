@@ -1488,7 +1488,7 @@ class BookingsController extends Controller
         foreach($bookingHasRooms as $bookingRoom){
             if($bookingRoom->room){
                 $processedData [] = [
-
+                    'room_id' => $bookingRoom->room->id,
                     'booking_room_id' => $bookingRoom->id,
                     'name' => $bookingRoom->room->name
                 ];
