@@ -1492,7 +1492,8 @@ class BookingsController extends Controller
                     'booking_room_id' => $bookingRoom->id,
                     'name' => $bookingRoom->room->name
                 ];
-        }}
+            }
+        }
 
         return response()->json($processedData);
         
@@ -1625,8 +1626,11 @@ class BookingsController extends Controller
             'source' => $booking->source,
             'adult_count' => $booking->adult_count,
             'children_count' => $booking->children_count,
+            'country_id' => $booking->country_id,
+            'state_id' => $booking->state_id,
             'first_name' => $bookerUser->first_name,
             'last_name' => $bookerUser->last_name,
+            'birth_date' => $bookerUser->birth_date,
             'gender' => $bookerUser->gender,
             'email' => $bookerUser->email,
             'phone_number' => $bookerUser->phone_number,
