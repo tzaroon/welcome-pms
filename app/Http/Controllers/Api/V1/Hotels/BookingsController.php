@@ -914,7 +914,8 @@ class BookingsController extends Controller
         $responseArray['vat'] = $booking->getVat();
         $responseArray['total_booking_price'] = number_format(($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'])-$booking->discount, 2, ',', '.');
         $responseArray['total_paid'] = $booking->totalPaid;
-        $responseArray['amount_to_pay'] = number_format(($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat']-$responseArray['total_paid'])-$booking->discount, 2, ',', '.');
+        $responseArray['discount'] = $booking->discount;
+        $responseArray['amount_to_pay'] = number_format(($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat']-$booking->totalPaid)-$booking->discount, 2, ',', '.');
 
         $responseArray['price'] = number_format($responseArray['price'], 2, ',', '.');
         $responseArray['total_price'] = number_format($responseArray['total_price'], 2, ',', '.');
