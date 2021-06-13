@@ -1534,7 +1534,7 @@ class BookingsController extends Controller
 
      public function updateBooking(Request $request, Booking $booking)
      {
-        $user = auth()->user();  
+        $user = auth()->user();
         $postData = $request->getContent();
         $postData = json_decode($postData, true);       
 
@@ -1558,7 +1558,8 @@ class BookingsController extends Controller
 
             $booker = Booker::find($booking->booker_id);
             $booker->fill($postData);
-            $booker->save();
+            $booker->user->fill($postData);
+            $booker->push();
 
             $booking->fill($postData);
             $booking->save();       
