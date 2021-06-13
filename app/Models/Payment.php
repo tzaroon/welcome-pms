@@ -43,7 +43,7 @@ class Payment extends Model
         ]
     ];
 
-    protected $cast = [
+    protected $casts = [
         'amount' => 'float'
     ];
 }
