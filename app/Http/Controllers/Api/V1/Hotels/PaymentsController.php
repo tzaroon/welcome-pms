@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Payment;
 use Validator;
+use Illuminate\Support\Facades\Storage;
+
 
 class PaymentsController extends Controller
 {
@@ -171,8 +173,16 @@ class PaymentsController extends Controller
     }
 
     public function showReceipt(Request $request , Payment $payment) {
+        //create pdf document
+        $pdf = app('Fpdf');
+        $pdf->AddPage();
+        $pdf->SetFont('Arial','B',16);
+        $pdf->Cell(40,10,'Hello World!');
 
-        $receipt = "payment-voucher.pdf";
-        return response()->json(['file' => $receipt]);
+        $fileName =  $payment->id . '-' . time() . '.pdf';
+        //save file
+        Storage::put('/public/' . $fileName, $pdf->Output('S'));
+
+        return response()->json(['file' => 'storage/' . $fileName]);
     }
 }
