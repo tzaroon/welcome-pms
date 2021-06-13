@@ -71,6 +71,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'birthday'  => 'date:Y-m-d'
     ];
 
     public function booker() {

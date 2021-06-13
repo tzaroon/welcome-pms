@@ -17,6 +17,7 @@ class Booking extends Model
         'adult_count',
         'children_count',
         'status',
+        'segment',
         'wubook_response',
         'source',
         'comment',
