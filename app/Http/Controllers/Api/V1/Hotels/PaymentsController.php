@@ -60,7 +60,7 @@ class PaymentsController extends Controller
         $payment = Payment::create([            
             'booking_id' =>  array_key_exists('booking_id', $postData) ? $postData['booking_id'] : null,
             'payment_date' => array_key_exists('payment_date', $postData) ? $postData['payment_date'] : date('Y-m-d'),
-            'amount' => array_key_exists('amount', $postData) ? \floatvalue($postData['amount']) : null,
+            'amount' => array_key_exists('amount', $postData) ? floatval($postData['amount']) : null,
             'payment_method' => array_key_exists('payment_method', $postData) && $postData['payment_method'] ? $postData['payment_method'] : Payment::TYPE_CASH,
             'initials' => array_key_exists('initials', $postData) ? $postData['initials'] : null,
             'payment_on_account' => array_key_exists('payment_on_account', $postData) ? $postData['payment_on_account'] : null,
