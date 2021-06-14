@@ -1132,7 +1132,7 @@ class BookingsController extends Controller
                 if($rateTypes) {
                     foreach($rateTypes as $rateType) {
                         $rates = $rateType->calculateRate($bookingQuery);
-                        $rateType->price = $rates['total_price'];
+                        $rateType->price = array_key_exists('total_price', $rates) ? $rates['total_price'] : 0;
                     }
                 }
 
