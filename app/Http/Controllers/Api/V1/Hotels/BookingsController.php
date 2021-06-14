@@ -868,9 +868,9 @@ class BookingsController extends Controller
             }
         }
 
-        $responseArray['total_adults'] = $adultCount;
-        $responseArray['total_children'] = $childrenCount;
-         
+        $responseArray['total_adults'] = $booking->adult_count;
+        $responseArray['total_children'] = $booking->children_count;
+        
         $priceBreakDown = [];
 
         if($allPrices) {
