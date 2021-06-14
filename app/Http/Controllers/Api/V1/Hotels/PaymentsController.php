@@ -156,8 +156,14 @@ class PaymentsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, Booking $booking, $payment) {        
+    public function destroy(Request $request, Booking $booking, $payment) 
+    {        
         $payment =  Payment::where('id', $payment)->first();
+
+        if(!$payment){
+            return response()->json(['message' => 'Payment not found']);  
+        }
+
         $payment->delete();        
         return response()->json(['message' => 'Deleted Successfully']);
     }

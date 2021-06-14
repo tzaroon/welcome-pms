@@ -52,9 +52,15 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::namespace('Users')->name('users.')->prefix('users')->group(function () {
                 Route::resource('bookers', 'BookersController', ['except' => ['create']]);
                 Route::get('bookers/autocomplete/{keyword}', 'BookersController@autocomplete')->name('bookers_list');
+                Route::resource('users', 'UsersController');
+                
             });
+
             Route::namespace('Communication')->name('communication.')->prefix('communication')->group(function (){
                 Route::get('whats-app', 'WhatsAppController@sendMessage')->name('whats_app');
+            });
+            Route::namespace('Roles')->name('roles.')->prefix('roles')->group(function (){
+                Route::resource('roles', 'RolesController');
             });
             
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
@@ -79,7 +85,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('booking/room/{bookingHasRoom}/old-Price', 'BookingsController@getOldPrice');
                 Route::post('booking/save-relocation', 'BookingsController@saveRelocation');
                 Route::post('booking/{booking}/update-booking', 'BookingsController@updateBooking');
-                Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
+                Route::resource('booking/{booking}/booking-payments', 'PaymentsController');                
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
                 Route::get('bookings/{booking}/load-rooms', 'BookingsController@loadRooms');
