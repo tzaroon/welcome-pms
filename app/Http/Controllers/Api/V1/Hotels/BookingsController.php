@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Hotels;
 
+use App\Dto\BookingQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingHasRoom;
@@ -1107,13 +1108,34 @@ class BookingsController extends Controller
         
         $postData = json_decode($postData, true);
 
+        $booking = $bookingRoom->booking;
+
+        $bookingRequest = [
+            'hotel_id' => null,
+            'adult_count' => $booking->adult_count,
+            'children_count' => $booking->children_count,
+            'nights' => $booking->numberOfDays,
+            'reservation_from' => $booking->reservation_from,
+            'reservation_to' => $booking->reservation_to
+        ];
+
+        $bookingQuery = BookingQuery::fromRequest( $bookingRequest);
+
         if(array_key_exists('room_id', $postData) && $postData['room_id']) {
             $room = Room::find($bookingRoom->room_id);
             $newRoom = Room::find($postData['room_id']);
+
             if($room && $room->room_type_id != $newRoom->room_type_id && (!array_key_exists('force', $postData) || !$postData['force'])) {
 
                 $rateTypes = RateType::where('room_type_id', $newRoom->room_type_id)->with(['detail'])->get();
                 
+                if($rateTypes) {
+                    foreach($rateTypes as $rateType) {
+                        $rates = $rateType->calculateRate($bookingQuery);
+                        $rateType->price = $rates['total_price'];
+                    }
+                }
+
                 return response()->json(array('rate_types' => $rateTypes, 'existing_price' => $bookingRoom->price));
             } else {
 
