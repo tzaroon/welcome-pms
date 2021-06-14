@@ -17,6 +17,7 @@ class Booking extends Model
         'adult_count',
         'children_count',
         'status',
+        'segment',
         'wubook_response',
         'source',
         'comment',
@@ -202,6 +203,11 @@ class Booking extends Model
     public function guests() {
 
         return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->withPivot('room_id');
+    }
+    
+    public function guestsWithUsers() {
+
+        return $this->belongsToMany(Guest::class, 'booking_room_guests', 'booking_id')->withPivot('room_id')->with('user');
     }
 
     public function productPrice() {

@@ -303,8 +303,8 @@ class BookingsController extends Controller
                                                 'status' => $objBooking->status,
                                                 'roomCount' => $objBooking->roomCount,
                                                 'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
-                                                'adult_count' => 2,
-                                                'children_count' => 3,
+                                                'adult_count' => $objBooking->adult_count,
+                                                'children_count' => $objBooking->children_count,
                                                 'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                                                 'numberOfDays' => $objBooking->numberOfDays,
                                                 'booker' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
@@ -868,9 +868,9 @@ class BookingsController extends Controller
             }
         }
 
-        $responseArray['total_adults'] = $adultCount;
-        $responseArray['total_children'] = $childrenCount;
-         
+        $responseArray['total_adults'] = $booking->adult_count;
+        $responseArray['total_children'] = $booking->children_count;
+        
         $priceBreakDown = [];
 
         if($allPrices) {
@@ -914,7 +914,8 @@ class BookingsController extends Controller
         $responseArray['vat'] = $booking->getVat();
         $responseArray['total_booking_price'] = number_format(($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'])-$booking->discount, 2, ',', '.');
         $responseArray['total_paid'] = $booking->totalPaid;
-        $responseArray['amount_to_pay'] = number_format(($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat']-$responseArray['total_paid'])-$booking->discount, 2, ',', '.');
+        $responseArray['discount'] = $booking->discount;
+        $responseArray['amount_to_pay'] = number_format((($responseArray['accommodation_price']+$responseArray['accessories_price']+$responseArray['city_tax']+$responseArray['vat'])-$booking->discount)-$booking->totalPaid, 2, ',', '.');
 
         $responseArray['price'] = number_format($responseArray['price'], 2, ',', '.');
         $responseArray['total_price'] = number_format($responseArray['total_price'], 2, ',', '.');
@@ -1488,63 +1489,78 @@ class BookingsController extends Controller
         foreach($bookingHasRooms as $bookingRoom){
             if($bookingRoom->room){
                 $processedData [] = [
-
+                    'room_id' => $bookingRoom->room->id,
                     'booking_room_id' => $bookingRoom->id,
                     'name' => $bookingRoom->room->name
                 ];
-        }}
+            }
+        }
 
         return response()->json($processedData);
         
     }
-
-    public function downloadReceipt(Request $request , Booking $booking){            
+    
+    public function showVoucher(Request $request , Booking $booking){            
        
-       $receipt = public_path().DIRECTORY_SEPARATOR."payment-voucher.pdf";
-       return  $receipt;      
+        $receipt = "payment-voucher.pdf";
+        return response()->json(['file' => $receipt]);     
     }
 
-    public function getOldPrice(Request $request, $bookingRoom){            
+    public function getOldPrice(Request $request, Booking $booking, Room $room){            
        
-        if (!$bookingRoom) {
+        $bookingRoom = BookingHasRoom::where('booking_id', $booking->id)
+            ->where('room_id', $room->id)->first();
 
+        if (!$bookingRoom) {
             return response()->json(array('errors' => ['room' => 'Room not found']), 422);
         }
 
-        $value = 40;
+        $productPrices = $bookingRoom->productPrice;
 
-       // $bookingRoom  = BookingHasRoom::find($bookingRoom);        
-       // return response()->json($bookingRoom->price); 
-       return response()->json($value);   
-        
-     }
+        $dailyCosting = [];
+        if($productPrices) {
+            
+            foreach($productPrices as $productPrice) {
 
+                $dailyPrice = DailyPrice::where('product_id', $productPrice->product_id)->first();
+                $dailyCosting[] = [
+                    'date' => $dailyPrice->date,
+                    'price' => $productPrice->price
+                ];
+            }
+        }
 
-
+        return response()->json($dailyCosting);        
+    }
 
      public function updateBooking(Request $request, Booking $booking)
      {
-        
         $user = auth()->user();
-        
         $postData = $request->getContent();
-        
         $postData = json_decode($postData, true);       
 
-        // $validator = Validator::make($postData, [
-        //     'reservation_from' => 'required',
-        //     'reservation_to' => 'required'
-        // ], [], [
-        //     'reservation_from' => 'Reservation from',
-        //     'reservation_to' => 'Reservation to'
-        // ]);
+        $validator = Validator::make($postData, [
+             'first_name' => 'required',
+             'last_name' => 'required',
+             'gender' => 'required',
+             'email' => 'required',
+             'adult_count' => 'required'
+        ], [], [
+             'first_name' => 'First Name',
+             'last_name' => 'Last Name'
+        ]);
 
-        // if (!$validator->passes()) {
+        if (!$validator->passes()) {
 
-        //     return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
-        // }
+             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
 
         DB::transaction(function() use ($booking, $user, $postData){
+
+            $booker = Booker::find($booking->booker_id);
+            $booker->fill($postData);
+            $booker->user->fill($postData);
+            $booker->push();
 
             $booking->fill($postData);
             $booking->save();       
@@ -1552,48 +1568,95 @@ class BookingsController extends Controller
 
         $guests = array_key_exists('guests', $postData) ? $postData['guests'] : [];      
 
-                    if($guests) {
-                        foreach($guests as $guestData) {                            
-                            
-                            
-                            if(array_key_exists('id', $guestData)) {
-                                $guest = Guest::find($guestData['id']);
-                                $guest->fill($guestData);
-                                $guest->user->fill($guestData);
-                                $guest->push();
-                            } else {
-                                $guestUser = User::create([
-                                    'company_id' => $user->company_id,
-                                    'first_name' => array_key_exists('first_name', $guestData) ? $guestData['first_name'] : null,
-                                    'last_name' => array_key_exists('last_name', $guestData) ? $guestData['last_name'] : null,
-                                    'email' => array_key_exists('email', $guestData) ? $guestData['email'] : null,
-                                    'phone_number' => array_key_exists('phone_number', $guestData) ? $guestData['phone_number'] : null,
-                                    'street' => array_key_exists('street', $guestData) ? $guestData['street'] : null,
-                                    'postal_code' => array_key_exists('postal_code', $guestData) ? $guestData['postal_code'] : null,
-                                    'city' => array_key_exists('city', $guestData) ? $guestData['city'] : null,
-                                    'country_id' => array_key_exists('country_id', $guestData) ? $guestData['country_id'] : null,
-                                    'gender' => array_key_exists('gender', $guestData) ? $guestData['gender'] : null,
-                                    'birth_date' => array_key_exists('birth_date', $guestData) ? $guestData['birth_date'] : null
-                                ]);
-    
-                                $guest = Guest::create([
-                                    'user_id' => $guestUser->id,
-                                    'guest_type' => array_key_exists('guest_type', $guestData) ? $guestData['guest_type'] : null,
-                                    'identification_number' => array_key_exists('identification_number', $guestData) ? $guestData['identification_number'] : null,
-                                    'identification' => array_key_exists('identification', $guestData) ? $guestData['identification'] : null,
-                                    'id_issue_date' => array_key_exists('id_issue_date', $guestData) ? $guestData['id_issue_date'] : null,
-                                    'id_expiry_date' => array_key_exists('id_expiry_date', $guestData) ? $guestData['id_expiry_date'] : null,
-                                ]);
-                            }
-                            
-                           // $bookingRoomGuest = BookingRoomGuest::firstOrNew(['room_id' => $bookingHasRoom->room_id, 'booking_id' => $booking->id, 'guest_id' => $guest->id]);
-                           // $bookingRoomGuest->save();
-                        }
-                    }
-                    
-        return response()->json($booking);                    
+        $i = 0;
+        $arrGuests = [];
+        if($guests) {
+            foreach($guests as $guestData) {                            
+                
+                if(array_key_exists('id', $guestData)) {
+                    $guest = Guest::find($guestData['id']);
+                    $guest->fill($guestData);
+                    $guest->user->fill($guestData);
+                    $guest->push();
+                } else {
+                    $guestUser = User::create([
+                        'company_id' => $user->company_id,
+                        'first_name' => array_key_exists('first_name', $guestData) ? $guestData['first_name'] : null,
+                        'last_name' => array_key_exists('last_name', $guestData) ? $guestData['last_name'] : null,
+                        'email' => array_key_exists('email', $guestData) ? $guestData['email'] : null,
+                        'phone_number' => array_key_exists('phone_number', $guestData) ? $guestData['phone_number'] : null,
+                        'street' => array_key_exists('street', $guestData) ? $guestData['street'] : null,
+                        'postal_code' => array_key_exists('postal_code', $guestData) ? $guestData['postal_code'] : null,
+                        'city' => array_key_exists('city', $guestData) ? $guestData['city'] : null,
+                        'country_id' => array_key_exists('country_id', $guestData) ? $guestData['country_id'] : null,
+                        'gender' => array_key_exists('gender', $guestData) ? $guestData['gender'] : null,
+                        'birth_date' => array_key_exists('birth_date', $guestData) ? $guestData['birth_date'] : null
+                    ]);
 
+                    $guest = Guest::create([
+                        'user_id' => $guestUser->id,
+                        'guest_type' => array_key_exists('guest_type', $guestData) ? $guestData['guest_type'] : null,
+                        'identification_number' => array_key_exists('identification_number', $guestData) ? $guestData['identification_number'] : null,
+                        'identification' => array_key_exists('identification', $guestData) ? $guestData['identification'] : null,
+                        'id_issue_date' => array_key_exists('id_issue_date', $guestData) ? $guestData['id_issue_date'] : null,
+                        'id_expiry_date' => array_key_exists('id_expiry_date', $guestData) ? $guestData['id_expiry_date'] : null,
+                    ]);
+                }
+
+
+                if(array_key_exists('room_id', $guestData)) {
+                    $arrGuests[$i]['room_id'] = $guestData['room_id'];
+                    $arrGuests[$i]['guest_id'] =  $guest->id;
+                    $i++;
+                }
+            }
+
+            $booking->guests()->sync($arrGuests);
+        }
+
+        return response()->json($booking);
+     } 
+
+     public function editBooking(Request $request, Booking $booking)
+     {
+        $guests = $booking->guestsWithUsers;
+        $booker = $booking->booker;
+        $bookerUser = $booking->booker->user;
+
+        $arrBooking = [
+            'id' => $booking->id,
+            'booker_id' => $booking->booker_id,
+            'time_start' => $booking->time_start,
+            'status' => $booking->status,
+            'source' => $booking->source,
+            'adult_count' => $booking->adult_count,
+            'children_count' => $booking->children_count,
+            'country_id' => $booking->booker->user->country_id,
+            'state_id' => $booking->booker->user->state_id,
+            'first_name' => $bookerUser->first_name,
+            'last_name' => $bookerUser->last_name,
+            'birth_date' => $bookerUser->birth_date,
+            'gender' => $bookerUser->gender,
+            'email' => $bookerUser->email,
+            'phone_number' => $bookerUser->phone_number,
+            'identification' => $booker->identification,
+            'language_id' => $bookerUser->language_id,
+            'segment' => $booking->segment,
+            'is_buisness_booking' => $booking->is_buisness_booking,
+            'overwrite_client' => $booking->overwrite_client,
+        ];
+
+        if($guests) {
+
+            foreach($guests as $guest) {
+                $arrBooking['guests'][] = [
+                    'id' => $guest->id,
+                    'first_name' => $guest->user->first_name,
+                    'last_name' => $guest->user->last_name,
+                    'email' => $guest->user->email
+                ];
+            }
+        }
+        return response()->json($arrBooking);
      }
-
-     
 }

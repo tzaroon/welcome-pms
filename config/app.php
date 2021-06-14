@@ -176,7 +176,9 @@ return [
         App\Providers\RouteServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Orangehill\Iseed\IseedServiceProvider::class,
-        Wubook\Wired\WubookWiredServiceProvider::class
+        Wubook\Wired\WubookWiredServiceProvider::class,
+
+        Crabbly\Fpdf\FpdfServiceProvider::class
     ],
 
     /*

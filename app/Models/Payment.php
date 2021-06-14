@@ -42,4 +42,8 @@ class Payment extends Model
             'name' => 'Credit Card'
         ]
     ];
+
+    protected $casts = [
+        'amount' => 'float'
+    ];
 }
