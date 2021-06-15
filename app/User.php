@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Booker;
+use App\Models\Country;
 use App\Models\Guest;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -81,5 +82,9 @@ class User extends Authenticatable implements JWTSubject
    
     public function guest() {
         return $this->hasOne(Guest::class);
+    }
+
+    public function country() {
+        return $this->hasOne(Country::class);
     }
 }

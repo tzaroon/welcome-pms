@@ -187,6 +187,7 @@ class PdfsController extends Controller
          //$y += 5;
          $pdf->SetXY($x+70, $y); 
          $pdf->SetFont('Arial','', 8);
+         dd($booking->booker->user->country->name);
          $pdf->Cell(20, $fontSize, $booking->booker->user->country->name);
 
          $y +=$yIncremenent;
