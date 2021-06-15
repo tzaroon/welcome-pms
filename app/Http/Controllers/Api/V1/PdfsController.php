@@ -287,8 +287,6 @@ class PdfsController extends Controller
          $pdf->SetFont('Arial','', 8);
          $date = Carbon::now();
          $pdf->Cell(20, $fontSize, $date);
-         
-                
         
         $pdf->Output('I');
        exit;

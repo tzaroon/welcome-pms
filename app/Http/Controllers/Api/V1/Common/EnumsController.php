@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Extra;
 use App\Models\Guest;
 use App\Models\Payment;
+use App\Models\Shift;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,5 +79,10 @@ class EnumsController extends Controller
     public function cancelReasons(Request $request) : JsonResponse
     {
         return response()->json(Booking::$__cancellation_reasons_array);
+    }
+
+    public function shifts(Request $request) : JsonResponse
+    {
+        return response()->json(Shift::$__shift_types_array);
     }
 }

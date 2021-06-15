@@ -49,6 +49,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('payment-methods', 'EnumsController@paymentMethods')->name('payment-methods');
                 Route::get('booking-segments', 'EnumsController@segments')->name('booking-segments');
                 Route::get('booking-cancel-reasons', 'EnumsController@cancelReasons');
+                Route::get('shifts', 'EnumsController@shifts');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);
@@ -56,8 +57,9 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::namespace('Users')->name('users.')->prefix('users')->group(function () {
                 Route::resource('bookers', 'BookersController', ['except' => ['create']]);
                 Route::get('bookers/autocomplete/{keyword}', 'BookersController@autocomplete')->name('bookers_list');
-                Route::resource('user', 'UsersController');
+                Route::resource('user/{role?}/{roleId?}', 'UsersController');
                 Route::resource('role', 'RolesController');
+                Route::resource('shift', 'ShiftsController');
                 
             });
 

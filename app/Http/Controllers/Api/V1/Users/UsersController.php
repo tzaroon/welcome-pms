@@ -14,12 +14,14 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request) { 
+    public function index(Request $request , $role = null, $roleId = null ) { 
         
         $user = auth()->user();
 
         $systemUsers = User::where(['company_id' => $user->company_id])
-                            ->where('is_system_user' , true)->get();
+                            ->where('is_system_user' , 1)
+                            ->where('role_id' , $roleId)
+                            ->get();
         
         if(0 == $systemUsers->count()) {
             return response()->json(['message' => 'no data found'], 201);
@@ -43,13 +45,13 @@ class UsersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request) {        
+    public function store(Request $request) {
 
         $authUser = auth()->user();
         
-        $postData = $request->getContent();       
+        $postData = $request->getContent();
 
-        $postData = json_decode($postData, true);       
+        $postData = json_decode($postData, true);
 
         $validator = Validator::make($postData, [
             'first_name' => 'required|string|max:191',
