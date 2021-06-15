@@ -17,6 +17,8 @@ Route::namespace('Api')->name('api.')->group(function () {
     Route::namespace('V1')->name('v1.')->prefix('v1')->group(function () {
         
         //Route::get('booking/{booking}/show-voucher', 'BookingsController@showVoucher');
+        Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PdfsController@showReceipt');//detailed 0 or 1
+        Route::get('booking/{booking}/show-voucher', 'pdfsController@showVoucher');
         Route::namespace('Auth')->name('auth.')->prefix('auth')->group(function () {
             Route::post('identify', 'SessionsController@identify')->name('identify');
             Route::post('signin', 'SessionsController@signin')->name('signin');
@@ -82,8 +84,8 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
                 Route::post('generate-lock', 'BookingsController@generateLock');
-                Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PaymentsController@showReceipt');//detailed 0 or 1
-                Route::get('booking/{booking}/show-voucher', 'BookingsController@showVoucher');
+                //Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PaymentsController@showReceipt');//detailed 0 or 1
+                //Route::get('booking/{booking}/show-voucher', 'BookingsController@showVoucher');
                 Route::get('booking/{booking}/room/{room}/old-price', 'BookingsController@getOldPrice');
                 Route::post('booking/save-relocation', 'BookingsController@saveRelocation');
                 Route::post('booking/{booking}/update-booking', 'BookingsController@updateBooking');
