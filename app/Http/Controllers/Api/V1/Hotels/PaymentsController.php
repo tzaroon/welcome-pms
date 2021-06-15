@@ -1,6 +1,6 @@
 <?php
 
- namespace App\Http\Controllers\Api\V1;
+ namespace App\Http\Controllers\Api\V1\Hotels;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
