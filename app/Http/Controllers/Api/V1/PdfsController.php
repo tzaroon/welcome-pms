@@ -35,7 +35,8 @@ class PdfsController extends Controller
         $pdf->SetXY($x, $y);
         $pdf->Cell(20,10,'STAYS');
 
-        $x =  $x - 60;
+       // $x =  $x - 60;
+        $x = 30;
         $y += $yIncremenent;
 
         $fontSize = 8;
@@ -43,7 +44,7 @@ class PdfsController extends Controller
 
         $pdf->SetXY($x, $y+2); 
         $pdf->Cell(20, $fontSize,'Casa Boutique Barcelona - Tel. +34.615.966.839 - Carrer Pau Claris , 145, 08009 Barcelona, Barcelona');
-        $x =  $x - 5;
+       // $x =  $x - 5;
         $y += $yIncremenent;
         $pdf->SetXY($x, $y+2);
         $pdf->SetFont('Arial','B',8); 
@@ -71,24 +72,29 @@ class PdfsController extends Controller
         
         $days = $endDate->diffInDays($startDate);
 
-         $x =  $x + 65; 
+         $x =  $x + 68; 
          $pdf->SetXY($x, $y);
          $pdf->Cell(20, $fontSize, $days);
 
-         $x = $x-125;
+         //$x = $x-125;
+         $x = 30;
          $y += $yIncremenent;
-         $yIncremenent =8;
+         $yIncremenent =8;         
 
          $pdf->SetXY($x, $y);
          $pdf->SetFont('Arial','B',8);
          $pdf->Cell(20, $fontSize, 'ITEM');
 
-         $x = $x + 120;         
+         $x = $x + 126;         
          $pdf->SetXY($x, $y);
          $pdf->SetFont('Arial','B',8);
          $pdf->Cell(20, $fontSize, 'TOTAL');
 
-         $x = $x - 130; 
+        // $x = $x - 130; 
+
+         $x = 30;
+
+
          $pdf->SetFont('Arial','',8);
 
          $y += $yIncremenent;
@@ -96,19 +102,14 @@ class PdfsController extends Controller
          foreach($rooms as $room)
             {            
                 $pdf->SetXY($x, $y);  
-                $pdf->Cell(20,10, $room->name . $room->roomType->roomTypeDetail->name); 
-               // $y += $yIncremenent ;
-            }  
-
-        
-        // $pdf->SetXY($x, $y);        
-         //$pdf->Cell(20, $fontSize, 'Double Ensuite 1 - 2 Adults - Room only - (2476237) ');
+                $pdf->Cell(20,10, $room->name . $room->roomType->roomTypeDetail->name);               
+            }        
 
          $y += $yIncremenent;
          $pdf->SetXY($x, $y);        
          $pdf->Cell(20, $fontSize, 'Room night ' . $booking->reservation_from .' To ' . $booking->reservation_to); 
 
-         $pdf->SetXY($x+130, $y);        
+         $pdf->SetXY($x+128, $y);        
          $pdf->Cell(20, $fontSize, $booking['price']['price']);
 
          $y += $yIncremenent;
@@ -186,8 +187,7 @@ class PdfsController extends Controller
 
          //$y += 5;
          $pdf->SetXY($x+70, $y); 
-         $pdf->SetFont('Arial','', 8);
-         dd($booking->booker->user->country->name);
+         $pdf->SetFont('Arial','', 8);         
          $pdf->Cell(20, $fontSize, $booking->booker->user->country->name);
 
          $y +=$yIncremenent;
@@ -205,6 +205,7 @@ class PdfsController extends Controller
          $y += 5;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
+         
          $pdf->Cell(20, $fontSize, $booking->booker->user->email);
          
          $pdf->SetXY($x+70, $y); 
@@ -245,19 +246,19 @@ class PdfsController extends Controller
          $y +=$yIncremenent;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, 'The day before check-in, once 100% of the reservation has been paid through the link that you will receive by email,');
+         $pdf->Cell(20, $fontSize, 'The day before check-in, once 100% of the reservation has been paid through the link that you will receive');
          $y +=$yIncremenent;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, 'you will receive a unique code, which  is used to access the hotel This code is used on the building portal. Once inside,');
+         $pdf->Cell(20, $fontSize, 'by email, you will receive a unique code, which  is used to access the hotel This code is used on the building');
          $y +=$yIncremenent;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, 'you must go up some stairs to the first floor. At the hotel door, the SAME code is used.,Once inside the hotel,');
+         $pdf->Cell(20, $fontSize, 'portal. Once inside, you must go up some stairs to the first floor. At the hotel door, the SAME code is used.');
          $y +=$yIncremenent;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, 'the SAME code is used in the room');
+         $pdf->Cell(20, $fontSize, ',Once inside the hotel, the SAME code is used in the room');
          $y +=$yIncremenent;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
@@ -284,7 +285,8 @@ class PdfsController extends Controller
          $y +=$yIncremenent;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, '15/06/2021');
+         $date = Carbon::now();
+         $pdf->Cell(20, $fontSize, $date);
          
                 
         
