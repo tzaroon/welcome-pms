@@ -16,7 +16,6 @@ use Illuminate\Http\Request;
 Route::namespace('Api')->name('api.')->group(function () {
     Route::namespace('V1')->name('v1.')->prefix('v1')->group(function () {
         
-        //Route::get('booking/{booking}/show-voucher', 'BookingsController@showVoucher');
         Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PdfsController@showReceipt');//detailed 0 or 1
         Route::get('booking/{booking}/show-voucher', 'PdfsController@showVoucher');
         Route::namespace('Auth')->name('auth.')->prefix('auth')->group(function () {
@@ -57,7 +56,10 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::namespace('Users')->name('users.')->prefix('users')->group(function () {
                 Route::resource('bookers', 'BookersController', ['except' => ['create']]);
                 Route::get('bookers/autocomplete/{keyword}', 'BookersController@autocomplete')->name('bookers_list');
-                Route::resource('user/{role?}/{roleId?}', 'UsersController');
+                Route::resource('user', 'UsersController')->except([
+                    'index'
+                ]);
+                Route::get('user/{role?}/{roleId?}', 'UsersController@index');
                 Route::resource('role', 'RolesController');
                 Route::resource('shift', 'ShiftsController');
                 
