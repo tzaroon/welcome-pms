@@ -22,11 +22,11 @@ class Cors
         {
             $handle
                 ->header('Access-Control-Allow-Origin', "*")
-                ->header('Access-Control-Allow-Methods', "PUT,POST,DELETE,GET,OPTION")
+                ->header('Access-Control-Allow-Methods', "PUT,POST,DELETE,GET,OPTIONS")
                 ->header('Access-Control-Allow-Headers', "Accept,Authorization,Content-Type");
         } else {
             $handle->headers->set('Access-Control-Allow-Origin', "*");
-            $handle->headers->set('Access-Control-Allow-Methods', "PUT,POST,DELETE,GET,OPTION");
+            $handle->headers->set('Access-Control-Allow-Methods', "PUT,POST,DELETE,GET,OPTIONS");
             $handle->headers->set('Access-Control-Allow-Headers', "Accept,Authorization,Content-Type");
         }
 
