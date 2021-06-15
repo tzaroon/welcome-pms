@@ -187,7 +187,7 @@ class PdfsController extends Controller
          //$y += 5;
          $pdf->SetXY($x+70, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, $booking->booker->user->country_id);
+         $pdf->Cell(20, $fontSize, $booking->booker->user->country->name);
 
          $y +=$yIncremenent;
          $pdf->Line($x, $y,170,$y);
@@ -204,11 +204,11 @@ class PdfsController extends Controller
          $y += 5;
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, 'stach.983494@guest.booking.com');
+         $pdf->Cell(20, $fontSize, $booking->booker->user->email);
          
          $pdf->SetXY($x+70, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, 'comments');
+         $pdf->Cell(20, $fontSize, $booking->comment);
 
          $y +=$yIncremenent;
          $pdf->Line($x, $y,170,$y);
@@ -222,7 +222,7 @@ class PdfsController extends Controller
 
          $pdf->SetXY($x+2, $y); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, 'Booking.com 3810694010');
+         $pdf->Cell(20, $fontSize, $booking->source);
 
          $y +=$yIncremenent;
          $pdf->SetXY($x+2, $y+6); 
