@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Hotels;
+ namespace App\Http\Controllers\Api\V1\Hotels;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -177,18 +177,143 @@ class PaymentsController extends Controller
         $payment->delete();        
         return response()->json(['message' => 'Deleted Successfully']);
     }
+   
 
-    public function showReceipt(Request $request , Payment $payment) {
-        //create pdf document
+    public function showReceipt(Request $request , Payment $payment  , $detailed) {
+      
+
+        if(!$payment){
+            return response()->json(['message' => 'Payment not found']);  
+        }
+        
+        $rooms = $payment->booking->rooms;
         $pdf = app('Fpdf');
+        $pdf->SetDrawColor(220,220,220);
+        $pdf->SetFont('Arial','',10);
         $pdf->AddPage();
-        $pdf->SetFont('Arial','B',16);
-        $pdf->Cell(40,10,'Hello World!');
+       
+        $x = 40;
+        $y = 20;
+        $pdf->SetXY($x, $y); 
+        $pdf->Cell(20,10,'CHIC');
+        $y += 6;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell(20,10,'STAYS');
+        $x =  $x - 20;
+        $y += 20;
+        $yIncremenent = 6;
+        $fontSize = 8;
+
+        $pdf->SetXY($x, $y); 
+        $pdf->Cell(20,$fontSize,'Chicstays S.L');
+
+        $pdf->SetXY(150, $y);
+        $pdf->Cell(20,10, $payment->booking->booker->user->first_name . ' ' . $payment->booking->booker->user->last_name );
+
+        $y += $yIncremenent;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell(20,$fontSize,'Ali Bei 15');
+        $y += $yIncremenent ;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell(20,10,'08010');
+        $y += $yIncremenent ;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell(20,$fontSize,'Barcelona (Espana)');
+        $y += $yIncremenent ;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell(20,$fontSize,'VAT : (B65121618)');
+        $y += $yIncremenent ;
+        $pdf->SetXY($x, $y);
+        $pdf->SetFont('Arial','B',$fontSize); 
+        $pdf->Cell(20,10,'Receipt #  : ' . $payment->id);
+        $y += $yIncremenent ;
+        
+        $pdf->SetXY($x, $y);
+        $pdf->Cell(20,10, date('D F j, Y', strtotime($payment->payment_date)));
+
+        $y += $yIncremenent ; 
+        $y += $yIncremenent ; 
+        $i = 20;
+             
+        if($detailed){
+            $i = 0;
+            $pdf->SetXY($x, $y); 
+            $pdf->SetFont('Arial','', $fontSize); 
+            $pdf->Cell(20,10,'ITEM');
+            $pdf->SetXY(150, $y); 
+            $pdf->Cell(20,10,'TOTAL');
+            $y += $yIncremenent ;
+
+            foreach($rooms as $room)
+            {            
+                $pdf->SetXY($x, $y);  
+                $pdf->Cell(20,10, $room->name . $room->roomType->roomTypeDetail->name); 
+                $y += $yIncremenent ;
+            }       
+            
+            $pdf->SetFont('Arial','B', $fontSize);
+            $pdf->SetXY($x, $y);
+            $pdf->Cell(50,10, 'Room night ' . $payment->booking->reservation_from .' To ' . $payment->booking->reservation_to); 
+            $pdf->SetFont('Arial','', $fontSize);  
+
+            $pdf->SetXY(150, $y);   
+        
+            $pdf->Cell(20,10, $payment->booking['price']['price']); 
+            $y += $yIncremenent ;
+            $pdf->SetXY($x, $y); 
+            $pdf->Cell(20,10, $payment->booking->adult_count. ' Adults '. '* ' . 'Tourist Tax Adultos '); 
+            $pdf->SetXY(150, $y);
+            $pdf->Cell(20,10, $payment->booking['price']['tax']);
+        
+        }
+       
+        $pdf->SetFont('Arial','', $fontSize);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetDrawColor(51,51,51);       
+        $pdf->Rect(21, 125 - $i, 150, 30);
+        $y += $yIncremenent ;
+        $y += $yIncremenent ;
+            
+         
+        $pdf->SetTextColor(51,51,51); 
+
+        $pdf->SetFont('Arial','B', $fontSize); 
+        $pdf->SetXY(130, $y);
+        $pdf->Cell(20,10,'Paid on Account'); 
+        $y += $yIncremenent ;
+        $pdf->SetXY(130, $y);
+        $pdf->SetFont('Arial','B', $fontSize);  
+       
+        $pdf->Cell(20,10, $payment->booking['price']['total']);
+       
+        $y += $yIncremenent ;
+        $pdf->SetXY(130, $y);
+        $pdf->Cell(20,10,'Taxes Inc'); 
+        $y += $yIncremenent ;
+        $pdf->SetXY(130, $y);
+        $pdf->SetFont('Arial','', $fontSize);
+        $pdf->Cell(20,10,'Payment Method : ' . $payment->payment_method);
+
+        $y += $yIncremenent ;
+        $y += $yIncremenent ;
+        $pdf->SetXY(40, $y);
+        $pdf->Cell(20,10,'Casa  Boutique Barcelona | info@chicstays.com | +34615967283'); 
+        $y += $yIncremenent ;
+
+        $pdf->SetXY(40, $y);
+        $pdf->Cell(20,10,'Nota a pie de factura que sa  pone on Ajustes abajo del todo');
+
+        
+       $pdf->Output('I');
+       exit;
 
         $fileName =  $payment->id . '-' . time() . '.pdf';
         //save file
         Storage::put('/public/' . $fileName, $pdf->Output('S'));
+        //$pdf->Output($$fileName, 'D');
 
         return response()->json(['file' => 'storage/' . $fileName]);
     }
+
+
 }

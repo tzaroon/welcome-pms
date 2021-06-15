@@ -80,12 +80,12 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
                 Route::post('generate-lock', 'BookingsController@generateLock');
-                Route::get('booking/payment/{payment}/show-receipt', 'PaymentsController@showReceipt');
+                Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PaymentsController@showReceipt');//detailed 0 or 1
                 Route::get('booking/{booking}/show-voucher', 'BookingsController@showVoucher');
                 Route::get('booking/{booking}/room/{room}/old-price', 'BookingsController@getOldPrice');
                 Route::post('booking/save-relocation', 'BookingsController@saveRelocation');
                 Route::post('booking/{booking}/update-booking', 'BookingsController@updateBooking');
-                Route::get('booking/{booking}/edit-booking', 'BookingsController@editBookingcom');
+                Route::get('booking/{booking}/edit-booking', 'BookingsController@editBooking');
                 Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');

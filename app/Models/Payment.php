@@ -46,4 +46,9 @@ class Payment extends Model
     protected $casts = [
         'amount' => 'float'
     ];
+
+    public function booking() {
+
+        return $this->belongsTo(Booking::class);
+    }
 }
