@@ -1,6 +1,6 @@
 <?php
 
- namespace App\Http\Controllers\Api\V1\Hotels;
+ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -184,9 +184,8 @@ class PaymentsController extends Controller
 
         if(!$payment){
             return response()->json(['message' => 'Payment not found']);  
-        }
-        
-        $rooms = $payment->booking->rooms;
+        }        
+       
         $pdf = app('Fpdf');
         $pdf->SetDrawColor(220,220,220);
         $pdf->SetFont('Arial','',10);
@@ -234,6 +233,7 @@ class PaymentsController extends Controller
         $y += $yIncremenent ; 
         $y += $yIncremenent ; 
         $i = 20;
+        $rooms = $payment->booking->rooms;
              
         if($detailed){
             $i = 0;
