@@ -253,6 +253,7 @@ class BookingsController extends Controller
                                             'booker' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                             'rooms' => $associatedRooms,
                                             'total_price' => $objBooking->price,
+                                            'calendar_price' => $objBooking->price['calendar_price'],
                                             'payment_atatus' => $paymentStatus[0],
                                             'addons' => $objBooking->accessories
                                         ];
@@ -330,6 +331,7 @@ class BookingsController extends Controller
                                                 'booker' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                                 'rooms' => $associatedRooms,
                                                 'total_price' => $objBooking->price,
+                                                'calendar_price' => $objBooking->price['calendar_price'],
                                                 'payment_atatus' => $paymentStatus[0],
                                                 'addons' => $objBooking->accessories
                                             ];
