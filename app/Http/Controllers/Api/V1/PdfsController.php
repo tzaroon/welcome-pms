@@ -24,6 +24,7 @@ class PdfsController extends Controller
        
         $pdf = app('Fpdf');
         $pdf->SetDrawColor(220,220,220);
+        $pdf->SetTextColor(105,105,105);
         $pdf->SetFont('Arial','',10);
         $pdf->AddPage();
        
@@ -300,21 +301,27 @@ class PdfsController extends Controller
         }        
        
         $pdf = app('Fpdf');
-        $pdf->SetDrawColor(220,220,220);
-        $pdf->SetFont('Arial','',10);
+        $pdf->SetDrawColor(208,208,208);
+        $pdf->SetTextColor(105,105,105);
+        $pdf->SetFont('Arial','',15);
         $pdf->AddPage();
        
-        $x = 40;
+        $x = 25;
         $y = 20;
         $pdf->SetXY($x, $y); 
-        $pdf->Cell(20,10,'CHIC');
-        $y += 6;
-        $pdf->SetXY($x, $y);
+        $pdf->Cell(20,10,'CHIC');        
+        $y += 8;       
+        $pdf->Line($x, $y,40,$y);
+        $pdf->SetFont('Arial','',15);
+        $pdf->SetXY($x, $y-2);
         $pdf->Cell(20,10,'STAYS');
-        $x =  $x - 20;
+
+       // $x =  $x - 20;
+       $x =  15;
         $y += 20;
         $yIncremenent = 6;
         $fontSize = 8;
+        $pdf->SetFont('Arial','',10);
 
         $pdf->SetXY($x, $y); 
         $pdf->Cell(20,$fontSize,'Chicstays S.L');
@@ -335,17 +342,22 @@ class PdfsController extends Controller
         $pdf->SetXY($x, $y);
         $pdf->Cell(20,$fontSize,'VAT : (B65121618)');
         $y += $yIncremenent ;
-        $pdf->SetXY($x, $y);
-        $pdf->SetFont('Arial','B',$fontSize); 
-        $pdf->Cell(20,10,'Receipt #  : ' . $payment->id);
+
+        $pdf->SetXY($x, $y+1);
+        $pdf->SetFont('Arial','B', $fontSize+5); 
+        
+        $pdf->SetTextColor(150,150,150);
+        $pdf->Cell(20,10,'Receipt ' . '#' . $payment->id);
         $y += $yIncremenent ;
+
+        $pdf->SetFont('Arial','B', $fontSize); 
         
         $pdf->SetXY($x, $y);
-        $pdf->Cell(20,10, date('D F j, Y', strtotime($payment->payment_date)));
+        $pdf->Cell(20,10, date('d/m/ Y', strtotime($payment->payment_date)));
 
         $y += $yIncremenent ; 
         $y += $yIncremenent ; 
-        $i = 20;
+        $i = 15;
         $rooms = $payment->booking->rooms;
              
         if($detailed){
@@ -381,35 +393,36 @@ class PdfsController extends Controller
         }
        
         $pdf->SetFont('Arial','', $fontSize);
-        $pdf->SetTextColor(255,255,255);
+        //$pdf->SetTextColor(255,255,255);
         $pdf->SetDrawColor(51,51,51);       
         $pdf->Rect(21, 125 - $i, 150, 30);
         $y += $yIncremenent ;
         $y += $yIncremenent ;
             
          
-        $pdf->SetTextColor(51,51,51); 
+        //$pdf->SetTextColor(51,51,51); 
 
         $pdf->SetFont('Arial','B', $fontSize); 
-        $pdf->SetXY(130, $y);
-        $pdf->Cell(20,10,'Paid on Account'); 
+        $pdf->SetXY(140, $y+4);
+        $pdf->Cell(20,10,'PAID ON ACCOUNT'); 
         $y += $yIncremenent ;
-        $pdf->SetXY(130, $y);
+        $pdf->SetXY(147, $y+4);
+        $pdf->SetFont('Arial','B', $fontSize +3);  
+       
+        $pdf->Cell(20,10, $payment->booking['price']['total'] ,0,0,'R');
+       
+        $y += $yIncremenent ;
+        $pdf->SetXY(155, $y+4);
         $pdf->SetFont('Arial','B', $fontSize);  
-       
-        $pdf->Cell(20,10, $payment->booking['price']['total']);
-       
-        $y += $yIncremenent ;
-        $pdf->SetXY(130, $y);
         $pdf->Cell(20,10,'Taxes Inc'); 
         $y += $yIncremenent ;
-        $pdf->SetXY(130, $y);
+        $pdf->SetXY(135, $y+4);
         $pdf->SetFont('Arial','', $fontSize);
         $pdf->Cell(20,10,'Payment Method : ' . $payment->payment_method);
 
         $y += $yIncremenent ;
         $y += $yIncremenent ;
-        $pdf->SetXY(40, $y);
+        $pdf->SetXY(40, $y);        
         $pdf->Cell(20,10,'Casa  Boutique Barcelona | info@chicstays.com | +34615967283'); 
         $y += $yIncremenent ;
 
