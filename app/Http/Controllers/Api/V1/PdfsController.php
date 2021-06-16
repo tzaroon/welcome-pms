@@ -110,15 +110,16 @@ class PdfsController extends Controller
          $pdf->SetXY($x, $y);        
          $pdf->Cell(20, $fontSize, 'Room night ' . $booking->reservation_from .' To ' . $booking->reservation_to); 
 
-         $pdf->SetXY($x+128, $y);        
-         $pdf->Cell(20, $fontSize, $booking['price']['price']);
+         $pdf->SetXY($x+128, $y);  
+
+         $pdf->Cell(20, $fontSize, number_format($booking['price']['price']  + $booking['price']['vat'] , 2));
 
          $y += $yIncremenent;
          $pdf->SetXY($x, $y);
          $pdf->Cell(20, $fontSize, $booking->adult_count . '  Adults ' .'x Tourist tax');
 
          $pdf->SetXY($x+130, $y);        
-         $pdf->Cell(20, $fontSize, $booking['price']['tax']);
+         $pdf->Cell(20, $fontSize, number_format($booking['price']['tax'], 2));
          $y += $yIncremenent;
 
          $pdf->Rect($x, $y, 70, 15);
@@ -128,7 +129,7 @@ class PdfsController extends Controller
          $y += 3;
          $pdf->SetXY($x+ 45, $y-3); 
          $pdf->SetFont('Arial','B',8);
-         $pdf->Cell(20, $fontSize, $booking['price']['total']);
+         $pdf->Cell(20, $fontSize, number_format($booking['price']['price'] + $booking['price']['vat'] + $booking['price']['tax'] , 2));
          
          //$y += $yIncremenent;
          $pdf->SetXY($x+ 45, $y+1); 
@@ -141,7 +142,7 @@ class PdfsController extends Controller
 
          $pdf->SetXY($x+ 75, $y+1); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, $booking['price']['total']);
+         $pdf->Cell(20, $fontSize, number_format($booking['price']['price'] + $booking['price']['vat'] + $booking['price']['tax'] - $booking['price']['total'] , 2));
 
          
          $y += $yIncremenent;
@@ -383,12 +384,12 @@ class PdfsController extends Controller
 
             $pdf->SetXY(150, $y);   
         
-            $pdf->Cell(20,10, $payment->booking['price']['price']); 
+            $pdf->Cell(20,10, number_format($payment->booking['price']['price'] + $payment->booking['price']['vat'] , 2)); 
             $y += $yIncremenent ;
             $pdf->SetXY($x, $y); 
             $pdf->Cell(20,10, $payment->booking->adult_count. ' Adults '. '* ' . 'Tourist Tax Adultos '); 
             $pdf->SetXY(150, $y);
-            $pdf->Cell(20,10, $payment->booking['price']['tax']);
+            $pdf->Cell(20,10, number_format($payment->booking['price']['tax'] , 2));
         
         }
        
@@ -409,7 +410,7 @@ class PdfsController extends Controller
         $pdf->SetXY(147, $y+4);
         $pdf->SetFont('Arial','B', $fontSize +3);  
        
-        $pdf->Cell(20,10, $payment->booking['price']['total'] ,0,0,'R');
+        $pdf->Cell(20,10, number_format($payment->booking['price']['price'] + $payment->booking['price']['vat'] + $payment->booking['price']['tax'] - $payment->booking['price']['total'] , 2) ,0,0,'R');
        
         $y += $yIncremenent ;
         $pdf->SetXY(155, $y+4);
@@ -422,12 +423,13 @@ class PdfsController extends Controller
 
         $y += $yIncremenent ;
         $y += $yIncremenent ;
-        $pdf->SetXY(40, $y);        
-        $pdf->Cell(20,10,'Casa  Boutique Barcelona | info@chicstays.com | +34615967283'); 
+        $pdf->SetXY(0, $y);        
+        $pdf->Cell(208,10,'Casa  Boutique Barcelona | info@chicstays.com | +34615967283',0,0,'C'); 
         $y += $yIncremenent ;
+        
 
-        $pdf->SetXY(40, $y);
-        $pdf->Cell(20,10,'Nota a pie de factura que sa  pone on Ajustes abajo del todo');
+        $pdf->SetXY(0, $y); 
+        $pdf->Cell(208,10,'Nota a pie de factura que sa  pone on Ajustes abajo del todo',0,0,'C'); 
 
         
        $pdf->Output('I');
