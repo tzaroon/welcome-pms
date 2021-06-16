@@ -28,13 +28,31 @@ use App\Models\Language;
 use ttlock\TTLock;
 use App\Models\Lock;
 
+use App\Services\Twilio\WhatsAppService;
+
 class BookingsController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response    
+     * 
      */
+
+    
+    /**
+     
+     *
+     * @var Service
+	*/
+	protected $whatsApp;
+
+	public function __construct(WhatsAppService $whatsApp)
+	{
+		$this->whatsApp = $whatsApp;
+	}
+
+
     public function indexsss(Request $request)
     {
         $user = auth()->user();
@@ -230,7 +248,7 @@ class BookingsController extends Controller
                                             'time_start' => $objBooking->time_start,
                                             'status' => $objBooking->status,
                                             'roomCount' => $objBooking->roomCount,
-                                            'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                            'guest' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                             'adult_count' => $objBooking->adult_count,
                                             'children_count' => $objBooking->children_count,
                                             'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
@@ -238,6 +256,7 @@ class BookingsController extends Controller
                                             'booker' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                             'rooms' => $associatedRooms,
                                             'total_price' => $objBooking->price,
+                                            'calendar_price' => $objBooking->price['calendar_price'],
                                             'payment_atatus' => $paymentStatus[0],
                                             'addons' => $objBooking->accessories
                                         ];
@@ -311,7 +330,7 @@ class BookingsController extends Controller
                                                 'time_start' => $objBooking->time_start,
                                                 'status' => $objBooking->status,
                                                 'roomCount' => $objBooking->roomCount,
-                                                'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                                'guest' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                                 'adult_count' => $objBooking->adult_count,
                                                 'children_count' => $objBooking->children_count,
                                                 'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
@@ -319,6 +338,7 @@ class BookingsController extends Controller
                                                 'booker' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                                 'rooms' => $associatedRooms,
                                                 'total_price' => $objBooking->price,
+                                                'calendar_price' => $objBooking->price['calendar_price'],
                                                 'payment_atatus' => $paymentStatus[0],
                                                 'addons' => $objBooking->accessories
                                             ];
@@ -405,7 +425,7 @@ class BookingsController extends Controller
                                 $paymentStatus = [
                                     'not-paid', 'partially-paid', 'payed'
                                 ];
-                                shuffle($paymentStatus);
+                                shuffle($paymentStatus); 
                                 
                                 $processedData[$count]['rate_type_bookings'][] = [
                                     'id' => $booking->id,
@@ -415,7 +435,7 @@ class BookingsController extends Controller
                                     'time_start' => $booking->time_start,
                                     'status' => $booking->status,
                                     'roomCount' => $booking->roomCount,
-                                    'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                    'guest' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                                     'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                                     'numberOfDays' => $booking->numberOfDays,
                                     'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
@@ -460,7 +480,7 @@ class BookingsController extends Controller
                             'time_start' => $booking->time_start,
                             'status' => $booking->status,
                             'roomCount' => $booking->roomCount,
-                            'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                            'guest' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                             'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
@@ -1308,7 +1328,7 @@ class BookingsController extends Controller
                         'reservation_to' => $sandBoxBooking->reservation_to,
                         'room_type_id' => $sandBoxBooking->room_type_id,
                         'room_type_name' => $lastRoomType != $sandBoxBooking->room_type_name ? $sandBoxBooking->room_type_name : '',
-                        'booking_guest' => $sandBoxBooking->first_guest_name,
+                        'booking_guest' => $sandBoxBooking->booker ? $sandBoxBooking->booker->user->first_name . ' ' . $sandBoxBooking->booker->user->last_name : null,
                         'adult_count' => $booking->getAdultGuestCount(),
                         'children_count' => $booking->getChildrenGuestsCount(),
                         'price' => $booking->price['total'],
@@ -1450,9 +1470,11 @@ class BookingsController extends Controller
                 $bookingRoom->ttlock_pin = $code;
                 $bookingRoom->save();
 
-                if(array_key_exists('send_key_via_whatsApp', $postData)){
+               // $this->whatsApp->sendMessage('whatsapp:+917889955696', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code '.$code.'. The address is '.$hotel->address.', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance '.$hotel->image_url.'. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
 
-                    //
+                if(array_key_exists('send_key_via_whatsApp', $postData)){                 
+
+                    $this->whatsApp->sendMessage('whatsapp:+917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code '.$code.'. The address is '.$hotel->address.', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance '.$hotel->image_url.'. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
                 }
                 if(array_key_exists('send_key_via_sms', $postData)){
 
@@ -1468,7 +1490,7 @@ class BookingsController extends Controller
                 return response()->json(array('errors' => ['lock' => 'Room does not have lock associated']), 422); 
             }
 
-            //$this->whatsApp->sendMessage('whatsapp:+917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code '.$code.'. The address is '.$hotel->address.', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance '.$hotel->image_url.'. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
+           
 
         }
 

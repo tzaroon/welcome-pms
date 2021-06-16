@@ -448,6 +448,19 @@ class Booking extends Model
             $prices['vat'] = round($prices['vat'], 2);
         }
 
+
+        $accomudationPrice = $this->getAccomudationPrice();
+        $accessoriesPrice = $this->getAccessoriesPrice();
+        $vat = $this->getVat();
+        $tax =  $this->getCityTax() +  $this->getChildrenCityTax();
+
+        $prices['calendar_price'] = [
+            'price' => $accomudationPrice + $accessoriesPrice,
+            'vat' => $vat,
+            'tax' => $tax,
+            'total' => $accomudationPrice + $accessoriesPrice + $vat +  $tax,
+            'pending' => $accomudationPrice + $accessoriesPrice + $vat +  $tax - $this->totalPaid 
+        ];
         $keyedDailyPrices = [];
         $gTotal = 0;
         if( $dailyPrices) {
