@@ -126,7 +126,8 @@ class RateType extends Model
                     'children_city_tax' => $taxesArr[Tax::CHILDREN_CITY_TAX]*$bookingQuery->numberOfChildren,
                     'vat' => 10/100*$price,
                     'cleanning' => $this->cleanning_price,
-                    'total_price' => $price+($taxesArr[Tax::CITY_TAX]*$bookingQuery->numberOfAdults)+($taxesArr[Tax::CHILDREN_CITY_TAX]*$bookingQuery->numberOfChildren)+$this->cleanning_price
+                    'total_price' => $price+($taxesArr[Tax::CITY_TAX]*$bookingQuery->numberOfAdults)+($taxesArr[Tax::CHILDREN_CITY_TAX]*$bookingQuery->numberOfChildren)+$this->cleanning_price,
+                    'rooms' =>  $this->roomType->rooms
                 ];
             }
         }
