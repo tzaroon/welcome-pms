@@ -227,7 +227,7 @@ class BookingsController extends Controller
                                             'time_start' => $objBooking->time_start,
                                             'status' => $objBooking->status,
                                             'roomCount' => $objBooking->roomCount,
-                                            'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                            'guest' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                             'adult_count' => $objBooking->adult_count,
                                             'children_count' => $objBooking->children_count,
                                             'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
@@ -304,7 +304,7 @@ class BookingsController extends Controller
                                                 'time_start' => $objBooking->time_start,
                                                 'status' => $objBooking->status,
                                                 'roomCount' => $objBooking->roomCount,
-                                                'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                                'guest' => $objBooking->booker ? $objBooking->booker->user->first_name . ' ' . $objBooking->booker->user->last_name : null,
                                                 'adult_count' => $objBooking->adult_count,
                                                 'children_count' => $objBooking->children_count,
                                                 'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
@@ -398,7 +398,7 @@ class BookingsController extends Controller
                                 $paymentStatus = [
                                     'not-paid', 'partially-paid', 'payed'
                                 ];
-                                shuffle($paymentStatus);
+                                shuffle($paymentStatus); 
                                 
                                 $processedData[$count]['rate_type_bookings'][] = [
                                     'id' => $booking->id,
@@ -408,7 +408,7 @@ class BookingsController extends Controller
                                     'time_start' => $booking->time_start,
                                     'status' => $booking->status,
                                     'roomCount' => $booking->roomCount,
-                                    'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                                    'guest' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                                     'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                                     'numberOfDays' => $booking->numberOfDays,
                                     'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
@@ -453,7 +453,7 @@ class BookingsController extends Controller
                             'time_start' => $booking->time_start,
                             'status' => $booking->status,
                             'roomCount' => $booking->roomCount,
-                            'guest' => $bookingHasRoom ? $bookingHasRoom->first_guest_name : null,
+                            'guest' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
                             'rateType' => $bookingHasRoom && $bookingHasRoom->rateType ? $bookingHasRoom->rateType->detail->name : null,
                             'numberOfDays' => $booking->numberOfDays,
                             'booker' => $booking->booker ? $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name : null,
@@ -1301,7 +1301,7 @@ class BookingsController extends Controller
                         'reservation_to' => $sandBoxBooking->reservation_to,
                         'room_type_id' => $sandBoxBooking->room_type_id,
                         'room_type_name' => $lastRoomType != $sandBoxBooking->room_type_name ? $sandBoxBooking->room_type_name : '',
-                        'booking_guest' => $sandBoxBooking->first_guest_name,
+                        'booking_guest' => $sandBoxBooking->booker ? $sandBoxBooking->booker->user->first_name . ' ' . $sandBoxBooking->booker->user->last_name : null,
                         'adult_count' => $booking->getAdultGuestCount(),
                         'children_count' => $booking->getChildrenGuestsCount(),
                         'price' => $booking->price['total'],
