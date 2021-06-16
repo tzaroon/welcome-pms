@@ -199,10 +199,13 @@ class BookingsController extends Controller
                                 if($reservationFromFirstDay < $calendarStartDate->format('Y-m-d')) {
                                     $hasPreviousBooking = true;
                                 }
+                                $lastBooking = null;
                                 for($i=0; $i < $days; $i++) {
                                     
                                     $booking = array_key_exists($calendarStartDate->format('Y-m-d'), $keyedRoomBookings) ? $keyedRoomBookings[$calendarStartDate->format('Y-m-d')] : null;                                    
+                                    
                                     if($booking) {
+                                        $lastBooking = $booking;
                                         $objBooking = new Booking;
                                         $objBooking->fill((array)$booking);
                                         $objBooking->id = $booking ? $booking->id : null;
@@ -238,19 +241,23 @@ class BookingsController extends Controller
                                             'payment_atatus' => $paymentStatus[0],
                                             'addons' => $objBooking->accessories
                                         ];
-                                        
-
                                     }
                                     $previousBooking = false;
                                     if($hasPreviousBooking && $reservationToFirstDay >= $calendarStartDate->format('Y-m-d')) {
                                         $previousBooking = true;
                                     }
-                                    $bookings[] = [
-                                        'date' => $calendarStartDate->format('Y-m-d'),
-                                        'day' => date('w', strtotime($calendarStartDate->format('Y-m-d'))),
-                                        'booking' => $booking ? $arrBooking : null,
-                                        'previous_booking' => $previousBooking
-                                    ];
+
+                                    if(($lastBooking && $lastBooking->reservation_from < $calendarStartDate->format('Y-m-d') && $lastBooking->reservation_to > $calendarStartDate->format('Y-m-d'))) {
+                                        
+                                    } else {
+                                        $bookings[] = [
+                                            'date' => $calendarStartDate->format('Y-m-d'),
+                                            'day' => date('w', strtotime($calendarStartDate->format('Y-m-d'))),
+                                            'booking' => $booking ? $arrBooking : null,
+                                            'previous_booking' => $previousBooking
+                                        ];
+                                    }
+                                   
                                     $calendarStartDate->addDay();
                                 }
                                 $processedData[$count]['bookings'] = $bookings;
