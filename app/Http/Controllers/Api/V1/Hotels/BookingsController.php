@@ -797,6 +797,7 @@ class BookingsController extends Controller
         $responseArray['reservation_from'] = $booking->reservation_from;
         $responseArray['reservation_to'] = $booking->reservation_to;
         $responseArray['status'] = $booking->status;
+        $responseArray['cleaning_status'] = $booking->cleaning_status;
         $responseArray['time_start'] = $booking->time_start;
         $responseArray['source'] = $booking->source;
         $responseArray['comment'] = $booking->comment;
