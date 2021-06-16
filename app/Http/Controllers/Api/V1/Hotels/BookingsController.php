@@ -991,8 +991,29 @@ class BookingsController extends Controller
         DB::transaction(function() use ($booking, $user, $postData) {
             $booking->fill($postData);
             $booking->save();
+            
 
             $rooms = array_key_exists('rooms', $postData) ? $postData['rooms'] : [];
+
+            $deletedGuests = array_key_exists('deleted_guest_ids', $postData) ? $postData['deleted_guest_ids'] : [];
+
+            if($deletedGuests) {
+            
+                foreach($deletedGuests as $guest) {
+    
+                    $guest = Guest::find($guest);
+                    $bookingRoomGuest = BookingRoomGuest ::where('booking_id' , $booking->id)
+                                        ->where('guest_id' , $guest->id)->get()->first();
+
+                    if($bookingRoomGuest)
+                    {
+                        $booking->guests()->detach($guest->id);
+                    }                              
+
+                    $guest->delete();
+                }
+            }
+    
 
             if($rooms)  {
                 $priceIds = [];
@@ -1985,5 +2006,7 @@ class BookingsController extends Controller
             }
         }
         return response()->json($arrBooking);
-     }
+     } 
+
+
 }
