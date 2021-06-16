@@ -112,14 +112,18 @@ class PdfsController extends Controller
 
          $pdf->SetXY($x+128, $y);  
 
-         $pdf->Cell(20, $fontSize, number_format($booking['price']['price']  + $booking['price']['vat'] , 2));
+         $accomudationPrice = $booking->getAccomudationPrice();
+         $vat = $booking->getVat();
+         $tax = $booking->getCityTax()+ $booking->getChildrenCityTax();
+
+         $pdf->Cell(20, $fontSize, $accomudationPrice  + $vat);
 
          $y += $yIncremenent;
          $pdf->SetXY($x, $y);
          $pdf->Cell(20, $fontSize, $booking->adult_count . '  Adults ' .'x Tourist tax');
 
          $pdf->SetXY($x+130, $y);        
-         $pdf->Cell(20, $fontSize, number_format($booking['price']['tax'], 2));
+         $pdf->Cell(20, $fontSize, $tax);
          $y += $yIncremenent;
 
          $pdf->Rect($x, $y, 70, 15);
@@ -129,7 +133,7 @@ class PdfsController extends Controller
          $y += 3;
          $pdf->SetXY($x+ 45, $y-3); 
          $pdf->SetFont('Arial','B',8);
-         $pdf->Cell(20, $fontSize, number_format($booking['price']['price'] + $booking['price']['vat'] + $booking['price']['tax'] , 2));
+         $pdf->Cell(20, $fontSize,  $accomudationPrice + $vat + $tax);
          
          //$y += $yIncremenent;
          $pdf->SetXY($x+ 45, $y+1); 
@@ -142,7 +146,7 @@ class PdfsController extends Controller
 
          $pdf->SetXY($x+ 75, $y+1); 
          $pdf->SetFont('Arial','', 8);
-         $pdf->Cell(20, $fontSize, number_format($booking['price']['price'] + $booking['price']['vat'] + $booking['price']['tax'] - $booking['price']['total'] , 2));
+         $pdf->Cell(20, $fontSize, $booking->totalPaid);
 
          
          $y += $yIncremenent;
@@ -360,6 +364,10 @@ class PdfsController extends Controller
         $y += $yIncremenent ; 
         $i = 15;
         $rooms = $payment->booking->rooms;
+
+        $accomudationPrice = $payment->booking->getAccomudationPrice();
+        $vat = $payment->booking->getVat();
+        $tax = $payment->booking->getCityTax()+ $payment->booking->getChildrenCityTax();
              
         if($detailed){
             $i = 0;
@@ -384,12 +392,12 @@ class PdfsController extends Controller
 
             $pdf->SetXY(150, $y);   
         
-            $pdf->Cell(20,10, number_format($payment->booking['price']['price'] + $payment->booking['price']['vat'] , 2)); 
+            $pdf->Cell(20,10, $accomudationPrice + $vat); 
             $y += $yIncremenent ;
             $pdf->SetXY($x, $y); 
             $pdf->Cell(20,10, $payment->booking->adult_count. ' Adults '. '* ' . 'Tourist Tax Adultos '); 
             $pdf->SetXY(150, $y);
-            $pdf->Cell(20,10, number_format($payment->booking['price']['tax'] , 2));
+            $pdf->Cell(20,10, $tax);
         
         }
        
@@ -408,9 +416,9 @@ class PdfsController extends Controller
         $pdf->Cell(20,10,'PAID ON ACCOUNT'); 
         $y += $yIncremenent ;
         $pdf->SetXY(147, $y+4);
-        $pdf->SetFont('Arial','B', $fontSize +3);  
+        $pdf->SetFont('Arial','B', $fontSize +3);
        
-        $pdf->Cell(20,10, number_format($payment->booking['price']['price'] + $payment->booking['price']['vat'] + $payment->booking['price']['tax'] - $payment->booking['price']['total'] , 2) ,0,0,'R');
+        $pdf->Cell(20,10, $payment->booking->totalPaid ,0,0,'R');
        
         $y += $yIncremenent ;
         $pdf->SetXY(155, $y+4);
