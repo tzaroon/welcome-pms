@@ -35,7 +35,9 @@ class User extends Authenticatable implements JWTSubject
         'city',
         'country_id',
         'state_id',
-        'birth_date'
+        'birth_date',
+        'username',
+        'role_id'
     ];
 
     const GENDER_MALE = 'male';

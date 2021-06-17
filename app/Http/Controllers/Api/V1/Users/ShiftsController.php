@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Users;
 
 use App\Http\Controllers\Controller;
 use App\Models\Shift;
+use App\Role;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Validator;
@@ -132,5 +133,82 @@ class ShiftsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function showShifts(Request $request)
+    {
+        $userShifts = Shift::all();
+        $roles = Role::all();       
+        $shifts = Shift::$__shift_types;
+       
+
+        $postData = $request->getContent();
+
+        $postData = $postData ? json_decode($postData, true) : [];
+
+
+        $validator = Validator::make($postData, [
+            'start_date' => 'required',
+            'end_date' => 'required'
+        ], [], [
+            'start_date' => 'From Date',
+            'end_date' => 'To Date'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $startDate = Carbon::parse($postData['start_date']);
+
+        $endDate = Carbon::parse($postData['end_date']);
+        
+        $days = $endDate->diffInDays($startDate);
+
+        $calendarStartDate = Carbon::parse($postData['start_date']);
+        
+        $bodyRows = [];
+        $j=0;
+        $bodyRows[$j] = [
+            'row_type' => 'heading',
+            'heading_one' => 'Roles',
+            'heading_two' => 'Shifts',
+        ];
+        $dates = [];
+        for($i = 0; $i < $days; $i++) {
+            $dates[] = [
+                'date' => $calendarStartDate->format('Y-m-d')
+            ];
+            $calendarStartDate->addDay();
+        }
+        $bodyRows[$j]['dates'] = $dates;
+        $j++;
+       
+        foreach($roles as $role)
+        {
+           foreach($shifts as $shift) {
+                $bodyRows[$j] = [
+                    'row_type' => 'body',
+                    'role_name' => $role->name,
+                    'shift' => $shift
+                ];
+                $users = [];
+                $calendarStartDate = Carbon::parse($postData['start_date']);
+                for($i = 0; $i < $days; $i++) {
+                    $users[] = [
+                        'date' => $calendarStartDate->format('Y-m-d'),
+                        'user_id' => 1,
+                        'user_name' => 'Abrar'
+                    ];
+                    $calendarStartDate->addDay();
+                }
+                $bodyRows[$j]['users'] = $users;
+                $j++;
+           }
+        }
+
+        return response()->json($bodyRows);
+                  
     }
 }
