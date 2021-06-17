@@ -62,7 +62,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('user/{role?}/{roleId?}', 'UsersController@index');
                 Route::resource('role', 'RolesController');
                 Route::resource('shift', 'ShiftsController');
-                Route::get('shifts-calendar', 'ShiftsController@showShifts');
+                Route::post('shifts-calendar', 'ShiftsController@showShifts');
                 
             });
 
