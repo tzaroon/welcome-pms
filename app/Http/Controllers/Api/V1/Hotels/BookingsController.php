@@ -262,7 +262,7 @@ class BookingsController extends Controller
                                         ];
                                     }
                                     $previousBooking = false;
-                                    if($hasPreviousBooking && $reservationToFirstDay >= $calendarStartDate->format('Y-m-d')) {
+                                    if($hasPreviousBooking && $reservationToFirstDay > $calendarStartDate->format('Y-m-d')) {
                                         $previousBooking = true;
                                     }
 
