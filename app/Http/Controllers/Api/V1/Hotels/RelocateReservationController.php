@@ -197,8 +197,9 @@ class RelocateReservationController extends Controller
 
         $oldBookingHasRoom->booking->productPrice()->sync($priceIds);
 
-        $booking->reservation_from = $startDate->format('Y-m-d');
-        $booking->reservation_to = $endDate->format('Y-m-d');
+        $booking->reservation_from = Carbon::parse($postData['arrivel_date'])->format('Y-m-d');
+        $booking->reservation_to = Carbon::parse($postData['departure_date'])->format('Y-m-d');
+
         $booking->save();
         
         return response()->json($oldBookingHasRoom);
