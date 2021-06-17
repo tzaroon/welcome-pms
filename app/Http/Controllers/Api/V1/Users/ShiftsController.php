@@ -197,9 +197,7 @@ class ShiftsController extends Controller
 
                 $calendarStartDate = Carbon::parse($postData['start_date']);
 
-                for($i = 0; $i < $days; $i++) {
-
-                  // dd($calendarStartDate->format('Y-m-d'));
+                for($i = 0; $i < $days; $i++) {                
 
                     $userShift = Shift::where('shift' , $shift)
                                     ->where('date', $calendarStartDate)
