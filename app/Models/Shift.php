@@ -18,9 +18,9 @@ class Shift extends Model
     const DOCUMENT_NIGHT = 'night';
 
     static $__shift_types = [
-        self::SHIFT_MORNING => 'morning',
-        self::SHIFT_EVENING => 'evening',
-        self::DOCUMENT_NIGHT => 'night'
+        self::SHIFT_MORNING => 'Morning',
+        self::SHIFT_EVENING => 'Evening',
+        self::DOCUMENT_NIGHT => 'Night'
     ];
     
     static $__shift_types_array = [
