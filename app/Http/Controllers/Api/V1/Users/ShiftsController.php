@@ -194,8 +194,12 @@ class ShiftsController extends Controller
                     'shift' => $shift
                 ];
                 $users = [];
+
                 $calendarStartDate = Carbon::parse($postData['start_date']);
+
                 for($i = 0; $i < $days; $i++) {
+
+                  // dd($calendarStartDate->format('Y-m-d'));
 
                     $userShift = Shift::where('shift' , $shift)
                                     ->where('date', $calendarStartDate)
@@ -207,8 +211,10 @@ class ShiftsController extends Controller
                         'user_id' => $userShift ? $userShift->user_id : null ,
                         'user_name' => $userShift ? $userShift->user->first_name : null
                     ];
+
                     $calendarStartDate->addDay();
                 }
+
                 $bodyRows[$j]['users'] = $users;
                 $j++;
            }
