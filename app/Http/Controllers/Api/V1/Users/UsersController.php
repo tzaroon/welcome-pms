@@ -17,11 +17,15 @@ class UsersController extends Controller
     public function index(Request $request , $role = null, $roleId = null ) { 
         
         $user = auth()->user();
+        
+        $user = User::where(['company_id' => $user->company_id])
+        ->where('is_system_user' , 1);
+        
+        if($roleId){
+            $user->where('role_id' , $roleId);
+        }        
 
-        $systemUsers = User::where(['company_id' => $user->company_id])
-                            ->where('is_system_user' , 1)
-                            ->where('role_id' , $roleId)
-                            ->get();
+        $systemUsers =  $user->get();
         
         if(0 == $systemUsers->count()) {
             return response()->json(['message' => 'no data found'], 201);
