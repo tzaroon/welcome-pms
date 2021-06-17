@@ -85,7 +85,8 @@ class Room extends Model
 			AND
 				`b`.`reservation_from` <= \''.$todate.'\'
 			AND
-				`br`.`room_id` = ' . (int)$id
+				`br`.`room_id` = ' . (int)$id .
+			' ORDER BY `b`.`reservation_from` ASC'
 		);
 	}
 
