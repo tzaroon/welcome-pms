@@ -139,16 +139,30 @@ class ShiftsController extends Controller
     {
         $userShifts = Shift::all();
         $roles = Role::all();       
-        $shifts = Shift::$__shift_types;        
+        $shifts = Shift::$__shift_types;
        
 
         $postData = $request->getContent();
 
         $postData = $postData ? json_decode($postData, true) : [];
 
+
+        $validator = Validator::make($postData, [
+            'start_date' => 'required',
+            'end_date' => 'required'
+        ], [], [
+            'start_date' => 'From Date',
+            'end_date' => 'To Date'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
         $startDate = Carbon::parse($postData['start_date']);
 
-        $endDate = Carbon::parse($postData['end_date']);       
+        $endDate = Carbon::parse($postData['end_date']);
         
         $days = $endDate->diffInDays($startDate);
 
