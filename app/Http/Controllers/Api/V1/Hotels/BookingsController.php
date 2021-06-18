@@ -1565,7 +1565,7 @@ class BookingsController extends Controller
                 $processedData [] = [
                     'room_id' => $bookingRoom->room->id,
                     'booking_room_id' => $bookingRoom->id,
-                    'name' => $bookingRoom->room->name
+                    'name' => $bookingRoom->room->roomType->hotel->property . ' - ' . $bookingRoom->room->name
                 ];
             }
         }
