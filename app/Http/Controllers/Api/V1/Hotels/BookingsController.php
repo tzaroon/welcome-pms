@@ -1350,7 +1350,7 @@ class BookingsController extends Controller
                         'reservation_to' => $sandBoxBooking->reservation_to,
                         'room_type_id' => $sandBoxBooking->room_type_id,
                         'room_type_name' => $lastRoomType != $sandBoxBooking->room_type_name ? $sandBoxBooking->room_type_name : '',
-                        'booking_guest' => $sandBoxBooking->booker ? $sandBoxBooking->booker->user->first_name . ' ' . $sandBoxBooking->booker->user->last_name : null,
+                        'booking_guest' => $sandBoxBooking ? $sandBoxBooking->booker->user->first_name . ' ' . $sandBoxBooking->booker->user->last_name : null,
                         'adult_count' => $booking->getAdultGuestCount(),
                         'children_count' => $booking->getChildrenGuestsCount(),
                         'price' => $booking->price['total'],
