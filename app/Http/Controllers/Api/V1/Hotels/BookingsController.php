@@ -262,7 +262,7 @@ class BookingsController extends Controller
                                         ];
                                     }
                                     $previousBooking = false;
-                                    if($hasPreviousBooking && $reservationToFirstDay >= $calendarStartDate->format('Y-m-d')) {
+                                    if($hasPreviousBooking && $reservationToFirstDay > $calendarStartDate->format('Y-m-d')) {
                                         $previousBooking = true;
                                     }
 
@@ -1350,7 +1350,7 @@ class BookingsController extends Controller
                         'reservation_to' => $sandBoxBooking->reservation_to,
                         'room_type_id' => $sandBoxBooking->room_type_id,
                         'room_type_name' => $lastRoomType != $sandBoxBooking->room_type_name ? $sandBoxBooking->room_type_name : '',
-                        'booking_guest' => $sandBoxBooking->booker ? $sandBoxBooking->booker->user->first_name . ' ' . $sandBoxBooking->booker->user->last_name : null,
+                        'booking_guest' => $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name,
                         'adult_count' => $booking->getAdultGuestCount(),
                         'children_count' => $booking->getChildrenGuestsCount(),
                         'price' => $booking->price['total'],
@@ -1565,7 +1565,7 @@ class BookingsController extends Controller
                 $processedData [] = [
                     'room_id' => $bookingRoom->room->id,
                     'booking_room_id' => $bookingRoom->id,
-                    'name' => $bookingRoom->room->name
+                    'name' => $bookingRoom->room->roomType->hotel->property . ' - ' . $bookingRoom->room->name
                 ];
             }
         }

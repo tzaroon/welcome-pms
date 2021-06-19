@@ -12,6 +12,19 @@ class Product extends Model
 
         $productPrice = ProductPrice::firstOrNew(['company_id' => $this->company_id, 'product_id' => $this->id, 'is_active' => 1, 'price' => $price]);
 
+        $oldProductTaxes = $this->price->taxes;
+        $oldTaxes = [];
+        if($oldProductTaxes->count()) {
+            foreach($oldProductTaxes as $oldTax) {
+                $oldTaxes[] = [
+                    'tax_id' => $oldTax->tax_id,
+                    'amount' => $oldTax->amount,
+                    'percentage' => $oldTax->percentage
+                ];
+            }
+        }
+
+        $taxes = array_merge($oldTaxes, $taxes);
         if(!$productPrice->id) {
             ProductPrice::where('product_id', $this->id)->update(['is_active' => 0]);
         }
