@@ -85,6 +85,7 @@ class RoomType extends Model
                 $availableRooms[] = $room;
             }
         }
+
         return $availableRooms;
     }
 

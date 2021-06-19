@@ -230,10 +230,16 @@ class HotelsController extends Controller
 
         $bookingQuery = BookingQuery::fromRequest($postData);
 
+       
+
         $roomTypes = [];
         if($rateTypes->count()) {
-            foreach($rateTypes as $rate) {
-                $roomTypes[] = $rate->calculateRate($bookingQuery);
+            foreach($rateTypes as $rate) 
+            {
+                $calculated = $rate->calculateRate($bookingQuery);
+                if($calculated) {
+                    $roomTypes[] = $calculated;
+                }
             }
         }
 
