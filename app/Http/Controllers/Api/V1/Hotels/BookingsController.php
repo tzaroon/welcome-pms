@@ -695,7 +695,7 @@ class BookingsController extends Controller
                 'postal_code' => array_key_exists('zip_code', $postData) ? $postData['zip_code'] : null,
                 'country_id' => array_key_exists('user_country', $postData) ? $postData['user_country'] : null,
                 'state_id' => array_key_exists('user_province_state', $postData) ? $postData['user_province_state'] : null,    
-                'email' => array_key_exists('email', $postData) ? $postData['email'] : null,
+                'email' => array_key_exists('user_email', $postData) ? $postData['user_email'] : null,
                 'language_id' => $language ? $language->id : null                              
             ]);
 
@@ -995,22 +995,29 @@ class BookingsController extends Controller
 
             $rooms = array_key_exists('rooms', $postData) ? $postData['rooms'] : [];
 
-            $deletedGuests = array_key_exists('deleted_guest_ids', $postData) ? $postData['deleted_guest_ids'] : [];
+            $deletedGuests = array_key_exists('deleted_guest_ids', $postData) ? $postData['deleted_guest_ids'] : [];  
+            
+           // dd($deletedGuests);
 
             if($deletedGuests) {
             
                 foreach($deletedGuests as $guest) {
-    
-                    $guest = Guest::find($guest);
-                    $bookingRoomGuest = BookingRoomGuest ::where('booking_id' , $booking->id)
-                                        ->where('guest_id' , $guest->id)->get()->first();
 
-                    if($bookingRoomGuest)
-                    {
-                        $booking->guests()->detach($guest->id);
-                    }                              
+                        
+                    $guestUser = Guest::find($guest); 
+                    if($guestUser)
+                        {                   
+                        
+                            $bookingRoomGuest = BookingRoomGuest ::where('booking_id' , $booking->id)
+                                            ->where('guest_id' , $guestUser->id)->get()->first();
 
-                    $guest->delete();
+                        if($bookingRoomGuest)
+                        {
+                            $booking->guests()->detach($guestUser->id);
+                        }                              
+
+                            $guest->delete();
+                        }
                 }
             }
     
@@ -1886,6 +1893,7 @@ class BookingsController extends Controller
         $user = auth()->user();
         $postData = $request->getContent();
         $postData = json_decode($postData, true);       
+        
 
         $validator = Validator::make($postData, [
              'first_name' => 'required',
@@ -1923,9 +1931,12 @@ class BookingsController extends Controller
                 
                 if(array_key_exists('id', $guestData)) {
                     $guest = Guest::find($guestData['id']);
-                    $guest->fill($guestData);
-                    $guest->user->fill($guestData);
-                    $guest->push();
+                    if($guest)
+                    {
+                        $guest->fill($guestData);
+                        $guest->user->fill($guestData);
+                        $guest->push();
+                    }
                 } else {
                     $guestUser = User::create([
                         'company_id' => $user->company_id,
@@ -1952,7 +1963,7 @@ class BookingsController extends Controller
                 }
 
 
-                if(array_key_exists('room_id', $guestData)) {
+                if(array_key_exists('room_id', $guestData) && $guest) {
                     $arrGuests[$i]['room_id'] = $guestData['room_id'];
                     $arrGuests[$i]['guest_id'] =  $guest->id;
                     $i++;
