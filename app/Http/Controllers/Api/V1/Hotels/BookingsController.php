@@ -1488,7 +1488,7 @@ class BookingsController extends Controller
             if($bookingRoom->room->lock_id){
                 $ttLock = Lock::find($bookingRoom->room->lock_id);
                 $code = rand(1000,9999);
-                $ttlock->passcode->add($ttLock->lock_id, $code, strtotime($postData['reservation_from_dt']), strtotime($postData['reservation_to_dt']), 1, time().'000' );
+                $ttlock->passcode->add($ttLock->lock_id, $code, strtotime($postData['reservation_from_dt']).'000', strtotime($postData['reservation_to_dt']).'000', 1, time().'000' );
                 $bookingRoom->ttlock_pin = $code;
                 $bookingRoom->save();
 

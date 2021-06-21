@@ -49,6 +49,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('booking-segments', 'EnumsController@segments')->name('booking-segments');
                 Route::get('booking-cancel-reasons', 'EnumsController@cancelReasons');
                 Route::get('shifts', 'EnumsController@shifts');
+                Route::post('upload-id-image', 'ImageController@uploadIdImage');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {
                 Route::resource('account', 'AccountController', ['except' => ['create']]);
