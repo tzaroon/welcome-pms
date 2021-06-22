@@ -131,10 +131,7 @@ class PaymentsController extends Controller
         }
 
         $validator = Validator::make($postData, [
-            'payment_date' => 'required',
-            'amount' => 'required',
-            'payment_method' => 'required',
-            'operation_code' => 'required'            
+            'amount' => 'required'    
             
         ], [], [
             'payment_date' => 'Payment Date',
@@ -148,9 +145,9 @@ class PaymentsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
         
-        $payment->payment_date = $postData['payment_date'];
+        $payment->payment_date = array_key_exists('payment_date', $postData) ? $postData['payment_date'] : date('Y-m-d');
         $payment->amount = $postData['amount'];
-        $payment->payment_method = $postData['payment_method'];
+        $payment->payment_method = (array_key_exists('payment_method', $postData) && $postData['payment_method']) ? $postData['payment_method'] : Payment::TYPE_CASH;
         $payment->operation_code = $postData['operation_code'];
         $payment->notes = array_key_exists('notes', $postData) ? $postData['notes'] : null;   
         $payment->payment_on_account = array_key_exists('payment_on_account', $postData) ? $postData['payment_on_account'] : null;
