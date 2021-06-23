@@ -171,7 +171,14 @@ class RelocateReservationController extends Controller
 
         $oldBookingHasRoom = BookingHasRoom::where('booking_id', $booking->id)
             ->where('room_id', $oldRoomId)->get()->first();
-        
+
+        if($oldBookingHasRoom->booking->productPrice) {
+            foreach($oldBookingHasRoom->booking->productPrice as $productPrice) {
+                $priceIds[$productPrice->pivot->booking_has_room_id]['product_price_id'] = $productPrice->pivot->product_price_id;
+                $priceIds[$productPrice->pivot->booking_has_room_id]['booking_has_room_id'] = $productPrice->pivot->booking_has_room_id;
+            }
+        }
+
         $oldBookingHasRoom->room_id = $roomId;
         $oldBookingHasRoom->rate_type_id = $rateTypeId;
         $oldBookingHasRoom->save();
@@ -188,8 +195,8 @@ class RelocateReservationController extends Controller
                         ->where('rate_type_id', $rateTypeId)
                         ->first();
 
-                    $priceIds[$i]['product_price_id'] = $dailyPrice->product->price->id;
-                    $priceIds[$i]['booking_has_room_id'] =  $oldBookingHasRoom->id;
+                    $priceIds[$oldBookingHasRoom->id]['product_price_id'] = $dailyPrice->product->price->id;
+                    $priceIds[$oldBookingHasRoom->id]['booking_has_room_id'] =  $oldBookingHasRoom->id;
                     $date = $date->addDay();
                 }
             }
