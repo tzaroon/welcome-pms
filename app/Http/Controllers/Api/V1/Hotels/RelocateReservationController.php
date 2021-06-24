@@ -155,8 +155,7 @@ class RelocateReservationController extends Controller
         $postData = $request->getContent();
        
         $postData = json_decode($postData, true);
-       
-
+    
         $startDate = Carbon::parse($postData['arrivel_date']);
         $endDate = Carbon::parse($postData['departure_date']);       
         $days = $endDate->diffInDays($startDate);
