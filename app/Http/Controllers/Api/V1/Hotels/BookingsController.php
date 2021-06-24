@@ -1167,12 +1167,10 @@ class BookingsController extends Controller
         if (array_key_exists('room_id', $postData) && $postData['room_id']) {
             $room = Room::find($bookingRoom->room_id);
             $newRoom = Room::find($postData['room_id']);
-
             if (!$newRoom->isAvailable($postData['room_id'], $booking->reservation_from)) {
 
                 return response()->json(['errors' => ['rooms' => $newRoom->name . ' ' . $newRoom->room_number . ' cannot be assigned as already occupied.']], 422);
             }
-
             if ($room && $room->room_type_id != $newRoom->room_type_id && (!array_key_exists('force', $postData) || !$postData['force'])) {
 
                 $rateTypes = RateType::where('room_type_id', $newRoom->room_type_id)->with(['detail'])->get();
