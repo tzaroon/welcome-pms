@@ -744,8 +744,7 @@ class BookingsController extends Controller
                 }
             }
 
-
-            $date = $start;
+            $date = Carbon::parse($postData['arrivel_date']);
 
             if ($rateTypes) {
                 foreach ($rateTypes as $rateType) {

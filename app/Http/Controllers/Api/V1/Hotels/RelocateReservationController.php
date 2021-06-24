@@ -171,7 +171,7 @@ class RelocateReservationController extends Controller
 
         $oldBookingHasRoom = BookingHasRoom::where('booking_id', $booking->id)
             ->where('room_id', $oldRoomId)->get()->first();
-        
+
         $oldBookingHasRoom->room_id = $roomId;
         $oldBookingHasRoom->rate_type_id = $rateTypeId;
         $oldBookingHasRoom->save();
@@ -180,22 +180,24 @@ class RelocateReservationController extends Controller
         {
             foreach($dailyPrices as $dailyPrice)
             {
+		        $startDate = Carbon::parse($postData['arrivel_date']);
                 for($i=0; $i < $days; $i++) 
                 {
-                    $rateDate = $date->format('Y-m-d');
+                    $rateDate = $startDate->format('Y-m-d');
+
                     $dailyPrice = new DailyPrice();
                     $dailyPrice = $dailyPrice->where('date', $rateDate)
                         ->where('rate_type_id', $rateTypeId)
                         ->first();
 
                     $priceIds[$i]['product_price_id'] = $dailyPrice->product->price->id;
-                    $priceIds[$i]['booking_has_room_id'] =  $oldBookingHasRoom->id;
-                    $date = $date->addDay();
+                    $priceIds[$i]['booking_id'] =  $booking->id;
+                    $startDate->addDay();
                 }
             }
         }
 
-        $oldBookingHasRoom->booking->productPrice()->sync($priceIds);
+        $oldBookingHasRoom->productPrice()->sync($priceIds);
 
         $booking->reservation_from = Carbon::parse($postData['arrivel_date'])->format('Y-m-d');
         $booking->reservation_to = Carbon::parse($postData['departure_date'])->format('Y-m-d');
