@@ -722,6 +722,7 @@ class BookingsController extends Controller
                 $rateType =  $room->roomType->rateTypes;
 
                 if ($rateType) {
+                    $selectedRateTypeId = $rateType[0]->id;
                     $bookingHasRoom = BookingHasRoom::create(['booking_id' => $booking->id, 'first_guest_name' => $bUser->first_name, 'room_id' => $postData['default_room_id'], 'rate_type_id' => $rateType[0]->id]);
                     $bookingHasRoom->save();
 
@@ -753,6 +754,10 @@ class BookingsController extends Controller
 
                     for ($j = 0; $j < $units; $j++) {
 
+                        if($selectedRateTypeId == $rateType['id'] && $j == 0) {
+                            continue;
+                        }
+                        
                         $bookingHasRoom = BookingHasRoom::create(['booking_id' => $booking->id, 'rate_type_id' => $rateType['id'], 'first_guest_name' => $bUser->first_name]);
                         $bookingHasRoom->save();
                         //$productprices = [];
