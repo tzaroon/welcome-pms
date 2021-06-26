@@ -160,7 +160,7 @@ class RelocateReservationController extends Controller
         $endDate = Carbon::parse($postData['departure_date']);       
         $days = $endDate->diffInDays($startDate);
         $date = $startDate;
-        $priceIds = [];
+        $productprices = [];
 
         $oldRoomId = array_key_exists('old_room_id', $postData) ? $postData['old_room_id'] : null;
         $roomId = array_key_exists('room_id', $postData) ? $postData['room_id'] : null;
@@ -175,9 +175,12 @@ class RelocateReservationController extends Controller
         $oldBookingHasRoom->rate_type_id = $rateTypeId;
         $oldBookingHasRoom->save();
 
-        if($dailyPrices)
+        $bookingRooms = $booking->bookingRooms;
+
+        $k = 0;
+        if($bookingRooms)
         {
-            foreach($dailyPrices as $dailyPrice)
+            foreach($bookingRooms as $bookingRoom)
             {
 		        $startDate = Carbon::parse($postData['arrivel_date']);
                 for($i=0; $i < $days; $i++) 
@@ -189,14 +192,16 @@ class RelocateReservationController extends Controller
                         ->where('rate_type_id', $rateTypeId)
                         ->first();
 
-                    $priceIds[$i]['product_price_id'] = $dailyPrice->product->price->id;
-                    $priceIds[$i]['booking_id'] =  $booking->id;
+                    $productprices[$k]['product_price_id'] = $dailyPrice->product->price->id;
+                    $productprices[$k]['booking_has_room_id'] =  $bookingRoom->id;
+                    
                     $startDate->addDay();
+                    $k++;
                 }
             }
         }
 
-        $oldBookingHasRoom->productPrice()->sync($priceIds);
+        $booking->productPrice()->sync($productprices);
 
         $booking->reservation_from = Carbon::parse($postData['arrivel_date'])->format('Y-m-d');
         $booking->reservation_to = Carbon::parse($postData['departure_date'])->format('Y-m-d');
