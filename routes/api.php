@@ -15,8 +15,8 @@ use Illuminate\Http\Request;
 
 Route::namespace('Api')->name('api.')->group(function () {
     Route::namespace('V1')->name('v1.')->prefix('v1')->group(function () {
-        
-        Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PdfsController@showReceipt');//detailed 0 or 1
+
+        Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PdfsController@showReceipt'); //detailed 0 or 1
         Route::get('booking/{booking}/show-voucher', 'PdfsController@showVoucher');
         Route::namespace('Auth')->name('auth.')->prefix('auth')->group(function () {
             Route::post('identify', 'SessionsController@identify')->name('identify');
@@ -24,10 +24,10 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::post('verify', 'SessionsController@verify')->name('verify');
         });
 
-        Route::namespace('WuBook')->name('wubook.')->prefix('wubook')->group(function (){
+        Route::namespace('WuBook')->name('wubook.')->prefix('wubook')->group(function () {
             Route::post('push-notification', 'PushNotificationController@index')->name('push-notification');
         });
-        
+
         Route::middleware('auth:api')->group(function () {
             Route::namespace('Common')->name('common.')->prefix('common')->group(function () {
                 Route::resource('taxes', 'TaxesController', ['except' => ['create']]);
@@ -64,18 +64,19 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('role', 'RolesController');
                 Route::resource('shift', 'ShiftsController');
                 Route::post('shifts-calendar', 'ShiftsController@showShifts');
-                
+                Route::post('role-shifts', 'ShiftsController@addRoleShifts');
+                Route::get('permissions', 'ShiftsController@loadPermissions');
             });
 
-            Route::namespace('Communication')->name('communication.')->prefix('communication')->group(function (){
+            Route::namespace('Communication')->name('communication.')->prefix('communication')->group(function () {
                 Route::get('whats-app', 'WhatsAppController@sendMessage')->name('whats_app');
             });
-            
-            
+
+
             Route::namespace('Hotels')->name('hotels.')->prefix('hotels')->group(function () {
                 Route::resource('hotels', 'HotelsController', ['except' => ['create']]);
                 Route::post('load-rate-types-rate-calculated', 'HotelsController@loadRateTypesWithRateCalculated')->name('load-rate-types-rate-calculated');
-                Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);                
+                Route::resource('room-types', 'RoomTypesController', ['except' => ['create']]);
                 Route::get('bookings/{booking}/status/{status}', 'BookingsController@changeStatus');
                 Route::resource('rate-types', 'RateTypesController', ['except' => ['create']]);
                 Route::resource('rooms', 'RoomsController', ['except' => ['index', 'create']]);
@@ -90,7 +91,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('temporary-closure', 'RoomsController@temporaryClosure');
                 Route::resource('{booking}/booking-notes', 'BookingNotesController');
                 Route::post('generate-lock', 'BookingsController@generateLock');
-                Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PaymentsController@showReceipt');//detailed 0 or 1
+                Route::get('booking/payment/{payment}/show-receipt/detailed/{detailed}', 'PaymentsController@showReceipt'); //detailed 0 or 1
                 Route::get('booking/{booking}/show-voucher', 'BookingsController@showVoucher');
                 Route::get('booking/{booking}/room/{room}/old-price', 'BookingsController@getOldPrice');
                 Route::post('booking/save-relocation', 'BookingsController@saveRelocation');
@@ -101,7 +102,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
                 Route::get('bookings/{booking}/load-rooms', 'BookingsController@loadRooms');
                 Route::post('{booking}/change-cleaning-status', 'BookingsController@changeCleaningStatus');
-                Route::post('booking-cancel', 'BookingsController@cancel');  
+                Route::post('booking-cancel', 'BookingsController@cancel');
                 Route::post('rooms/check-avalibility', 'RelocateReservationController@checkAvalibility');
                 Route::post('rooms/load-rate-types', 'RelocateReservationController@loadRateTypes');
                 Route::post('booking/{booking}/relocateBooking', 'RelocateReservationController@relocateBooking');
