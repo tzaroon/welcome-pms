@@ -8,9 +8,13 @@ use App\Models\Role;
 use App\Models\RoleHasPermission;
 use App\Models\RoleShift;
 use App\Models\Shift;
+
+use App\Models\UserShift;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Validator;
+use App\User;
 
 class ShiftsController extends Controller
 {
@@ -53,13 +57,13 @@ class ShiftsController extends Controller
             'from_date' => 'required',
             'to_date' => 'required',
             'role_id' => 'required',
-            'shift' => 'required',
+            'shift_id' => 'required',
             'user_id' => 'required',
         ], [], [
             'from_date' => 'From Date',
             'to_date' => 'To Date',
             'role_id' => 'Role',
-            'shift' => 'Shift',
+            'shift_id' => 'Shift',
             'user_id' => 'User'
         ]);
 
@@ -75,15 +79,22 @@ class ShiftsController extends Controller
 
         $calendarStartDate = Carbon::parse($postData['from_date']);
 
-        for ($i = 0; $i < $days; $i++) {
-            $shiftDate = $calendarStartDate->format('Y-m-d');
+        $selectedDays = array_key_exists('days', $postData) ? $postData['days'] : null;
 
-            $shift = Shift::create([
-                'role_id' => array_key_exists('role_id', $postData) ? $postData['role_id'] : null,
-                'shift' => array_key_exists('shift', $postData) ? $postData['shift'] : null,
-                'date' => $shiftDate,
-                'user_id' => array_key_exists('user_id', $postData) ? $postData['user_id'] : null
-            ]);
+        for ($i = 0; $i < $days; $i++) {
+
+            $shiftDate = $calendarStartDate->format('Y-m-d');
+            $selectedDay = $calendarStartDate->format('w');
+
+            if (in_array($selectedDay, $selectedDays)) {
+                $shift = UserShift::create([
+                    'role_id' => array_key_exists('role_id', $postData) ? $postData['role_id'] : null,
+                    'shift_id' => array_key_exists('shift_id', $postData) ? $postData['shift_id'] : null,
+                    'days' => array_key_exists('days', $postData) ? json_encode($postData['days']) : null,
+                    'date' => $shiftDate,
+                    'user_id' => array_key_exists('user_id', $postData) ? $postData['user_id'] : null
+                ]);
+            }
 
             $calendarStartDate = $calendarStartDate->addDay();
         }
@@ -141,7 +152,6 @@ class ShiftsController extends Controller
         $userShifts = Shift::all();
         $roles = Role::all();
         $shifts = Shift::$__shift_types;
-
 
         $postData = $request->getContent();
 
