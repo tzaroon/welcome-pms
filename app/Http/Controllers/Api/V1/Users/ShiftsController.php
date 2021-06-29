@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api\V1\Users;
 
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
+use App\Models\Role;
 use App\Models\RoleHasPermission;
 use App\Models\RoleShift;
 use App\Models\Shift;
+
 use App\Models\UserShift;
-use App\Models\Role;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Validator;
