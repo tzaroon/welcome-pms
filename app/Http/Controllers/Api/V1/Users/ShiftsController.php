@@ -206,7 +206,7 @@ class ShiftsController extends Controller
                 $bodyRows[$j] = [
                     'row_type' => 'body',
                     'role_name' => $role->id != $previousRoleId ? $role->name : '',
-                    'shift' => $shift->name . ' ' . $shift->from_time,
+                    'shift' => $shift->name,
                     'from_time' => $shift->from_time,
                     'to_time' => $shift->to_time
                 ];
