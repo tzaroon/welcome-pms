@@ -19,7 +19,8 @@ class DailyRatesController extends Controller
 {
 	private $recurtionCount = 0;
 
-	public function index(Request $request, $id): JsonResponse
+	public function index(Request $request): JsonResponse
+
 	{
 		$user = auth()->user();
 		$postData = $request->getContent();
@@ -31,122 +32,142 @@ class DailyRatesController extends Controller
 		$days = $carbonToDate->diffInDays($carbonFromDate);
 		$inputRoomType = $request->input('room-type') ?: null;
 
-		$roomsTypes = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $id])
-			->with(
-				[
-					'roomTypeDetail',
-					'rateTypes'
-				]
-			)->get();
 
-		$resultData = [];
-		$count = 0;
-		$room = new Room();
+		$hotels = Hotel::where('company_id', $user->company_id)->get();
 
-		$dailyPrices = DailyPrice::where('date', '>=', $dateFrom)
-			->where('date', '<=', $dateTo)
-			->with([
-				'product.price',
-				'rateType.roomType.hotel' => function ($q) use ($id) {
-					$q->where('id', $id);
-				}
-			])->get();
+		$hotelCount = 0;
+		if ($hotels) {
 
-		$keyedPrices = [];
-		if ($dailyPrices) {
-			foreach ($dailyPrices as $dailyPrice) {
-				$keyedPrices[$dailyPrice->rate_type_id][$dailyPrice->date] = [
-					'id' => $dailyPrice->id,
-					'price' => $dailyPrice->product->price->price,
-					'checkin_closed' => $dailyPrice->checkin_closed,
-					'exit_closed' => $dailyPrice->exit_closed,
-					'minimum_stay' => $dailyPrice->minimum_stay,
-					'maximum_stay' => $dailyPrice->maximum_stay
+			foreach ($hotels as $hotel) {
+				$roomsTypes = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $hotel->id])
+					->with(
+						[
+							'roomTypeDetail',
+							'rateTypes'
+						]
+					)->get();
+
+				$count = 0;
+				$resultData[$hotelCount][$count] = [
+					'row_type' => 'hotel',
+					'name' => $hotel->property
+
 				];
-			}
-		}
+				$count++;
+				$room = new Room();
 
-		$totalRoomTypesOnDate = [];
+				$dailyPrices = DailyPrice::where('date', '>=', $dateFrom)
+					->where('date', '<=', $dateTo)
+					->with([
+						'product.price',
+						'rateType.roomType.hotel' => function ($q) use ($hotel) {
+							$q->where('id', $hotel->id);
+						}
+					])->get();
 
-		foreach ($roomsTypes as $roomType) {
-
-			$rateTypes = $roomType->rateTypes;
-			$resultData[$count] = ['name' => $roomType->roomTypeDetail->name];
-
-			$totalRooms = Room::where('room_type_id', $roomType->id)
-				->where('company_id', $user->company_id)
-				->get()->count();
-
-			$countJ = 0;
-			$carbonFromDate = new Carbon($dateFrom);
-
-			for ($i = 0; $i <= $days; $i++) {
-
-				$bookedCount = 0;
-				$rateDate = $carbonFromDate->format('Y-m-d');
-				$result = $room->avaliability($roomType->id, $rateDate);
-
-				if (isset($result) && 0 < sizeof($result)) {
-
-					$bookedCount = $result[0]->count;
+				$keyedPrices = [];
+				if ($dailyPrices) {
+					foreach ($dailyPrices as $dailyPrice) {
+						$keyedPrices[$dailyPrice->rate_type_id][$dailyPrice->date] = [
+							'id' => $dailyPrice->id,
+							'price' => $dailyPrice->product->price->price,
+							'checkin_closed' => $dailyPrice->checkin_closed,
+							'exit_closed' => $dailyPrice->exit_closed,
+							'minimum_stay' => $dailyPrice->minimum_stay,
+							'maximum_stay' => $dailyPrice->maximum_stay
+						];
+					}
 				}
 
-				$avaliableRooms = $totalRooms - $bookedCount;
-				$dailyPrice = new DailyPrice();
-				$resultData[$count]['avaiability'][] = [
-					'date' => $rateDate,
-					'available' => $avaliableRooms
-				];
+				$totalRoomTypesOnDate = [];
 
-				if (array_key_exists($rateDate, $totalRoomTypesOnDate)) {
-					$totalRoomTypesOnDate[$rateDate] += $avaliableRooms;
-				} else {
-					$totalRoomTypesOnDate[$rateDate] = $avaliableRooms;
-				}
+				foreach ($roomsTypes as $roomType) {
 
-				$carbonFromDate = $carbonFromDate->addDay();
-			}
+					$rateTypes = $roomType->rateTypes;
+					$resultData[$hotelCount][$count] = ['name' => $roomType->roomTypeDetail->name];
 
-			foreach ($rateTypes as $rateType) {
-				$resultData[$count]['rate_types'][$countJ]['id'] = $rateType->id;
-				$resultData[$count]['rate_types'][$countJ]['name'] = $rateType->detail->name;
-				$resultData[$count]['rate_types'][$countJ]['rate_type_id'] = $rateType->rate_type_id;
-				$resultData[$count]['rate_types'][$countJ]['number_of_people'] = $rateType->number_of_people;
-				$carbonFromDate = new Carbon($dateFrom);
+					$totalRooms = Room::where('room_type_id', $roomType->id)
+						->where('company_id', $user->company_id)
+						->get()->count();
 
-				for ($i = 0; $i <= $days; $i++) {
+					$countJ = 0;
+					$carbonFromDate = new Carbon($dateFrom);
+
+					for ($i = 0; $i <= $days; $i++) {
+
+						$bookedCount = 0;
+						$rateDate = $carbonFromDate->format('Y-m-d');
+						$result = $room->avaliability($roomType->id, $rateDate);
+
+						if (isset($result) && 0 < sizeof($result)) {
+
+							$bookedCount = $result[0]->count;
+						}
+
+						$avaliableRooms = $totalRooms - $bookedCount;
+						$dailyPrice = new DailyPrice();
+						$resultData[$hotelCount][$count]['avaiability'][] = [
+							'date' => $rateDate,
+							'available' => $avaliableRooms
+						];
+
+						if (array_key_exists($rateDate, $totalRoomTypesOnDate)) {
+							$totalRoomTypesOnDate[$rateDate] += $avaliableRooms;
+						} else {
+							$totalRoomTypesOnDate[$rateDate] = $avaliableRooms;
+						}
+
+						$carbonFromDate = $carbonFromDate->addDay();
+					}
+
+					foreach ($rateTypes as $rateType) {
+						$resultData[$hotelCount][$count]['rate_types'][$countJ]['id'] = $rateType->id;
+						$resultData[$hotelCount][$count]['rate_types'][$countJ]['name'] = $rateType->detail->name;
+						$resultData[$hotelCount][$count]['rate_types'][$countJ]['rate_type_id'] = $rateType->rate_type_id;
+						$resultData[$hotelCount][$count]['rate_types'][$countJ]['number_of_people'] = $rateType->number_of_people;
+						$carbonFromDate = new Carbon($dateFrom);
+
+						for ($i = 0; $i <= $days; $i++) {
+							$bookedCount = 0;
+							$rateDate = $carbonFromDate->format('Y-m-d');
+							$id = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['id'] : 0;
+							$price = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['price'] : 0;
+							$checkinClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['checkin_closed'] : 0;
+							$exitClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['exit_closed'] : 0;
+							$minimumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['minimum_stay'] : 0;
+							$maximumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['maximum_stay'] : 0;
+
+							$avaliableRooms = $totalRooms - $bookedCount;
+							$dailyPrice = new DailyPrice();
+							$resultData[$hotelCount][$count]['rate_types'][$countJ]['rate'][] = [
+								'id' => $id,
+								'rate_type_id' => $rateType->id,
+								'parent_rate_type_id' => $rateType->rate_type_id,
+								'date' => $rateDate,
+								'price' => $price,
+								'checkin_closed' => $checkinClosed,
+								'exit_closed' => $exitClosed,
+								'minimum_stay' => $minimumStay,
+								'maximum_stay' => $maximumStay,
+							];
+
+							$carbonFromDate = $carbonFromDate->addDay();
+						}
+
+						$countJ++;
+					}
+
 					$bookedCount = 0;
-					$rateDate = $carbonFromDate->format('Y-m-d');
-					$id = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['id'] : 0;
-					$price = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['price'] : 0;
-					$checkinClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['checkin_closed'] : 0;
-					$exitClosed = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['exit_closed'] : 0;
-					$minimumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['minimum_stay'] : 0;
-					$maximumStay = array_key_exists($rateType->id, $keyedPrices) && array_key_exists($rateDate, $keyedPrices[$rateType->id]) ? $keyedPrices[$rateType->id][$rateDate]['maximum_stay'] : 0;
-
-					$avaliableRooms = $totalRooms - $bookedCount;
-					$dailyPrice = new DailyPrice();
-					$resultData[$count]['rate_types'][$countJ]['rate'][] = [
-						'id' => $id,
-						'rate_type_id' => $rateType->id,
-						'parent_rate_type_id' => $rateType->rate_type_id,
-						'date' => $rateDate,
-						'price' => $price,
-						'checkin_closed' => $checkinClosed,
-						'exit_closed' => $exitClosed,
-						'minimum_stay' => $minimumStay,
-						'maximum_stay' => $maximumStay,
-					];
-
-					$carbonFromDate = $carbonFromDate->addDay();
+					$count++;
 				}
 
-				$countJ++;
+				$hotelCount++;
 			}
 
 			$bookedCount = 0;
 			$count++;
 		}
+
 
 		$totalAvailabilityCount = [];
 		if ($totalRoomTypesOnDate) {

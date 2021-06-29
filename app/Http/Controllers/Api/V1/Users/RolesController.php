@@ -185,11 +185,13 @@ class RolesController extends Controller
 
             foreach ($permissions as $permission) {
                 $keyedPermissions[] = [
+                    'role_id' => $role->id,
                     'permission_id' => $permission
                 ];
             }
         }
 
+        $role->permissions()->sync([]);
         $role->permissions()->sync($keyedPermissions);
 
         $shifts = array_key_exists('shifts', $postData) ? $postData['shifts'] : null;

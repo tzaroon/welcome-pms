@@ -107,10 +107,14 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('rooms/check-avalibility', 'RelocateReservationController@checkAvalibility');
                 Route::post('rooms/load-rate-types', 'RelocateReservationController@loadRateTypes');
                 Route::post('booking/{booking}/relocateBooking', 'RelocateReservationController@relocateBooking');
+
                 Route::post('daily-rates/bulk-update', 'DailyRatesController@bulkPriceUpdate');
                 Route::post('{hotel}/booking-calender', 'DailyRatesController@bookingCalender');
                 Route::resource('daily-rates', 'DailyRatesController');
                 Route::post('daily-rates/{id}', 'DailyRatesController@index');
+
+                Route::resource('daily-rates', 'DailyRatesController',  ['except' => ['create', 'index']]);
+                Route::post('daily-rates', 'DailyRatesController@index');
 
                 Route::get('room-types/{roomType}/rate-types', 'RateTypesController@rateTypeList')->name('rate_type_list');
                 Route::get('room-rate-types/{hotel}', 'HotelsController@loadRoomTypeRateType')->name('load-room-type-rate-type');
