@@ -282,15 +282,47 @@ class ShiftsController extends Controller
         return response()->json(['message' => 'Role added sucessfully.']);
     }
 
-    public function loadPermissions(Request $request)
+
+    public function loadPermissionsold(Request $request)
     {
-        $permission = Permission::all();
-        return response()->json($permission);
+        $permissions = Permission::where('permission_id', null)->get();
+
+        $result = [];
+        $i = 0;
+
+        foreach ($permissions as $permission) {
+
+            $acess = Permission::where('permission_id', $permission->id)->get();
+
+            $result[$i]['name'] = $permission->name;
+
+            foreach ($acess as $obj) {
+
+                $result[$i]['permisssion'][] = [
+                    'id' => $obj['id'],
+                    'name' => $obj['name']
+                ];
+            }
+            $i++;
+        }
     }
 
-    public function roleShifts(Request $request)
+    public function loadPermissions(Request $request)
     {
-        $permission = Permission::all();
-        return response()->json($permission);
+        $permissions = Permission::where('permission_id', null)->get();
+        $result = [];
+        $i = 0;
+
+        foreach ($permissions as $permission) {
+
+            $acess = Permission::where('permission_id', $permission->id)->get();
+            $result[$i]['id'] = $permission->id;
+            $result[$i]['name'] = $permission->name;
+            $result[$i]['read_permission_id'] = $acess[0]['id'];
+            $result[$i]['modify_permission_id'] = $acess[1]['id'];
+            $i++;
+        }
+
+        return response()->json($result);
     }
 }
