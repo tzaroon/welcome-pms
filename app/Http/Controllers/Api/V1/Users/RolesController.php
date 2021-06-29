@@ -191,7 +191,7 @@ class RolesController extends Controller
 
         foreach ($shifts as $shift) {
 
-            if($shift['id']) {
+            if(array_key_exists('id', $shift) && $shift['id']) {
                
                 $roleShift = RoleShift::find($shift['id']);
                 $roleShift->role_id = $role->id;
