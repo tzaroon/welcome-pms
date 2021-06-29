@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api\V1\Users;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Role;
+use App\Models\Role;
+use App\Models\RoleShift;
 use Validator;
 
 class RolesController extends Controller
@@ -45,29 +46,62 @@ class RolesController extends Controller
      */
     public function store(Request $request) {        
 
-        $authUser = auth()->user();       
-
+        $authUser = auth()->user();
         $postData = $request->getContent();
-
-        $postData = json_decode($postData, true);
-        
+        $postData =  $postData ? json_decode($postData, true) : [];
 
         $validator = Validator::make($postData, [
-            'name' => 'required'            
+            'role_name' => 'required',
+            'shifts.*.name' => 'required',
+            'shifts.*.from_time' => 'required',
+            'shifts.*.to_time' => 'required'
+
         ], [], [
-            'name' => 'Name'           
+            'role_name' => 'Role Name',
+            'shifts.*.name' => 'Shift Name',
+            'shifts.*.from_time' => 'From Time',
+            'shifts.*.to_time' => 'To Time'
         ]);
+
 
         if (!$validator->passes()) {
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
+        $user = auth()->user();
 
-        $role = new Role();
-        $role->fill($postData);
-        $role->save();
+        $role = Role::create([
+            'company_id' => $user->company_id,
+            'name' => $postData['role_name']
+        ]);
 
-        return response()->json($role);        
+        $shifts = array_key_exists('shifts', $postData) ? $postData['shifts'] : null;
+
+        foreach ($shifts as $shift) {
+
+            $roleHasShift = RoleShift::create([
+                'role_id' => $role->id,
+                'name' => $shift['name'],
+                'from_time' => $shift['from_time'],
+                'to_time' => $shift['to_time']
+            ]);
+        }
+
+        $permissions = array_key_exists('permissions', $postData) ? $postData['permissions'] : null;
+
+        $keyedPermissions = [];
+        if ($permissions) {
+
+            foreach($permissions as $permission) {
+                $keyedPermissions[] = [
+                    'permission_id' => $permission
+                ];
+            }
+        }
+
+        $role->permissions()->sync($keyedPermissions);
+
+        return response()->json(['message' => 'Role added sucessfully.']);    
     }
 
     /**
@@ -87,10 +121,28 @@ class RolesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, $id) {
+    public function edit(Request $request, Role $role) {
         
-        $role =  Role::find($id);
-        return response()->json($role);
+        $arrResponseArray = [
+            'id' => $role->id,
+            'role_name' => $role->name
+        ];
+        if($role->permissions) {
+            foreach($role->permissions as $permission) {
+                $arrResponseArray['permissions'][] = $permission->id;
+            }
+        }
+        if($role->shifts) {
+            foreach($role->shifts as $shift) {
+                $arrResponseArray['shifts'][] = [
+                    'id' => $shift->id,
+                    'name' => $shift->name,
+                    'from_time' => $shift->from_time,
+                    'to_time' => $shift->to_time
+                ];
+            }
+        }
+        return response()->json($arrResponseArray);
     }
 
     /**
@@ -100,24 +152,17 @@ class RolesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request, Role $role) {
         
        
         $postData = $request->getContent();       
         
         $postData = json_decode($postData, true);
 
-        $role =  Role::find($id);
-
-        if (!$role) {
-
-            return response()->json(array('errors' => ['user' => 'role not found']), 422);
-        }
-
         $validator = Validator::make($postData, [
-            'name' => 'required',            
+            'role_name' => 'required',            
         ], [], [
-            'name' => 'Name'            
+            'role_name' => 'Name'            
         ]);
 
         if (!$validator->passes()) {
@@ -125,8 +170,54 @@ class RolesController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }       
         
-        $role->name = $postData['name'];         
+        $role->name = $postData['role_name'];         
         $role->save();
+
+        $permissions = array_key_exists('permissions', $postData) ? $postData['permissions'] : null;
+
+        $keyedPermissions = [];
+        if ($permissions) {
+
+            foreach($permissions as $permission) {
+                $keyedPermissions[] = [
+                    'permission_id' => $permission
+                ];
+            }
+        }
+
+        $role->permissions()->sync($keyedPermissions);
+
+        $shifts = array_key_exists('shifts', $postData) ? $postData['shifts'] : null;
+
+        foreach ($shifts as $shift) {
+
+            if($shift['id']) {
+               
+                $roleShift = RoleShift::find($shift['id']);
+                $roleShift->role_id = $role->id;
+                $roleShift->name = $shift['name'];
+                $roleShift->from_time = $shift['from_time'];
+                $roleShift->to_time = $shift['to_time'];
+                $roleShift->save();
+            } else {
+
+                $roleHasShift = RoleShift::create([
+                    'role_id' => $role->id,
+                    'name' => $shift['name'],
+                    'from_time' => $shift['from_time'],
+                    'to_time' => $shift['to_time']
+                ]);
+            }
+        }
+
+        $deleteShifts = array_key_exists('delete_shifts', $postData) ? $postData['delete_shifts'] : null;
+
+        if($deleteShifts) {
+            foreach($deleteShifts as $deletedShift) {
+                $roleShift = RoleShift::find($deletedShift);
+                $roleShift->delete();
+            }
+        }
         return response()->json($role);
     }
 
