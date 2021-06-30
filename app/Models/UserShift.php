@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\User;
+
 use Illuminate\Database\Eloquent\Model;
 
 class UserShift extends Model
@@ -13,4 +15,9 @@ class UserShift extends Model
         'user_id',
         'days'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

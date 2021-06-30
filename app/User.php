@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Traits\HasJWT;
+use App\Models\Role;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -22,13 +23,13 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'company_id', 
-        'title', 
-        'first_name', 
-        'last_name', 
-        'gender', 
-        'email', 
-        'language_id', 
+        'company_id',
+        'title',
+        'first_name',
+        'last_name',
+        'gender',
+        'email',
+        'language_id',
         'phone_number',
         'street',
         'postal_code',
@@ -78,15 +79,23 @@ class User extends Authenticatable implements JWTSubject
         'birthday'  => 'date:Y-m-d'
     ];
 
-    public function booker() {
+    public function booker()
+    {
         return $this->hasOne(Booker::class);
     }
-   
-    public function guest() {
+
+    public function guest()
+    {
         return $this->hasOne(Guest::class);
     }
 
-    public function country() {
+    public function country()
+    {
         return $this->belongsTo(Country::class);
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 }

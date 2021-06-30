@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1\Users;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\User;
+use Illuminate\Support\Facades\Hash;
 use Validator;
+use Illuminate\Validation\Rule;
 
 class UsersController extends Controller
 {
@@ -14,20 +16,21 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request , $role = null, $roleId = null ) { 
-        
+    public function index(Request $request, $role = null, $roleId = null)
+    {
+
         $user = auth()->user();
-        
+
         $user = User::where(['company_id' => $user->company_id])
-        ->where('is_system_user' , 1);
-        
-        if($roleId){
-            $user->where('role_id' , $roleId);
-        }        
+            ->where('is_system_user', 1);
+
+        if ($roleId) {
+            $user->where('role_id', $roleId);
+        }
 
         $systemUsers =  $user->get();
-        
-        if(0 == $systemUsers->count()) {
+
+        if (0 == $systemUsers->count()) {
             return response()->json(['message' => 'no data found'], 201);
         }
         return response()->json($systemUsers);
@@ -49,10 +52,11 @@ class UsersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
 
         $authUser = auth()->user();
-        
+
         $postData = $request->getContent();
 
         $postData = json_decode($postData, true);
@@ -62,26 +66,38 @@ class UsersController extends Controller
             'last_name' => 'required|string|max:191',
             'gender' => 'required|string',
             'email' => 'required|string',
+            'password' => 'required|string|min:8',
             'doc' => 'mimes:jpeg,png,pdf|max:4096',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')
+                    ->where('email', $postData['email'])
+                    ->where('company_id', $authUser->company_id)
+                    ->WhereNull('deleted_at')
+            ],
         ], [], [
             'first_name' => 'First Name',
             'last_name' => 'Last Name',
             'gender' => 'Gender',
             'email' => 'Email',
+            'password' => 'Password',
         ]);
 
         if (!$validator->passes()) {
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
-       
+
         $user = new User();
         $user->fill($postData);
         $user->company_id = $authUser->company_id;
         $user->is_system_user = true;
+        $user->password = Hash::make($postData['password']);
         $user->save();
-        return response()->json($user);  
-        
+        return response()->json($user);
     }
 
     /**
@@ -101,8 +117,9 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, User $booking, $id) {
-        
+    public function edit(Request $request, User $booking, $id)
+    {
+
         $user =  User::find($id);
         return response()->json($user);
     }
@@ -114,11 +131,12 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id) {
-        
-       
-        $postData = $request->getContent();       
-        
+    public function update(Request $request, $id)
+    {
+
+
+        $postData = $request->getContent();
+
         $postData = json_decode($postData, true);
 
         $user =  User::find($id);
@@ -144,14 +162,14 @@ class UsersController extends Controller
         if (!$validator->passes()) {
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
-        }       
-        
+        }
+
         $user->first_name = $postData['first_name'];
         $user->last_name = $postData['last_name'];
         $user->gender = $postData['gender'];
         $user->email = $postData['email'];
         $user->role_id = array_key_exists('role_id', $postData) ? $postData['role_id'] : null;
-        
+
         $user->save();
 
         return response()->json($user);
@@ -164,12 +182,12 @@ class UsersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(Request $request, $id)
-     {
-               
+    {
+
         $user =  User::where('id', $id)->first();
 
-        if(!$user){
-            
+        if (!$user) {
+
             return response()->json(['message' => 'User not found']);
         }
 
@@ -177,5 +195,4 @@ class UsersController extends Controller
 
         return response()->json(['message' => 'Deleted Successfully']);
     }
-    
 }

@@ -196,12 +196,19 @@ class ShiftsController extends Controller
         $bodyRows[$j]['dates'] = $dates;
         $j++;
 
+        $previousRoleId = '';
+
         foreach ($roles as $role) {
+
+            $shifts = RoleShift::where('role_id', $role->id)->get();
+
             foreach ($shifts as $shift) {
                 $bodyRows[$j] = [
                     'row_type' => 'body',
-                    'role_name' => $role->name,
-                    'shift' => $shift
+                    'role_name' => $role->id != $previousRoleId ? $role->name : '',
+                    'shift' => $shift->name,
+                    'from_time' => $shift->from_time,
+                    'to_time' => $shift->to_time
                 ];
                 $users = [];
 
@@ -209,7 +216,7 @@ class ShiftsController extends Controller
 
                 for ($i = 0; $i < $days; $i++) {
 
-                    $userShift = Shift::where('shift', $shift)
+                    $userShift = UserShift::where('shift_id', $shift->id)
                         ->where('date', $calendarStartDate)
                         ->where('role_id', $role->id)
                         ->get()->first();
@@ -225,6 +232,7 @@ class ShiftsController extends Controller
 
                 $bodyRows[$j]['users'] = $users;
                 $j++;
+                $previousRoleId = $role->id;
             }
         }
 

@@ -8,6 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
+use App\Models\Permission;
+use App\Models\RoleHasPermission;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -39,7 +41,7 @@ class SessionsController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function identify(Request $request) : JsonResponse
+    public function identify(Request $request): JsonResponse
     {
         $request->validate([
             'username' => "required|exists:users,{$this->identifier($request)},deleted_at,NULL",
@@ -60,7 +62,7 @@ class SessionsController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function signin(Request $request) : JsonResponse
+    public function signin(Request $request): JsonResponse
     {
         $request->validate([
             'username' => "required|exists:users,{$this->identifier($request)}",
@@ -73,7 +75,45 @@ class SessionsController extends Controller
             $phone = $user->phone_number;
             $channel = $request->post('channel', 'sms');
             //$verification = $this->verify->startVerification($phone, $channel);
-            return response()->json(['token' => $token]);
+
+            $permissions = Permission::where('permission_id', null)->get();
+
+            $arrayPermissions = [];
+
+            $roleHasPermission = $user->role->permissions;
+            $permissionIds = [];
+            $i = 0;
+
+            foreach ($roleHasPermission as $rolePermission) {
+                $permissionIds[$i] =  $rolePermission['id'];
+                $i++;
+            }
+
+            //return response()->json($roleHasPermission);
+
+
+
+            foreach ($permissions as $permission) {
+
+                $permissionList = Permission::where('permission_id', $permission->id)->get();
+
+                $parentPermission = str_replace(' ', '_', strtolower($permission->name));
+                $arrayPermissions[$parentPermission] = [];
+                // dd($arrayPermissions);
+
+                foreach ($permissionList as $item) {
+
+                    $key = strstr($item['name'], '_read') ? 'read' : 'modify';
+
+                    $arrayPermissions[$parentPermission][] =
+                        [
+                            $key => in_array($item['id'], $permissionIds) &&   strstr($item['name'], '_read') ? true : false
+                        ];
+                }
+            }
+
+            return response()->json(['token' => $token, 'permissions' => $arrayPermissions]);
+
             if (!$verification->isValid()) {
                 return response()->json(['errors' => $verification->getErrors()], 401);
             } else {
@@ -88,20 +128,20 @@ class SessionsController extends Controller
     {
         $code = $request->post('code');
         $token = $request->post('token');
-        try{
+        try {
             $user = JWTAuth::setToken($token)->toUser();
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['errors' => ['Invalid Token']], 401);
-        } catch(\Error $e) {
+        } catch (\Error $e) {
             return response()->json(['errors' => ['Invalid Token']], 401);
         }
-                
+
         //$verification = $this->verify->checkVerification($user->phone_number, $code);
 
         if (1 || $verification->isValid()) {
             $this->guard()->logout();
             if ($token = $this->attempt($request)) {
-            
+
                 return $this->respondWithToken($token);
             } else {
                 return response()->json(array('errors' => ['Unauthorized']), 401);
@@ -117,7 +157,7 @@ class SessionsController extends Controller
      *
      * @return string/null
      */
-    protected function attempt(Request $request) : ?string
+    protected function attempt(Request $request): ?string
     {
         return $this->guard()->attempt([
             $this->identifier($request) => $request->input('username'),
@@ -132,7 +172,7 @@ class SessionsController extends Controller
      *
      * @return string
      */
-    protected function identifier(Request $request) : string
+    protected function identifier(Request $request): string
     {
         return filter_var(
             $request->input('username'),
@@ -147,7 +187,7 @@ class SessionsController extends Controller
      *
      * @return Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($authToken) : JsonResponse
+    protected function respondWithToken($authToken): JsonResponse
     {
         $user = JWTAuth::setToken($authToken)->toUser();
 
@@ -169,7 +209,7 @@ class SessionsController extends Controller
      *
      * @return bool
      */
-    protected function saveAuthToken(string $token, User $user) : bool
+    protected function saveAuthToken(string $token, User $user): bool
     {
         $user->api_token = $token;
         $user->last_signin = now();
@@ -182,7 +222,7 @@ class SessionsController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function user() : JsonResponse
+    public function user(): JsonResponse
     {
         return response()->json($this->guard()->user());
     }
@@ -202,7 +242,7 @@ class SessionsController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function signout() : JsonResponse
+    public function signout(): JsonResponse
     {
         $user = $this->guard()->user();
 
@@ -219,7 +259,7 @@ class SessionsController extends Controller
      *
      * @return \Illuminate\Contracts\Auth\Guard
      */
-    protected function guard() : Guard
+    protected function guard(): Guard
     {
         return Auth::guard('api');
     }
