@@ -90,23 +90,22 @@ class SessionsController extends Controller
                     $i++;
                 }
     
+                $j = 0;
                 foreach ($permissions as $permission) {
     
                     $permissionList = Permission::where('permission_id', $permission->id)->get();
     
                     $parentPermission = str_replace(' ', '_', strtolower($permission->name));
-                    $arrayPermissions[$parentPermission] = [];
-                    // dd($arrayPermissions);
-    
+
+                    $arrayPermissions[$j]['name'] = $parentPermission;
+
                     foreach ($permissionList as $item) {
     
                         $key = strstr($item['name'], '_read') ? 'read' : 'modify';
     
-                        $arrayPermissions[$parentPermission][] =
-                            [
-                                $key => in_array($item['id'], $permissionIds) &&   strstr($item['name'], '_read') ? true : false
-                            ];
+                        $arrayPermissions[$j][$key] = in_array($item['id'], $permissionIds) ? true : false;
                     }
+                    $j++;
                 }
             }
             
