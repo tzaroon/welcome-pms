@@ -895,17 +895,18 @@ class BookingsController extends Controller
         $responseArray['total_children'] = $booking->children_count;
 
         $finalBreakDown = [];
-
+        $totalPrice = 0;
         if ($allPrices) {
             foreach ($allPrices as $roomPrices) {
 
                 if ($roomPrices) {
                     foreach ($roomPrices as $roomPrice) {
                         //if (array_key_exists($roomPrice['date'], $priceBreakDown)) {
-                            $finalBreakDown[$roomPrice['date']] = [
+                            $finalBreakDown[] = [
                                 'date' => $roomPrice['date'],
                                 'price' => number_format($roomPrice['price'], 2, ',', '.')
                             ];
+                            $totalPrice += $roomPrice['price'];
                        // } else {
                             //$priceBreakDown[$roomPrice['date']] = $roomPrice['price'];
                        // }
