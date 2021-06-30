@@ -435,13 +435,13 @@ class Booking extends Model
 
         $acuualPrice = array_key_exists('price', $prices) ? $prices['price'] : 0;
         $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
-
-        $prices['price'] = round($acuualPrice*90/100, 2);
+        
+        $prices['price'] = number_format($acuualPrice*90/100, 2, ',', '.');
        // $prices['tax'] =  round($acuualTax*90/100, 2);
         $tax = $this->getCityTax()+$this->getChildrenCityTax();
-        $prices['tax'] = $tax; 
-        $prices['vat'] = round(($acuualPrice*10/100)+($acuualTax*10/100), 2);
-        $prices['total'] = array_key_exists('total', $prices) ? round(($prices['total'] + $tax + $this->tourist_tax - $this->discount) - $this->totalPaid, 2) : 0;
+        $prices['tax'] = number_format($tax, 2, ',', '.'); 
+        $prices['vat'] = ($acuualPrice*10/100)+($acuualTax*10/100);
+        $prices['total'] = array_key_exists('total', $prices) ? number_format(($prices['total'] + $tax + $this->tourist_tax - $this->discount) - $this->totalPaid, 2, ',', '.') : 0;
 
         if(isset($accessoryVat)) {
             $prices['vat'] += round($accessoryVat, 2);
@@ -455,11 +455,11 @@ class Booking extends Model
         $tax =  $this->getCityTax() +  $this->getChildrenCityTax();
 
         $prices['calendar_price'] = [
-            'price' => $accomudationPrice + $accessoriesPrice,
-            'vat' => $vat,
-            'tax' => $tax,
-            'total' => $accomudationPrice + $accessoriesPrice + $vat +  $tax,
-            'pending' => $accomudationPrice + $accessoriesPrice + $vat +  $tax - $this->totalPaid 
+            'price' => number_format($accomudationPrice + $accessoriesPrice, 2, ',', '.'),
+            'vat' => number_format($vat, 2, ',', '.'),
+            'tax' => number_format($tax, 2, ',', '.'),
+            'total' => number_format($accomudationPrice + $accessoriesPrice + $vat +  $tax, 2, ',', '.'),
+            'pending' => number_format($accomudationPrice + $accessoriesPrice + $vat +  $tax - $this->totalPaid, 2, ',', '.') 
         ];
         $keyedDailyPrices = [];
         $gTotal = 0;
