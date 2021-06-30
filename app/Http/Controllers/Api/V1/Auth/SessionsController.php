@@ -80,38 +80,36 @@ class SessionsController extends Controller
 
             $arrayPermissions = [];
 
-            $roleHasPermission = $user->role->permissions;
+            $roleHasPermission = $user->role ? $user->role->permissions : [];
             $permissionIds = [];
             $i = 0;
 
-            foreach ($roleHasPermission as $rolePermission) {
-                $permissionIds[$i] =  $rolePermission['id'];
-                $i++;
-            }
-
-            //return response()->json($roleHasPermission);
-
-
-
-            foreach ($permissions as $permission) {
-
-                $permissionList = Permission::where('permission_id', $permission->id)->get();
-
-                $parentPermission = str_replace(' ', '_', strtolower($permission->name));
-                $arrayPermissions[$parentPermission] = [];
-                // dd($arrayPermissions);
-
-                foreach ($permissionList as $item) {
-
-                    $key = strstr($item['name'], '_read') ? 'read' : 'modify';
-
-                    $arrayPermissions[$parentPermission][] =
-                        [
-                            $key => in_array($item['id'], $permissionIds) &&   strstr($item['name'], '_read') ? true : false
-                        ];
+            if($roleHasPermission) {
+                foreach ($roleHasPermission as $rolePermission) {
+                    $permissionIds[$i] =  $rolePermission['id'];
+                    $i++;
+                }
+    
+                foreach ($permissions as $permission) {
+    
+                    $permissionList = Permission::where('permission_id', $permission->id)->get();
+    
+                    $parentPermission = str_replace(' ', '_', strtolower($permission->name));
+                    $arrayPermissions[$parentPermission] = [];
+                    // dd($arrayPermissions);
+    
+                    foreach ($permissionList as $item) {
+    
+                        $key = strstr($item['name'], '_read') ? 'read' : 'modify';
+    
+                        $arrayPermissions[$parentPermission][] =
+                            [
+                                $key => in_array($item['id'], $permissionIds) &&   strstr($item['name'], '_read') ? true : false
+                            ];
+                    }
                 }
             }
-
+            
             return response()->json(['token' => $token, 'permissions' => $arrayPermissions]);
 
             if (!$verification->isValid()) {
