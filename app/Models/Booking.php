@@ -337,11 +337,11 @@ class Booking extends Model
                             }
                         }
                     }
-                    if(array_key_exists($priceDate, $dailyPrices)) {
-                        $dailyPrices[$priceDate] += $totalDayPrice;
-                    } else {
-                        $dailyPrices[$priceDate] = $totalDayPrice;
-                    }
+                    //if(array_key_exists($priceDate, $dailyPrices)) {
+                        $dailyPrices[$priceDate][] = $totalDayPrice;
+                    //} else {
+                       // $dailyPrices[$priceDate] = $totalDayPrice;
+                    //}
                     
                 }    
             }
@@ -436,10 +436,10 @@ class Booking extends Model
         $acuualPrice = array_key_exists('price', $prices) ? $prices['price'] : 0;
         $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
         
-        $prices['price'] = number_format($acuualPrice*90/100, 2, ',', '.');
+        $prices['price'] = $acuualPrice*90/100;
        // $prices['tax'] =  round($acuualTax*90/100, 2);
         $tax = $this->getCityTax()+$this->getChildrenCityTax();
-        $prices['tax'] = number_format($tax, 2, ',', '.'); 
+        $prices['tax'] = $tax; 
         $prices['vat'] = ($acuualPrice*10/100)+($acuualTax*10/100);
         $prices['total'] = array_key_exists('total', $prices) ? number_format(($prices['total'] + $tax + $this->tourist_tax - $this->discount) - $this->totalPaid, 2, ',', '.') : 0;
 
@@ -465,11 +465,16 @@ class Booking extends Model
         $gTotal = 0;
         if( $dailyPrices) {
             foreach( $dailyPrices as $date=>$price) {
-                $keyedDailyPrices[] = [
-                    'date' => $date,
-                    'value' => number_format($price, 2, ',', '.')
-                ];
-                $gTotal += $price;
+                if($price) {
+                    foreach($price as $singlePrice) {
+                        $keyedDailyPrices[] = [
+                            'date' => $date,
+                            //'value' => number_format($price, 2, ',', '.')
+                            'value' => number_format($singlePrice, 2, ',', '.')
+                        ];
+                    }
+                    $gTotal += $singlePrice;
+                }
             } 
         }
         
