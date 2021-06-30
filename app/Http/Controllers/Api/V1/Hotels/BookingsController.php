@@ -894,39 +894,40 @@ class BookingsController extends Controller
         $responseArray['total_adults'] = $booking->adult_count;
         $responseArray['total_children'] = $booking->children_count;
 
-        $finalBreakDown = [];
+        $priceBreakDown = [];
         $totalPrice = 0;
         if ($allPrices) {
             foreach ($allPrices as $roomPrices) {
 
                 if ($roomPrices) {
                     foreach ($roomPrices as $roomPrice) {
-                        //if (array_key_exists($roomPrice['date'], $priceBreakDown)) {
-                            $finalBreakDown[] = [
-                                'date' => $roomPrice['date'],
-                                'price' => number_format($roomPrice['price'], 2, ',', '.')
-                            ];
-                            $totalPrice += $roomPrice['price'];
-                       // } else {
-                            //$priceBreakDown[$roomPrice['date']] = $roomPrice['price'];
-                       // }
+                        
+                        $priceBreakDown[$roomPrice['date']][] = [
+                            'date' => $roomPrice['date'],
+                            'price' => $roomPrice['price']
+                        ];
                     }
                 }
             }
         }
 
-       /*  $finalBreakDown = [];
+         $finalBreakDown = [];
         $totalPrice = 0;
         if ($priceBreakDown) {
             foreach ($priceBreakDown as $date => $breakDown) {
-                $finalBreakDown[] = [
-                    'date' => $date,
-                    'price' => number_format($breakDown, 2, ',', '.')
-                ];
-                $totalPrice += $breakDown;
+                if($breakDown) {
+                    foreach($breakDown as $onePrice) {
+                        $finalBreakDown[] = [
+                            'date' => $date,
+                            'price' => number_format($onePrice['price'], 2, ',', '.')
+                        ];
+                        $totalPrice += $onePrice['price'];
+                    }
+                    
+                }
             }
         }
- */
+ 
         $responseArray['rooms'] = $rooms;
         $responseArray['price'] = $booking->price['price'];
         $responseArray['total_price'] = $booking->price['total'];
