@@ -894,24 +894,27 @@ class BookingsController extends Controller
         $responseArray['total_adults'] = $booking->adult_count;
         $responseArray['total_children'] = $booking->children_count;
 
-        $priceBreakDown = [];
+        $finalBreakDown = [];
 
         if ($allPrices) {
             foreach ($allPrices as $roomPrices) {
 
                 if ($roomPrices) {
                     foreach ($roomPrices as $roomPrice) {
-                        if (array_key_exists($roomPrice['date'], $priceBreakDown)) {
-                            $priceBreakDown[$roomPrice['date']] += $roomPrice['price'];
-                        } else {
-                            $priceBreakDown[$roomPrice['date']] = $roomPrice['price'];
-                        }
+                        //if (array_key_exists($roomPrice['date'], $priceBreakDown)) {
+                            $finalBreakDown[$roomPrice['date']] = [
+                                'date' => $roomPrice['date'],
+                                'price' => number_format($roomPrice['price'], 2, ',', '.')
+                            ];
+                       // } else {
+                            //$priceBreakDown[$roomPrice['date']] = $roomPrice['price'];
+                       // }
                     }
                 }
             }
         }
 
-        $finalBreakDown = [];
+       /*  $finalBreakDown = [];
         $totalPrice = 0;
         if ($priceBreakDown) {
             foreach ($priceBreakDown as $date => $breakDown) {
@@ -922,7 +925,7 @@ class BookingsController extends Controller
                 $totalPrice += $breakDown;
             }
         }
-
+ */
         $responseArray['rooms'] = $rooms;
         $responseArray['price'] = $booking->price['price'];
         $responseArray['total_price'] = $booking->price['total'];
