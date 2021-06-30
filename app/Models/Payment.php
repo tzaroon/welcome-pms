@@ -18,6 +18,11 @@ class Payment extends Model
         'notes'
     ];
 
+
+    protected $appends = [
+        'formated_amount'
+    ];
+
     const TYPE_BANKCARD = 'bankcard';
     const TYPE_CASH = 'cash';
     const TYPE_GIFTCARD = 'giftcard';
@@ -50,5 +55,10 @@ class Payment extends Model
     public function booking() {
 
         return $this->belongsTo(Booking::class);
+    }
+
+    public function getFormatedAmountAttribute()
+    {
+        return number_format($this->amount, 2, ',', '.');
     }
 }
