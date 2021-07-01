@@ -22,6 +22,7 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::post('identify', 'SessionsController@identify')->name('identify');
             Route::post('signin', 'SessionsController@signin')->name('signin');
             Route::post('verify', 'SessionsController@verify')->name('verify');
+            Route::get('user-permissions', 'SessionsController@userPermissions')->name('user-permissions');
         });
 
         Route::namespace('WuBook')->name('wubook.')->prefix('wubook')->group(function () {

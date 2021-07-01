@@ -84,31 +84,31 @@ class SessionsController extends Controller
             $permissionIds = [];
             $i = 0;
 
-            if($roleHasPermission) {
+            if ($roleHasPermission) {
                 foreach ($roleHasPermission as $rolePermission) {
                     $permissionIds[$i] =  $rolePermission['id'];
                     $i++;
                 }
-    
+
                 $j = 0;
                 foreach ($permissions as $permission) {
-    
+
                     $permissionList = Permission::where('permission_id', $permission->id)->get();
-    
+
                     $parentPermission = str_replace(' ', '_', strtolower($permission->name));
 
                     $arrayPermissions[$j]['name'] = $parentPermission;
 
                     foreach ($permissionList as $item) {
-    
+
                         $key = strstr($item['name'], '_read') ? 'read' : 'modify';
-    
+
                         $arrayPermissions[$j][$key] = in_array($item['id'], $permissionIds) ? true : false;
                     }
                     $j++;
                 }
             }
-            
+
             return response()->json(['token' => $token, 'permissions' => $arrayPermissions]);
 
             if (!$verification->isValid()) {
@@ -259,5 +259,44 @@ class SessionsController extends Controller
     protected function guard(): Guard
     {
         return Auth::guard('api');
+    }
+
+    public function userPermissions(Request $request)
+    {
+        $user = auth()->user();
+        $permissions = Permission::where('permission_id', null)->get();
+
+        $arrayPermissions = [];
+
+        $roleHasPermission = $user->role ? $user->role->permissions : [];
+        $permissionIds = [];
+        $i = 0;
+
+        if ($roleHasPermission) {
+            foreach ($roleHasPermission as $rolePermission) {
+                $permissionIds[$i] =  $rolePermission['id'];
+                $i++;
+            }
+
+            $j = 0;
+            foreach ($permissions as $permission) {
+
+                $permissionList = Permission::where('permission_id', $permission->id)->get();
+
+                $parentPermission = str_replace(' ', '_', strtolower($permission->name));
+
+                $arrayPermissions[$j]['name'] = $parentPermission;
+
+                foreach ($permissionList as $item) {
+
+                    $key = strstr($item['name'], '_read') ? 'read' : 'modify';
+
+                    $arrayPermissions[$j][$key] = in_array($item['id'], $permissionIds) ? true : false;
+                }
+                $j++;
+            }
+        }
+
+        return response()->json(['permissions' => $arrayPermissions]);
     }
 }
