@@ -268,7 +268,7 @@ class SessionsController extends Controller
 
         $arrayPermissions = [];
 
-        $roleHasPermission = $user->role ? $user->role->permissions : [];
+        $roleHasPermission = $user && $user->role ? $user->role->permissions : [];
         $permissionIds = [];
         $i = 0;
 
