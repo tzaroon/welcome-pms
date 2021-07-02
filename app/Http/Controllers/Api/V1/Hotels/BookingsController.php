@@ -837,41 +837,37 @@ class BookingsController extends Controller
         $adultCount = 0;
         $childrenCount = 0;
 
+        $guests = $booking->guestsWithUsers;
+
+        $keyedGuests = [];
+        $j=0;
+
+        if ($guests) {
+            foreach ($guests as $guest) {
+
+                $keyedGuests[$guest->pivot->room_id][$j]['id'] = $guest->id;
+                $keyedGuests[$guest->pivot->room_id][$j]['first_name'] = $guest->user->first_name;
+                $keyedGuests[$guest->pivot->room_id][$j]['last_name'] = $guest->user->last_name;
+                $keyedGuests[$guest->pivot->room_id][$j]['email'] = $guest->user->email;
+                $keyedGuests[$guest->pivot->room_id][$j]['phone_number'] = $guest->user->phone_number;
+                $keyedGuests[$guest->pivot->room_id][$j]['street'] = $guest->user->street;
+                $keyedGuests[$guest->pivot->room_id][$j]['postal_code'] = $guest->user->postal_code;
+                $keyedGuests[$guest->pivot->room_id][$j]['city'] = $guest->user->city;
+                $keyedGuests[$guest->pivot->room_id][$j]['country_id'] = $guest->user->country_id;
+                $keyedGuests[$guest->pivot->room_id][$j]['gender'] = $guest->user->gender;
+                $keyedGuests[$guest->pivot->room_id][$j]['birth_date'] = $guest->user->birth_date;
+                $keyedGuests[$guest->pivot->room_id][$j]['identification_number'] = $guest->identification_number;
+                $keyedGuests[$guest->pivot->room_id][$j]['identification'] = $guest->identification;
+                $keyedGuests[$guest->pivot->room_id][$j]['id_issue_date'] = $guest->id_issue_date;
+                $keyedGuests[$guest->pivot->room_id][$j]['id_expiry_date'] = $guest->id_expiry_date;
+                $j++;
+            }
+        }
+
         if ($booking->bookingRooms) {
             $i = 0;
             foreach ($booking->bookingRooms as $room) {
 
-                $guests = $room->guests();
-
-                $keyedGuests = [];
-                $j = 0;
-                if ($guests) {
-                    foreach ($guests as $guest) {
-                        $keyedGuests[$j]['id'] = $guest->guest_id;
-                        $keyedGuests[$j]['guest_type'] = $guest->guest_type;
-                        $keyedGuests[$j]['first_name'] = $guest->first_name;
-                        $keyedGuests[$j]['last_name'] = $guest->last_name;
-                        $keyedGuests[$j]['email'] = $guest->email;
-                        $keyedGuests[$j]['phone_number'] = $guest->phone_number;
-                        $keyedGuests[$j]['street'] = $guest->street;
-                        $keyedGuests[$j]['postal_code'] = $guest->postal_code;
-                        $keyedGuests[$j]['city'] = $guest->city;
-                        $keyedGuests[$j]['country_id'] = $guest->country_id;
-                        $keyedGuests[$j]['gender'] = $guest->gender;
-                        $keyedGuests[$j]['birth_date'] = $guest->birth_date;
-                        $keyedGuests[$j]['identification_number'] = $guest->identification_number;
-                        $keyedGuests[$j]['identification'] = $guest->identification;
-                        $keyedGuests[$j]['id_issue_date'] = $guest->id_issue_date;
-                        $keyedGuests[$j]['id_expiry_date'] = $guest->id_expiry_date;
-                        $j++;
-
-                        if (Guest::GUEST_TYPE_ADULT == $guest->guest_type) {
-                            $adultCount++;
-                        } else {
-                            $childrenCount++;
-                        }
-                    }
-                }
                 $rooms[$i]['room_id'] = $room->room_id;
                 $rooms[$i]['booking_room_id'] = $room->id;
                 $rooms[$i]['rate_type_id'] = $room->rate_type_id;
@@ -879,7 +875,7 @@ class BookingsController extends Controller
                 $allPrices[] = $prices;
                 $rooms[$i]['prices'] = $prices;
                 //$rooms[$i]['rate_types'] = $room->room->roomType->rateTypes;
-                $rooms[$i]['guests'] = $keyedGuests;
+                $rooms[$i]['guests'] = array_key_exists($room->id, $keyedGuests) ? $keyedGuests[$room->id] : [];
                 $rooms[$i]['room_name'] = $room->room ? $room->room->name : null;
                 $rooms[$i]['room_number'] = $room->room ? $room->room->room_number : null;
                 $i++;
