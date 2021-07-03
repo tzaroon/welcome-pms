@@ -68,6 +68,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('role-shifts', 'ShiftsController@addRoleShifts');
                 Route::get('permissions', 'ShiftsController@loadPermissions');
                 Route::get('role/{role}/shifts', 'RolesController@loadShiftsByRole');
+                Route::get('delete-user-shift/{userShift}', 'ShiftsController@deleteUserShift');
             });
 
             Route::namespace('Communication')->name('communication.')->prefix('communication')->group(function () {

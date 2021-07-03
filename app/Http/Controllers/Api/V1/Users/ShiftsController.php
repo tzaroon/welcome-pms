@@ -228,6 +228,7 @@ class ShiftsController extends Controller
                         ->get()->first();
 
                     $users[] = [
+                        'id' => $userShift ? $userShift->id : null,
                         'date' => $calendarStartDate->format('Y-m-d'),
                         'user_id' => $userShift ? $userShift->user_id : null,
                         'user_name' => $userShift ? $userShift->user->first_name : null
@@ -348,5 +349,11 @@ class ShiftsController extends Controller
         }
 
         return response()->json($result);
+    }
+
+    public function deleteUserShift(Request $request, UserShift $userShift) {
+
+        $userShift->delete();
+        return response()->json(['message' => 'User shift deleted successfully.']);
     }
 }
