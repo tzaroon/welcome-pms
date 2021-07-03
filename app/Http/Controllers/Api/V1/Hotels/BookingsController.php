@@ -878,6 +878,7 @@ class BookingsController extends Controller
                 $rooms[$i]['guests'] = array_key_exists($room->id, $keyedGuests) ? $keyedGuests[$room->id] : [];
                 $rooms[$i]['room_name'] = $room->room ? $room->room->name : null;
                 $rooms[$i]['room_number'] = $room->room ? $room->room->room_number : null;
+                $rooms[$i]['lock_pin'] = $room->ttlock_pin;
                 $i++;
 
                 if (!array_key_exists('primary_room', $responseArray)) {
