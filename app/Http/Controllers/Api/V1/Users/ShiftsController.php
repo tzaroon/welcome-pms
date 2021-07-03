@@ -87,13 +87,19 @@ class ShiftsController extends Controller
             $selectedDay = $calendarStartDate->format('w');
 
             if (in_array($selectedDay, $selectedDays)) {
-                $shift = UserShift::create([
+                $userShift = UserShift::firstOrNew([
                     'role_id' => array_key_exists('role_id', $postData) ? $postData['role_id'] : null,
                     'shift_id' => array_key_exists('shift_id', $postData) ? $postData['shift_id'] : null,
-                    'days' => array_key_exists('days', $postData) ? json_encode($postData['days']) : null,
-                    'date' => $shiftDate,
-                    'user_id' => array_key_exists('user_id', $postData) ? $postData['user_id'] : null
+                    'date' => $shiftDate
                 ]);
+                if($userShift->id) {
+                    $userShift->delete();
+                }
+                
+                $userShift->user_id = array_key_exists('user_id', $postData) ? $postData['user_id'] : null;
+                $userShift->days = array_key_exists('days', $postData) ? json_encode($postData['days']) : null;
+
+                $userShift->save();
             }
 
             $calendarStartDate = $calendarStartDate->addDay();
