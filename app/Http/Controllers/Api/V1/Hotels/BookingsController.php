@@ -854,6 +854,8 @@ class BookingsController extends Controller
                 $keyedGuests[$guest->pivot->room_id][$j]['postal_code'] = $guest->user->postal_code;
                 $keyedGuests[$guest->pivot->room_id][$j]['city'] = $guest->user->city;
                 $keyedGuests[$guest->pivot->room_id][$j]['country_id'] = $guest->user->country_id;
+                $keyedGuests[$guest->pivot->room_id][$j]['country'] = $guest->user->country->name;
+                $keyedGuests[$guest->pivot->room_id][$j]['language'] = 'English';
                 $keyedGuests[$guest->pivot->room_id][$j]['gender'] = $guest->user->gender;
                 $keyedGuests[$guest->pivot->room_id][$j]['birth_date'] = $guest->user->birth_date;
                 $keyedGuests[$guest->pivot->room_id][$j]['identification_number'] = $guest->identification_number;

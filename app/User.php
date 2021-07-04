@@ -5,6 +5,7 @@ namespace App;
 use App\Models\Booker;
 use App\Models\Country;
 use App\Models\Guest;
+use App\Models\Language;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -97,5 +98,10 @@ class User extends Authenticatable implements JWTSubject
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+    
+    public function language()
+    {
+        return $this->belongsTo(Language::class);
     }
 }

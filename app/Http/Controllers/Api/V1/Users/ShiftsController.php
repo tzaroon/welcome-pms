@@ -231,7 +231,9 @@ class ShiftsController extends Controller
                         'id' => $userShift ? $userShift->id : null,
                         'date' => $calendarStartDate->format('Y-m-d'),
                         'user_id' => $userShift ? $userShift->user_id : null,
-                        'user_name' => $userShift ? $userShift->user->first_name : null
+                        'role_id' => $userShift && $userShift->user && $userShift->user->role ? $userShift->user->role->id : null,
+                        'role' => $userShift && $userShift->user && $userShift->user->role ? $userShift->user->role->name : null,
+                        'user_name' => $userShift ? $userShift->user->first_name : null,
                     ];
 
                     $calendarStartDate->addDay();

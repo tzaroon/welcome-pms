@@ -78,6 +78,10 @@ class RolesController extends Controller
             'name' => $postData['role_name']
         ]);
 
+        $role->hotel_ids = array_key_exists('hotel_ids', $postData) ? json_encode($postData['hotel_ids']) : null;
+        $role->is_login_shift_period = array_key_exists('is_login_shift_period', $postData) ? $postData['is_login_shift_period'] : null;
+        $role->save();
+
         $shifts = array_key_exists('shifts', $postData) ? $postData['shifts'] : null;
 
         foreach ($shifts as $shift) {
@@ -126,11 +130,13 @@ class RolesController extends Controller
      */
     public function edit(Request $request, Role $role)
     {
-
         $arrResponseArray = [
             'id' => $role->id,
-            'role_name' => $role->name
+            'role_name' => $role->name,
+            'is_login_shift_period' => $role->is_login_shift_period,
+            'hotel_ids' => json_decode($role->hotel_ids)
         ];
+
         if ($role->permissions) {
             foreach ($role->permissions as $permission) {
                 $arrResponseArray['permissions'][] = $permission->id;
@@ -176,8 +182,10 @@ class RolesController extends Controller
         }
 
         $role->name = $postData['role_name'];
+        $role->hotel_ids = array_key_exists('hotel_ids', $postData) ? json_encode($postData['hotel_ids']) : null;
+        $role->is_login_shift_period = array_key_exists('is_login_shift_period', $postData) ? $postData['is_login_shift_period'] : null;
         $role->save();
-
+        
         $permissions = array_key_exists('permissions', $postData) ? $postData['permissions'] : null;
 
         $keyedPermissions = [];
@@ -198,9 +206,7 @@ class RolesController extends Controller
 
         foreach ($shifts as $shift) {
 
-
             if (array_key_exists('id', $shift) && $shift['id']) {
-
 
                 $roleShift = RoleShift::find($shift['id']);
                 $roleShift->role_id = $role->id;

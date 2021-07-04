@@ -96,7 +96,11 @@ class UsersController extends Controller
         $user->company_id = $authUser->company_id;
         $user->is_system_user = true;
         $user->password = Hash::make($postData['password']);
+        $user->edit_payment = array_key_exists('edit_payment', $postData) ? $postData['edit_payment'] : null;
+        $user->take_payments = array_key_exists('take_payments', $postData) ? $postData['take_payments'] : null;
+
         $user->save();
+ 
         return response()->json($user);
     }
 
@@ -169,6 +173,8 @@ class UsersController extends Controller
         $user->gender = $postData['gender'];
         $user->email = $postData['email'];
         $user->role_id = array_key_exists('role_id', $postData) ? $postData['role_id'] : null;
+        $user->edit_payment = array_key_exists('edit_payment', $postData) ? $postData['edit_payment'] : null;
+        $user->take_payments = array_key_exists('take_payments', $postData) ? $postData['take_payments'] : null;
 
         $user->save();
 
