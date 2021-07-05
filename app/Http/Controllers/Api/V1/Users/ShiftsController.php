@@ -428,6 +428,15 @@ class ShiftsController extends Controller
         $days = $endDate->diffInDays($startDate);
         $selectedDays = array_key_exists('days', $postData) ? $postData['days'] : null;
 
+        $userAttendances = UserAttendance::where('attendance', $postData['status'])->where('date', '>=', $startDate->format('Y-m-d'))->where('date', '<', $endDate->format('Y-m-d'))->get();
+
+        $userAttendanceArray = [];
+        if($userAttendances) {
+            foreach($userAttendances as $attendance) {
+                $userAttendanceArray[$attendance->date][$attendance->user_id] = $attendance;
+            }
+        }
+
         for ($i = 0; $i < $days; $i++) {
 
             $attendanceDate = $calendarStartDate->format('Y-m-d');
@@ -435,13 +444,14 @@ class ShiftsController extends Controller
 
             if (!$selectedDays || in_array($selectedDay, $selectedDays)) {
 
-                $userAttendance = UserAttendance::create([
-                    'company_id' => 1,
-                    'user_id' => $postData['user_id'],
-                    'date' => $attendanceDate,
-                    'attendance' => $postData['status']
-                ]);
-
+                if(!array_key_exists($attendanceDate, $userAttendanceArray) || !array_key_exists($postData['user_id'], $userAttendanceArray[$attendanceDate])) {
+                    $userAttendance = UserAttendance::create([
+                        'company_id' => 1,
+                        'user_id' => $postData['user_id'],
+                        'date' => $attendanceDate,
+                        'attendance' => $postData['status']
+                    ]);
+                }
             }
 
             $calendarStartDate->addDay();
