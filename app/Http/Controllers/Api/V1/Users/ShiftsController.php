@@ -8,13 +8,14 @@ use App\Models\Role;
 use App\Models\RoleHasPermission;
 use App\Models\RoleShift;
 use App\Models\Shift;
-
+use App\Models\UserAttendance;
 use App\Models\UserShift;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Validator;
 use App\User;
+use DB;
 
 class ShiftsController extends Controller
 {
@@ -245,7 +246,45 @@ class ShiftsController extends Controller
             }
         }
 
-        return response()->json($bodyRows);
+        
+        $offRows = [];
+        foreach(['off', 'holiday', 'sick'] as $status) {
+
+            $dateCount = UserAttendance::where('attendance', $status)->orderByDesc('total')->groupBy('date')->select('date', DB::raw('count(*) as total'))->first();
+            $maxRows = $dateCount ? $dateCount->total : 0;
+
+            $userAttendances = UserAttendance::where('attendance', $status)->where('date', '>=', $startDate->format('Y-m-d'))->where('date', '<', $endDate->format('Y-m-d'))->get();
+
+            $userAttendanceArray = [];
+            if($userAttendances) {
+                foreach($userAttendances as $attendance) {
+                    $userAttendanceArray[$attendance->date][] = $attendance;
+                }
+            }
+
+            for($i=0; $i<=$maxRows; $i++) {
+                $offFromDate = Carbon::parse($postData['start_date']);
+                for ($j = 0; $j < $days; $j++) {
+
+                    $attendance = null;
+                    $date = $offFromDate->format('Y-m-d');
+                    if(array_key_exists($date, $userAttendanceArray) && array_key_exists($i, $userAttendanceArray[$date])) {
+                        $attendance = $userAttendanceArray[$date][$i];
+                    }
+                    
+                    $offRows[$status][$i][] = [
+                        'id' => $attendance ? $attendance->id : null,
+                        'date' => $offFromDate->format('Y-m-d'),
+                        'user_name' => $attendance && $attendance->user ? $attendance->user->first_name . ' ' . $attendance->user->last_name : null,
+                    ];
+
+                    $offFromDate->addDay();
+                }
+            }
+        }
+        
+
+        return response()->json(array_merge(['shift_rows' => $bodyRows], $offRows));
     }
 
     public function addRoleShifts(Request $request)
@@ -357,5 +396,57 @@ class ShiftsController extends Controller
 
         $userShift->delete();
         return response()->json(['message' => 'User shift deleted successfully.']);
+    }
+
+    public function addAttendance(Request $request) {
+
+        $postData = $request->getContent();
+        $postData =  $postData ? json_decode($postData, true) : [];
+
+        $validator = Validator::make($postData, [
+            'user_id' => 'required',
+            'from_date' => 'required',
+            'to_date' => 'required',
+            'status' => 'required'
+        ], [], [
+            'user_id' => 'User',
+            'from_date' => 'From Date',
+            'to_date' => 'To Date',
+            'status' => 'Status'
+        ]);
+
+        if (!$validator->passes()) {
+
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $startDate = Carbon::parse($postData['from_date']);
+        $endDate = Carbon::parse($postData['to_date']);
+
+        $calendarStartDate = Carbon::parse($postData['from_date']);
+
+        $days = $endDate->diffInDays($startDate);
+        $selectedDays = array_key_exists('days', $postData) ? $postData['days'] : null;
+
+        for ($i = 0; $i < $days; $i++) {
+
+            $attendanceDate = $calendarStartDate->format('Y-m-d');
+            $selectedDay = $calendarStartDate->format('w');
+
+            if (!$selectedDays || in_array($selectedDay, $selectedDays)) {
+
+                $userAttendance = UserAttendance::create([
+                    'company_id' => 1,
+                    'user_id' => $postData['user_id'],
+                    'date' => $attendanceDate,
+                    'attendance' => $postData['status']
+                ]);
+
+            }
+
+            $calendarStartDate->addDay();
+        }
+
+        return response()->json(['message' => 'Attendance added.']);
     }
 }
