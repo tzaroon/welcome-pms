@@ -70,6 +70,8 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('role/{role}/shifts', 'RolesController@loadShiftsByRole');
                 Route::get('delete-user-shift/{userShift}', 'ShiftsController@deleteUserShift');
                 Route::post('add-attendance', 'ShiftsController@addAttendance');
+                Route::post('cash-management-lists', 'CashManagementController@index');
+                Route::resource('cash-management', 'CashManagementController', ['except' => ['index']]);
             });
 
             Route::namespace('Communication')->name('communication.')->prefix('communication')->group(function () {

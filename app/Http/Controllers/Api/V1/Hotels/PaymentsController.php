@@ -59,8 +59,11 @@ class PaymentsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }      
 
+        $user = auth()->user();
+
         $payment = Payment::create([            
             'booking_id' =>  array_key_exists('booking_id', $postData) ? $postData['booking_id'] : null,
+            'user_id' =>  $user->id,
             'payment_date' => array_key_exists('payment_date', $postData) ? $postData['payment_date'] : date('Y-m-d'),
             'amount' => array_key_exists('amount', $postData) ? floatval($postData['amount']) : null,
             'payment_method' => array_key_exists('payment_method', $postData) && $postData['payment_method'] ? $postData['payment_method'] : Payment::TYPE_CASH,

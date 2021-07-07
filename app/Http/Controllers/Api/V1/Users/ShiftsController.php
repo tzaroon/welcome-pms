@@ -212,6 +212,8 @@ class ShiftsController extends Controller
             foreach ($shifts as $shift) {
                 $bodyRows[$j] = [
                     'row_type' => 'body',
+                    'role_id' => $role->id,
+                    'shift_id' => $shift->id,
                     'role_name' => $role->id != $previousRoleId ? $role->name : '',
                     'shift' => $shift->name,
                     'from_time' => $shift->from_time,

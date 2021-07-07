@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
     protected $fillable = [
         'booking_id',
+        'user_id',
         'payment_method',
         'initials',
         'payment_date',
@@ -20,7 +22,8 @@ class Payment extends Model
 
 
     protected $appends = [
-        'formated_amount'
+        'formated_amount',
+        'decimal_amount'
     ];
 
     const TYPE_BANKCARD = 'bankcard';
@@ -60,5 +63,14 @@ class Payment extends Model
     public function getFormatedAmountAttribute()
     {
         return number_format($this->amount, 2, ',', '.');
+    }
+    
+    public function getDecimalAmountAttribute()
+    {
+        return number_format($this->amount, 2);
+    }
+
+    public function assignment() {
+        return $this->hasOne(PaymentAssignment::class)->with(['assignedBy', 'assignedTo'])->latest();
     }
 }
