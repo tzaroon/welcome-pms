@@ -238,10 +238,9 @@ class DailyRatesController extends Controller
 		$dailyPriceIds = array_key_exists('daily_price_ids',  $postData) ?  $postData['daily_price_ids'] : [];
 
 
+		$dailyPrices = DailyPrice::whereIn('id', $dailyPriceIds)->with(['rateType.roomType.hotel'])->get();
 
-		foreach ($dailyPriceIds as $id) {
-
-			$dailyPrice = DailyPrice::find($id);
+		foreach ($dailyPrices as $dailyPrice) {
 
 			$hotel = $dailyPrice->rateType->roomType->hotel;
 
