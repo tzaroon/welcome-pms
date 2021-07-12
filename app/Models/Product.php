@@ -12,9 +12,10 @@ class Product extends Model
 
         $productPrice = ProductPrice::firstOrNew(['company_id' => $this->company_id, 'product_id' => $this->id, 'is_active' => 1, 'price' => $price]);
 
-        $oldProductTaxes = $this->price->taxes;
+        $oldProductTaxes = $this->price ? $this->price->taxes : null;
         $oldTaxes = [];
-        if($oldProductTaxes->count()) {
+        if($oldProductTaxes && $oldProductTaxes->count()) {
+            
             foreach($oldProductTaxes as $oldTax) {
                 $oldTaxes[] = [
                     'tax_id' => $oldTax->tax_id,
