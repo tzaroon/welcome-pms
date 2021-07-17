@@ -382,9 +382,11 @@ class RateTypesController extends Controller
      */
     public function destroy(Request $request, RateType $rateType) : JsonResponse
     {
-       
+        $rateType = RateType::find($rateType->id);
         $rateType->delete();
 
-        return response()->json(array('message' => 'Rate type deleted successfully'));
+        return response()->json(array(
+            'message' => 'Rate type deleted successfully',
+        ));
     }
 }
