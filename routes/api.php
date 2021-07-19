@@ -65,6 +65,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('role', 'RolesController');
                 Route::resource('shift', 'ShiftsController');
                 Route::post('shifts-calendar', 'ShiftsController@showShifts');
+                Route::post('change-shift', 'ShiftsController@changeShifts');
                 Route::post('role-shifts', 'ShiftsController@addRoleShifts');
                 Route::get('permissions', 'ShiftsController@loadPermissions');
                 Route::get('role/{role}/shifts', 'RolesController@loadShiftsByRole');

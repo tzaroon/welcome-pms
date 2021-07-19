@@ -289,6 +289,20 @@ class ShiftsController extends Controller
         return response()->json(array_merge(['shift_rows' => $bodyRows], $offRows));
     }
 
+    public function changeShifts(Request $request){
+
+        $postData = $request->getContent();
+        $postData =  $postData ? json_decode($postData, true) : [];
+        
+        foreach($postData["user_shifts_id"] as $userShiftId){
+            $userShift = UserShift::find($userShiftId);
+            $userShift->shift_id = $postData["shift_id"];
+            $userShift->save();
+        }
+
+        return response()->json(['message' => 'User shift changed sucessfully.']);
+    }
+
     public function addRoleShifts(Request $request)
     {
         $role = new Role();
