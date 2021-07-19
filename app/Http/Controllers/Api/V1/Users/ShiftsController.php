@@ -293,10 +293,10 @@ class ShiftsController extends Controller
 
         $postData = $request->getContent();
         $postData =  $postData ? json_decode($postData, true) : [];
-        
-        foreach($postData["user_shifts_id"] as $userShiftId){
+
+        foreach($postData["user_shift_ids"] as $userShiftId){
             $userShift = UserShift::find($userShiftId);
-            $userShift->shift_id = $postData["shift_id"];
+            $userShift->shift_id = $postData["new_shift_id"];
             $userShift->save();
         }
 
