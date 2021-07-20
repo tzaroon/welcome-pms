@@ -295,9 +295,16 @@ class ShiftsController extends Controller
         $postData =  $postData ? json_decode($postData, true) : [];
 
         foreach($postData["user_shift_ids"] as $userShiftId){
+            $roleShift = RoleShift::find($postData["new_shift_id"]);
+
             $userShift = UserShift::find($userShiftId);
             $userShift->shift_id = $postData["new_shift_id"];
-            $userShift->save();
+
+            if($roleShift->role_id == $userShift->role_id) {
+                $userShift->save();
+            } else {
+                return response()->json(array('errors' => ['Cannot relocate to different role shift.']), 422);
+            }
         }
 
         return response()->json(['message' => 'User shift changed sucessfully.']);
