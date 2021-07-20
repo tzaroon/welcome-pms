@@ -17,6 +17,7 @@ class Booker extends Model
         'sent_auto_emails',
         'identification',
         'identification_number',
+        'identification_date_of_issue',
         'identification_date_of_expiry',
         'passport_country_id',
         'discount_amount',
