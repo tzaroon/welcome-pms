@@ -1,14 +1,18 @@
 <?php
 
- namespace App\Http\Controllers\Api\V1\Hotels;
+namespace App\Http\Controllers\Api\V1\Hotels;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\PaymentLink;
 use Validator;
 use Illuminate\Support\Facades\Storage;
 
+use App\PaymentClass\paycomet_bankstore;
+
+// include("class/paycomet_bankstore.php");
 
 class PaymentsController extends Controller
 {
@@ -313,6 +317,72 @@ class PaymentsController extends Controller
         //$pdf->Output($$fileName, 'D');
 
         return response()->json(['file' => 'storage/' . $fileName]);
+    }
+
+
+    public function generateLink(Request $request, Booking $booking) {
+
+        $roomNames = [];
+        foreach($booking->rooms as $room){
+            $roomNames[] = $room->name;
+        }
+
+        $roomNames = json_encode($roomNames); // array to string conversion
+
+        $totalAdults = $booking->adult_count;
+        $totalChildrens = $booking->children_count;
+        $totalRooms = $booking->roomCount;
+
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
+
+        $number = number_format($postData['amount'], 2, '.', '');
+        $amount = $number * 100;
+
+        $merchantCode	= "h893x7h4";
+        $password		= "y56mk9r2hxwjn7zhtdwu";
+        $terminal		= "31999";
+        $jetid			= NULL; // Optional
+
+        $paycomet = new Paycomet_Bankstore($merchantCode, $terminal, $password, $jetid);
+        
+        $description = "totalAdults: ".$totalAdults.", totalChildrens: ".$totalChildrens.
+                       ", totalRooms: ".$totalRooms.", roomNames ".$roomNames;
+        
+        // get payment link
+        $response = $paycomet->ExecutePurchaseUrl($booking->id, $amount, "EUR", "EN", $description);
+        // return response()->json($response);
+
+        if ($response->RESULT == "OK") {
+            return response()->json(['paymentLink' => $response->URL_REDIRECT]);
+        } else {
+            return response()->json(['errors' => ['paymentLink' => ['Payment link is not generated!']]]);
+        }
+    }
+
+
+    public function sendPaymentLink(Request $request, Booking $booking){
+        
+        $postData = $request->getContent();  
+        $postData = json_decode($postData, true);
+        // return $postData;        
+
+        $validator = Validator::make($postData, [
+            'amount' => 'required',
+            'payment_url' => 'required'
+        ]);
+
+        if (!$validator->passes()) {
+            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
+        }
+
+        $paymentLink = PaymentLink::create([            
+            'amount' =>  array_key_exists('amount', $postData) ? $postData['amount'] : null,
+            'booking_id' =>  $booking->id,
+            'payment_url' =>  array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null,
+        ]); 
+        
+        return response()->json(['data' => $paymentLink]);
     }
 
 

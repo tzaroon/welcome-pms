@@ -105,6 +105,8 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('booking/{booking}/update-booking', 'BookingsController@updateBooking');
                 Route::get('booking/{booking}/edit-booking', 'BookingsController@editBooking');
                 Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
+                Route::post('booking/{booking}/generate-payment-link', 'PaymentsController@generateLink');
+                Route::post('booking/{booking}/send-payment-link', 'PaymentsController@sendPaymentLink');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
                 Route::get('bookings/{booking}/load-rooms', 'BookingsController@loadRooms');
