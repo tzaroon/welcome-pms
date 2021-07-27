@@ -14,6 +14,7 @@ use App\Models\RoomType;
 use App\Models\RoomTypeDetail;
 use App\Models\Tax;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
@@ -38,8 +39,9 @@ class RateTypesController extends Controller
         $postData = json_decode($postData, true);
         $details = $postData['rate_type_details'];       
         $name = $details[0]['name'];
-        $roomTypeId = $postData['room_type_id']; 
-        
+        $roomTypeId = $postData['room_type_id'];
+        // return response()->json($apply_rate_from);
+
         $validator = Validator::make($postData, [
             'room_type_id' => 'required',
             'number_of_people' => 'required',
@@ -62,6 +64,21 @@ class RateTypesController extends Controller
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
+
+        // calculate total number of months between two dates
+        $result = CarbonPeriod::create($postData['apply_rate_from'], '1 month', $postData['apply_rate_to']);
+        $totalMonths = [];
+
+        foreach ($result as $dt) {
+            $totalMonths[] = $dt->format("Y-m");
+        }
+
+        // return response()->json($totalMonths);
+        // return response()->json(count($totalMonths));
+        if (count($totalMonths) > 18){
+            return response()->json(['errors' => ['apply_rate_from' => ['Range between dates exceeds the limit of 18 months!']]]);
+        }
+        // ----------------------------------------------------------
 
         DB::transaction(function() use ($user, $postData) {
 
@@ -241,6 +258,21 @@ class RateTypesController extends Controller
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
+
+        // calculate total number of months between two dates
+        $result = CarbonPeriod::create($postData['apply_rate_from'], '1 month', $postData['apply_rate_to']);
+        $totalMonths = [];
+
+        foreach ($result as $dt) {
+            $totalMonths[] = $dt->format("Y-m");
+        }
+
+        // return response()->json($totalMonths);
+        // return response()->json(count($totalMonths));
+        if (count($totalMonths) > 18){
+            return response()->json(['errors' => 'Range between dates exceeds the limit of 18 months!']);
+        }
+        // ----------------------------------------------------------
 
         DB::transaction(function() use ($user, $rateType, $postData) {
 

@@ -805,7 +805,7 @@ class BookingsController extends Controller
         $responseArray['received'] = $booking->created_at;
         $responseArray['nights'] = $booking->numberOfDays;
 
-        $booking->booker->user;
+        $booking->booker->user->country;
 
         $responseArray['booker_name'] = $booking->booker->user->first_name . ' ' . $booking->booker->user->last_name;
         $responseArray['booker_email'] = $booking->booker->user->email;
