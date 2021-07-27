@@ -7,12 +7,15 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\PaymentLink;
+use App\Models\ContactDetail;
+use App\Models\Conversation;
 use Validator;
 use Illuminate\Support\Facades\Storage;
+use DB;
+
 
 use App\PaymentClass\paycomet_bankstore;
 
-// include("class/paycomet_bankstore.php");
 
 class PaymentsController extends Controller
 {
@@ -362,10 +365,12 @@ class PaymentsController extends Controller
 
 
     public function sendPaymentLink(Request $request, Booking $booking){
+
+        $admin = auth()->user();
         
         $postData = $request->getContent();  
         $postData = json_decode($postData, true);
-        // return $postData;        
+        // return $booking->booker->user->id;       
 
         $validator = Validator::make($postData, [
             'amount' => 'required',
@@ -375,13 +380,97 @@ class PaymentsController extends Controller
         if (!$validator->passes()) {
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
-
-        $paymentLink = PaymentLink::create([            
-            'amount' =>  array_key_exists('amount', $postData) ? $postData['amount'] : null,
-            'booking_id' =>  $booking->id,
-            'payment_url' =>  array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null,
-        ]); 
         
+        //----------------------------------------------------------------
+        $type = $postData['whatsapp'];
+        $type = array_keys($postData, $type);
+        $whatsapp = $type[0];
+
+        $type = $postData['email'];
+        $type = array_keys($postData, $type);
+        $email = $type[0];
+
+        $type = $postData['sms'];
+        $type = array_keys($postData, $type);
+        $sms = $type[0];
+
+        $whatsappValue = ContactDetail::where("user_id",$booking->booker->user->id)->where("type","whatsapp")->first(["id","contact"]);
+        $emailValue = ContactDetail::where("user_id",$booking->booker->user->id)->where("type","email")->first(["id","contact"]);
+        $smsValue = ContactDetail::where("user_id",$booking->booker->user->id)->where("type","sms")->first(["id","contact"]);
+        
+        DB::transaction(function () use ($booking, $postData, $admin, $whatsapp, $email, $sms, $whatsappValue, $emailValue, $smsValue, &$paymentLink) {
+
+            if (gettype($postData['whatsapp']) != 'NULL'){
+                
+                if($whatsappValue && $postData['whatsapp'] == $whatsappValue->contact){
+                    $contactDetail = ContactDetail::find($whatsappValue->id);
+                    // return $contactDetail;
+                } else {
+                    $contactDetail = new ContactDetail;
+                    $contactDetail->user_id = $booking->booker->user->id;
+                    $contactDetail->contact =  array_key_exists('whatsapp', $postData) ? $postData['whatsapp'] : null;
+                    $contactDetail->type = $whatsapp;
+                    $contactDetail->save();
+                }                
+
+                $conversation = new Conversation;
+                $conversation->contact_detail_id = $contactDetail->id;
+                $conversation->from_user_id = $admin->id;
+                $conversation->to_user_id = $booking->booker->user->id;
+                $conversation->message = array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null;
+                $conversation->type = $whatsapp;
+                $conversation->save();
+            }
+
+            if (gettype($postData['email']) != 'NULL'){
+
+                if($emailValue && $postData['email'] == $emailValue->contact){
+                    $contactDetail = ContactDetail::find($emailValue->id);
+                } else {
+                    $contactDetail = new ContactDetail;
+                    $contactDetail->user_id = $booking->booker->user->id;
+                    $contactDetail->contact =  array_key_exists('email', $postData) ? $postData['email'] : null;
+                    $contactDetail->type = $email;
+                    $contactDetail->save();
+                }
+
+                $conversation = new Conversation;
+                $conversation->contact_detail_id = $contactDetail->id;
+                $conversation->from_user_id = $admin->id;
+                $conversation->to_user_id = $booking->booker->user->id;
+                $conversation->message = array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null;
+                $conversation->type = $email;
+                $conversation->save();
+            }
+
+            if (gettype($postData['sms']) != 'NULL'){
+
+                if($smsEmail && $postData['sms'] == $smsValue->contact){
+                    $contactDetail = ContactDetail::find($smsValue->id);
+                } else {
+                    $contactDetail = new ContactDetail;
+                    $contactDetail->user_id = $booking->booker->user->id;
+                    $contactDetail->contact =  array_key_exists('sms', $postData) ? $postData['sms'] : null;
+                    $contactDetail->type = $sms;
+                    $contactDetail->save();
+                }
+
+                $conversation = new Conversation;
+                $conversation->contact_detail_id = $contactDetail->id;
+                $conversation->from_user_id = $admin->id;
+                $conversation->to_user_id = $booking->booker->user->id;
+                $conversation->message = array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null;
+                $conversation->type = $sms;
+                $conversation->save();
+            }
+
+            $paymentLink = PaymentLink::create([            
+                'amount' =>  array_key_exists('amount', $postData) ? $postData['amount'] : null,
+                'booking_id' =>  $booking->id,
+                'payment_url' =>  array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null,
+            ]); 
+        });
+
         return response()->json(['data' => $paymentLink]);
     }
 
