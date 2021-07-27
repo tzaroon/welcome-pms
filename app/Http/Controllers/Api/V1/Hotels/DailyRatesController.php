@@ -38,7 +38,11 @@ class DailyRatesController extends Controller
 		$hotelCount = 0;
 		if ($hotels) {
 
+			
+
 			foreach ($hotels as $hotel) {
+				$hotelBooked = [];
+				$hotelTotalRooms = [];
 				$roomsTypes = RoomType::where(['company_id' => $user->company_id, 'hotel_id' => $hotel->id])
 					->with(
 						[
@@ -53,7 +57,11 @@ class DailyRatesController extends Controller
 					'name' => $hotel->property
 
 				];
+				
+				$hotalReserveKey = $count;
 				$count++;
+				//$count++;
+
 				$room = new Room();
 
 				$dailyPrices = DailyPrice::where('date', '>=', $dateFrom)
@@ -117,6 +125,16 @@ class DailyRatesController extends Controller
 							$totalRoomTypesOnDate[$rateDate] = $avaliableRooms;
 						}
 
+						if (array_key_exists($rateDate, $hotelTotalRooms)) {
+
+							$hotelTotalRooms[$rateDate] += $totalRooms;
+							$hotelBooked[$rateDate] += $bookedCount;
+						} else {
+	
+							$hotelTotalRooms[$rateDate] = $totalRooms;
+							$hotelBooked[$rateDate] = $bookedCount;
+						}
+
 						$carbonFromDate = $carbonFromDate->addDay();
 					}
 
@@ -159,6 +177,21 @@ class DailyRatesController extends Controller
 
 					$bookedCount = 0;
 					$count++;
+				}
+
+				if($hotelTotalRooms) {
+					$hotalRoomTotalCount = 0;
+					foreach($hotelTotalRooms as $date=>$roomCount) {
+
+						$resultData[$hotelCount][$hotalReserveKey]['room_counts'][$hotalRoomTotalCount] = [
+							'date' => $date,
+							'total_rooms' => $roomCount,
+							'booked_rooms' => $hotelBooked[$date],
+							'percent' => round($hotelBooked[$date]/$roomCount*100, 2)
+						];
+
+						$hotalRoomTotalCount++;
+					}
 				}
 
 				$hotelCount++;
