@@ -201,7 +201,6 @@ class DailyRatesController extends Controller
 			$count++;
 		}
 
-
 		$totalAvailabilityCount = [];
 		if ($totalRoomTypesOnDate) {
 			foreach ($totalRoomTypesOnDate as $date => $dateAvailability) {
