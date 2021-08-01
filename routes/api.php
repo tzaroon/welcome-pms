@@ -107,6 +107,8 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
                 Route::post('booking/{booking}/generate-payment-link', 'PaymentsController@generateLink');
                 Route::post('booking/{booking}/send-payment-link', 'PaymentsController@sendPaymentLink');
+                Route::post('booking/get-all-users-conversation', 'ConversationController@getAllUsersConversation');
+                Route::post('booking/get-all-conversation', 'ConversationController@getAllConversation');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
                 Route::get('bookings/{booking}/load-rooms', 'BookingsController@loadRooms');
