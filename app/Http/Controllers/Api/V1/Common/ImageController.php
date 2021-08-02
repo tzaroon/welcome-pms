@@ -36,8 +36,8 @@ class ImageController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }        
 
-        $path = Storage::disk('local')->path('public');
-        $idImagePath = "/id-".time().".png";
+        $path = '/home/ChicStays/chicstays-frontend/dist/';
+        $idImagePath = "assets/id-".time().".png";
         $path .= $idImagePath;
 
         $img = substr($base64String, strpos($base64String, ",")+1);
