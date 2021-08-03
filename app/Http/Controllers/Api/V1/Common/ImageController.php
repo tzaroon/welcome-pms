@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class ImageController extends Controller
@@ -19,12 +20,15 @@ class ImageController extends Controller
      */
     public function uploadIdImage(Request $request) : JsonResponse
     {
-        $postData = $request->all();
+        $postData = $request->getContent();
+        $postData = json_decode($postData, true);
+
+        $base64String = $postData['base_64'];
 
         $validator = Validator::make($postData, [
-            'id_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg'
+            'base_64' => 'required'
         ], [], [
-            'id_image' => 'File'
+            'base_64' => 'Image'
         ]);
 
         if (!$validator->passes()) {
@@ -32,12 +36,15 @@ class ImageController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }        
 
-        if ($request->hasFile('id_image')) {
-            
-            $idImagePath = $request->file('id_image')->hashName();
-            $request->file('id_image')->store('public');
-        }
+        $path = '/home/ChicStays/chicstays-frontend/dist/';
+        $idImagePath = "assets/id-".time().".png";
+        $path .= $idImagePath;
 
+        $img = substr($base64String, strpos($base64String, ",")+1);
+        $data = base64_decode($img);
+
+        $success = file_put_contents($path, $data);
+        
         return response()->json($idImagePath);
     }
 }
