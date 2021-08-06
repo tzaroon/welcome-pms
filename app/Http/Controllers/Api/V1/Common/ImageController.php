@@ -20,6 +20,7 @@ class ImageController extends Controller
      */
     public function uploadIdImage(Request $request) : JsonResponse
     {
+        
         $postData = $request->getContent();
         $postData = json_decode($postData, true);
 
