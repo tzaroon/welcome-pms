@@ -19,9 +19,24 @@ use DB;
 use App\Models\Country;
 use App\Models\Language;
 use App\Models\RoomType;
+use App\Models\ContactDetail;
+use App\Models\Conversation;
+
+use Twilio\TwiML\MessagingResponse;
+use App\Services\Twilio\WhatsAppService;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Str;
+
 
 class PushNotificationController extends Controller
 {
+
+    public function __construct(WhatsAppService $whatsApp)
+    {
+        $this->whatsApp = $whatsApp;
+    }
+
     public function index(Request $request)
     {
         $token = WuBook::auth()->acquire_token(); 
@@ -171,4 +186,43 @@ class PushNotificationController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function ReceiveMessage(Request $request){
+        
+        $messageStatus = $request->input("SmsStatus");
+        $messageMedia = $request->input("NumMedia");
+        $messageBody = $request->input("Body");
+        $messageFromRequest = $request->input("From");
+        $messageFrom = substr($messageFromRequest,9);
+        $messageMedium = substr($messageFromRequest, 0, 8);
+        // --------- test purpose -----------
+        // $messageBody = "received test message";
+        // $messageFrom = "+917889450196";
+        // $messageMedium = "whatsapp";
+
+        if($messageStatus == "received"){
+
+            $contactDetail = ContactDetail::where('contact',$messageFrom)
+                                      ->where('type',$messageMedium)
+                                      ->first(['id','user_id']);
+
+            $conversation = new Conversation;
+            $conversation->contact_detail_id = $contactDetail->id;
+            $conversation->from_user_id = $contactDetail->user_id;
+            $conversation->to_user_id = 1;
+            $conversation->message = $messageBody;
+            $conversation->type = $messageMedium;
+            $conversation->save();
+        
+        }
+        Storage::put('communication.txt', "message status: ".$messageStatus.", message body: ".$messageBody.", message from: ".$messageFrom.", message medium: ".$messageMedium);
+
+        // $message = "Thank you for your message. I will reply you back!";
+        // $this->whatsApp->sendMessage('whatsapp:'.$messageFrom, $message);
+
+        dd("message status: ".$messageStatus.", message body: ".$messageBody.", message from: ".$messageFrom.", message medium: ".$messageMedium);
+        return "message status: ".$messageStatus.", message body: ".$messageBody.", message from: ".$messageFrom.", message medium: ".$messageMedium;
+
+    }
+
 }

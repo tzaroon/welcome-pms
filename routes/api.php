@@ -25,8 +25,10 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::get('user-permissions', 'SessionsController@userPermissions')->name('user-permissions');
         });
 
+
         Route::namespace('WuBook')->name('wubook.')->prefix('wubook')->group(function () {
             Route::post('push-notification', 'PushNotificationController@index')->name('push-notification');
+            Route::post('receive-message', 'PushNotificationController@ReceiveMessage');
         });
 
         Route::middleware('auth:api')->group(function () {

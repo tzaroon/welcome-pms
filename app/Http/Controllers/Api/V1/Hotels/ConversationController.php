@@ -13,16 +13,24 @@ use App\User;
 use Validator;
 use Illuminate\Support\Facades\Storage;
 use App\Services\Twilio\WhatsAppService;
+use App\Services\Twilio\SmsService;
 
 class ConversationController extends Controller
 {
 
     protected $whatsApp;
+    protected $sms;
 
-    public function __construct(WhatsAppService $whatsApp)
+    public function __construct(WhatsAppService $whatsApp,SmsService $sms)
     {
         $this->whatsApp = $whatsApp;
+        $this->sms = $sms;
+
     }
+
+    // public function __construct(SmsService $sms)
+    // {
+    // }
 
 
     public function getAllUsersConversation(Request $request){
@@ -72,6 +80,7 @@ class ConversationController extends Controller
         ]);
     }
 
+
     public function getAllUsersConversationList(Request $request){
         $loggedInUser = auth()->user();
         // return $loggedInUser;
@@ -79,9 +88,8 @@ class ConversationController extends Controller
         $postData = json_decode($postData, true);
         // return $postData;
 
-        if($postData){
+        if($postData["mode"] != "all"){
             $ids = Conversation::where('type',$postData['mode'])->orderBy('id', 'DESC')->get(["id","from_user_id", "to_user_id"]);
-        // return $ids;
 
             $chatUserIds = [];
             foreach($ids as $temp){
@@ -124,47 +132,48 @@ class ConversationController extends Controller
             ]);
         }
 
+        if($postData["mode"] == "all"){
+            $ids = Conversation::orderBy('id', 'DESC')->get(["id","from_user_id", "to_user_id"]);
+            // return $ids;
 
-        $ids = Conversation::orderBy('id', 'DESC')->get(["id","from_user_id", "to_user_id"]);
-        // return $ids;
-
-        $chatUserIds = [];
-        foreach($ids as $temp){
-            if($temp['from_user_id'] != $loggedInUser->id){
-                $chatUserIds[] = $temp['from_user_id'];
+            $chatUserIds = [];
+            foreach($ids as $temp){
+                if($temp['from_user_id'] != $loggedInUser->id){
+                    $chatUserIds[] = $temp['from_user_id'];
+                }
+                if($temp['to_user_id'] != $loggedInUser->id){
+                    $chatUserIds[] = $temp['to_user_id'];
+                }
             }
-            if($temp['to_user_id'] != $loggedInUser->id){
-                $chatUserIds[] = $temp['to_user_id'];
+            $chatUserIds = array_unique($chatUserIds);
+            $chatUserIds = array_values($chatUserIds);
+            // return $chatUserIds;
+            $chat = [];
+                for($i = 0; $i < count($chatUserIds); $i++){
+                    $chatUserId = $chatUserIds[$i];
+                    $chat[$i] = Conversation::where(function ($query) use ($chatUserId){
+                                                $query->where('conversations.from_user_id', '=', $chatUserId)
+                                                    ->orWhere('conversations.to_user_id', '=', $chatUserId);
+                                            })
+                                            ->select("message","type","created_at")
+                                            ->orderBy('id','DESC')
+                                            ->limit(1)
+                                            ->first();
+
+                $chat[$i]['chat_with_user_id'] = $chatUserId;
+                $chat[$i]['first_name'] = User::where('id',$chatUserId)->value('first_name');
+                $chat[$i]['last_name'] = User::where('id',$chatUserId)->value('last_name');
+                $chat[$i]['unread_messages'] = Conversation::where('from_user_id',$chatUserId)
+                                                            ->where('to_user_id',$loggedInUser->id)
+                                                            ->where('is_viewed',0)
+                                                            ->count();
             }
+
+
+            return response()->json([
+                'conversation' => $chat
+            ]);
         }
-        $chatUserIds = array_unique($chatUserIds);
-        $chatUserIds = array_values($chatUserIds);
-        // return $chatUserIds;
-        $chat = [];
-            for($i = 0; $i < count($chatUserIds); $i++){
-                $chatUserId = $chatUserIds[$i];
-                $chat[$i] = Conversation::where(function ($query) use ($chatUserId){
-                                            $query->where('conversations.from_user_id', '=', $chatUserId)
-                                                ->orWhere('conversations.to_user_id', '=', $chatUserId);
-                                        })
-                                        ->select("message","type","created_at")
-                                        ->orderBy('id','DESC')
-                                        ->limit(1)
-                                        ->first();
-
-            $chat[$i]['chat_with_user_id'] = $chatUserId;
-            $chat[$i]['first_name'] = User::where('id',$chatUserId)->value('first_name');
-            $chat[$i]['last_name'] = User::where('id',$chatUserId)->value('last_name');
-            $chat[$i]['unread_messages'] = Conversation::where('from_user_id',$chatUserId)
-                                                        ->where('to_user_id',$loggedInUser->id)
-                                                        ->where('is_viewed',0)
-                                                        ->count();
-        }
-
-
-        return response()->json([
-            'conversation' => $chat
-        ]);
 
 
 
@@ -253,12 +262,46 @@ class ConversationController extends Controller
 
             // $this->whatsApp->sendMessage($to, $body);
             $this->whatsApp->sendMessage('whatsapp:'.$userPhoneNumber, $postData['message']);
+            // return $this->whatsApp;
+            // $this->whatsApp->sendMessage('whatsapp:+917889450196', $postData['message']);
 
             return response()->json([
                 'message' => 'Whatsapp message sent',
             ]);
         }
+
+        if($postData['mode'] == 'sms'){
+            if($contactInfo && $userPhoneNumber == $contactInfo->contact){
+                $contactDetail = ContactDetail::find($contactInfo->id);
+                // return $contactDetail;
+            } else {
+                $contactDetail = new ContactDetail;
+                $contactDetail->user_id = $postData['user_id'];
+                $contactDetail->contact = $userPhoneNumber;
+                $contactDetail->type = $postData['mode'];
+                $contactDetail->save();
+            }
+
+            $conversation = new Conversation;
+            $conversation->contact_detail_id = $contactDetail->id;
+            $conversation->from_user_id = $loggedInUser->id;
+            $conversation->to_user_id = $postData['user_id'];
+            $conversation->message = $postData['message'];
+            $conversation->type = $postData['mode'];
+            $conversation->save();
+
+            // $this->whatsApp->sendMessage($to, $body);
+            $this->sms->sendSmsMessage($userPhoneNumber, $postData['message']);
+            // return $this->whatsApp;
+            // $this->whatsApp->sendMessage('whatsapp:+917889450196', $postData['message']);
+
+            return response()->json([
+                'message' => 'SMS message sent',
+            ]);
+        }
         
         
     }
+
+
 }

@@ -5,11 +5,11 @@ namespace App\Services\Twilio;
 
 
 //use App\Verify\Result;
-use App\WhatsApp\Service;
+use App\SMS\Service;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
-class WhatsAppService implements Service
+class SmsService implements Service
 {
 	/**
 	 * @var Client
@@ -34,14 +34,21 @@ class WhatsAppService implements Service
 		$this->verification_sid = $verification_sid ?: config('app.twilio.verification_sid');
 	}
 
-	public function sendMessage($to , $body)
+	public function sendSmsMessage($to , $body)
 	{
-		$message = $this->client->messages 
-		->create($to, 
-				 array( 
-					 "from" => "whatsapp:+14155238886",	
-					 "body" => $body
-				 ) 
-		);
+		// $message = $this->client->messages 
+		// ->create($to, 
+		// 		 array( 
+		// 			 "from" => "whatsapp:+14155238886",	
+		// 			 "body" => $body
+		// 		 ) 
+		// );
+        $message = $this->client->messages 
+                   ->create($to, // to 
+                           array(  
+                               "messagingServiceSid" => "MG29b503ed339e53fde2f4577126614b0e",      
+                               "body" => $body 
+                            ) 
+        );
 	}
 }
