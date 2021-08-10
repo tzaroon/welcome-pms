@@ -112,7 +112,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::post('booking/get-all-users-conversation', 'ConversationController@getAllUsersConversation');
                 Route::post('booking/get-all-users-conversation-list', 'ConversationController@getAllUsersConversationList');
                 Route::post('booking/get-all-conversation', 'ConversationController@getAllConversation');
-                Route::post('booking/send-message', 'ConversationController@sendReplyMessage');
+                Route::post('booking/send-message', 'ConversationController@sendMessage');
                 Route::resource('booking-restrictions', 'RestrictionsController');
                 Route::get('bookings/{booking}/products', 'BookingsController@loadProductPrices');
                 Route::get('bookings/{booking}/load-rooms', 'BookingsController@loadRooms');

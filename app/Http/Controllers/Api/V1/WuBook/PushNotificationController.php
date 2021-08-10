@@ -220,7 +220,7 @@ class PushNotificationController extends Controller
         // $message = "Thank you for your message. I will reply you back!";
         // $this->whatsApp->sendMessage('whatsapp:'.$messageFrom, $message);
 
-        dd("message status: ".$messageStatus.", message body: ".$messageBody.", message from: ".$messageFrom.", message medium: ".$messageMedium);
+        // dd("message status: ".$messageStatus.", message body: ".$messageBody.", message from: ".$messageFrom.", message medium: ".$messageMedium);
         return "message status: ".$messageStatus.", message body: ".$messageBody.", message from: ".$messageFrom.", message medium: ".$messageMedium;
 
     }
