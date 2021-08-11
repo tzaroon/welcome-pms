@@ -191,6 +191,12 @@ class ConversationController extends Controller
         if (!$validator->passes()) {
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
+        
+        // $page = $postData['page'];
+        // $limit = $postData['limit'];
+
+        // $offset  = $page * $limit;
+        // $offset  = ($page * $limit) - 10;
 
         Conversation::where(function ($query) use ($postData, $loggedInUser) {
                         $userId = $postData['user_id'];                    
@@ -207,6 +213,7 @@ class ConversationController extends Controller
                                             ->orWhere('conversations.to_user_id', '=', $userId);
                                     })
                                     ->where('conversations.type',$postData['mode'])
+                                    // ->offset($offset)->limit($limit)
                                     ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
 
         
@@ -229,6 +236,15 @@ class ConversationController extends Controller
                         ->first();
 
         $user = User::find($postData['user_id']);
+
+        if(!$user){
+            return response()->json([
+                'conversation' => $conversation,
+                'user_info' => $userInfo,
+                'booking_info' => null,
+                'payment_info' => null
+            ]);
+        }
       
         $bookingDetails = Booking::where('bookings.booker_id',$user->booker->id)->first(); 
         
@@ -302,7 +318,7 @@ class ConversationController extends Controller
             $conversation->type = $postData['mode'];
             $conversation->save();
 
-            $this->whatsApp->sendMessage('whatsapp:'.$userPhoneNumber, $postData['message']);
+            // $this->whatsApp->sendMessage('whatsapp:'.$userPhoneNumber, $postData['message']);
 
             return response()->json([
                 'message' => 'Whatsapp message sent',
@@ -328,7 +344,7 @@ class ConversationController extends Controller
             $conversation->type = $postData['mode'];
             $conversation->save();
 
-            $this->sms->sendSmsMessage($userPhoneNumber, $postData['message']);
+            // $this->sms->sendSmsMessage($userPhoneNumber, $postData['message']);
 
             return response()->json([
                 'message' => 'SMS message sent',

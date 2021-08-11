@@ -4,12 +4,14 @@ namespace App\Notifications;
 
 class Message {
 
-    protected $whatsAppService;
-    protected $smsService;
-    protected $emailService;
+    protected $WHATSAPP;
+    protected $SMS;
+    protected $EMAIL;
 
     public function __construct($whatsAppService = NULL, $smsService = NULL, $emailService = NULL) {
-        $this->whatsAppService = $whatsAppService;
+        $this->WHATSAPP = $whatsAppService;
+        $this->SMS = $smsService;
+        $this->EMAIL = $emailService;
     }
 }
 
