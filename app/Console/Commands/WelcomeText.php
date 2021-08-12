@@ -28,7 +28,7 @@ class WelcomeText extends Command
      *
      * @var string
      */
-    protected $description = '';
+    protected $description = 'On booking, send a welcome message to the customer';
 
     /**
      * Create a new command instance.
@@ -49,32 +49,17 @@ class WelcomeText extends Command
      */
     public function handle()
     {
-        // TODO: Send welcome message
-        //* get all bookings
-        //* work with created_at col
-        //* check condition of 10 minutes gap on created_at
-        //* get user's phone number using booker id -> user_id 
-        //* send welcome mesages
-
-        //* ---------------------------------------------------
-
         $welcomeMessage = new WelcomeMessage($this->whatsappService,$this->smsService);
         $bookings = \DB::table('bookings')->get(["id","booker_id","created_at"]);
-
-        // $user = User::find($postData['user_id']);
-
-
-        // $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
+        echo Carbon::now();
 
         foreach ($bookings as $booking){
-            // $bookingDetails = Booker::where('booker.id',$booking->booker_id)->value('user_id'); 
-
             $startTime = Carbon::parse($booking->created_at);
             $endTime = Carbon::parse(Carbon::now());
 
+            //* calculate minute difference
             $startTime01 = strtotime($booking->created_at);
             $endTime01 = strtotime(Carbon::now());
-            echo Carbon::now();
 
             $totalSecondsDiff = abs($startTime01-$endTime01);
             $totalMinutesDiff = round($totalSecondsDiff/60);
@@ -87,7 +72,6 @@ class WelcomeText extends Command
             $userInfo = User::find($user->id);
         
             $bookingDetails = Booking::where('bookings.booker_id',$userInfo->booker->id)->first();
-            // $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
             $roomNames = [];
             foreach($bookingDetails->rooms as $room){
                 $roomNames[] = $room->name;
@@ -95,19 +79,18 @@ class WelcomeText extends Command
             if(count($roomNames) > 0){
                 $rooms = implode(',',$roomNames);
                 $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
-            } 
-
-            echo "\r\n---------------------------------\r\n";
-            echo "Hotel: ".$hotelName;
-            echo "\r\nName:".$user->first_name." ".$user->last_name;
-            echo "\r\nPhone Number:".$user->phone_number;      
-            echo("\r\ncreated at: ".$startTime."   \r\ncurrent time: ".$endTime);
-            echo "\r\nTotal minutes:".$totalMinutesDiff;
-            echo "\r\n---------------------------------";
-            echo "\r\n\r\n";
+            }            
 
             if($totalMinutesDiff <= 10){
-                $welcomeMessage->send($startTime, $user, $hotelName);
+                echo "\r\n---------------------------------\r\n";
+                echo "Hotel: ".$hotelName;
+                echo "\r\nName:".$user->first_name." ".$user->last_name;
+                echo "\r\nPhone Number:".$user->phone_number;      
+                echo("\r\ncreated at: ".$startTime."   \r\ncurrent time: ".$endTime);
+                echo "\r\nTotal minutes:".$totalMinutesDiff;
+                echo "\r\n---------------------------------";
+                echo "\r\n\r\n";
+                $welcomeMessage->send($user, $hotelName);
             }
         }       
     }

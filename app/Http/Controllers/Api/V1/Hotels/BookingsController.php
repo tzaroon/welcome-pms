@@ -29,6 +29,7 @@ use ttlock\TTLock;
 use App\Models\Lock;
 
 use App\Services\Twilio\WhatsAppService;
+use App\Services\Twilio\SmsService;
 
 class BookingsController extends Controller
 {
@@ -46,10 +47,13 @@ class BookingsController extends Controller
      * @var Service
      */
     protected $whatsApp;
+    protected $sms;
 
-    public function __construct(WhatsAppService $whatsApp)
+    public function __construct(WhatsAppService $whatsApp, SmsService $sms)
     {
         $this->whatsApp = $whatsApp;
+        $this->sms = $sms;
+
     }
 
 
@@ -641,8 +645,14 @@ class BookingsController extends Controller
     {
 
         $user = auth()->user();
+        // return response()->json($user);
         $postData = $request->getContent();
         $postData = json_decode($postData, true);
+        // return response()->json($postData);
+
+        $currentDate = date("Y-m-d",strtotime(Carbon::now()));
+        // return response()->json($currentDate);
+
 
         $validator = Validator::make($postData, [
             'arrivel_date' => 'required',
@@ -657,7 +667,7 @@ class BookingsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $booking = DB::transaction(function () use ($user, $postData) {
+        $booking = DB::transaction(function () use ($user, $postData, &$userInfo) {
             $booking = Booking::create([
                 'company_id' => $user->company_id,
                 'reservation_from' => array_key_exists('arrivel_date', $postData) ? $postData['arrivel_date'] : null,
@@ -693,6 +703,7 @@ class BookingsController extends Controller
                 'email' => array_key_exists('user_email', $postData) ? $postData['user_email'] : null,
                 'language_id' => $language ? $language->id : null
             ]);
+            $userInfo = User::find($bUser->id);
 
             $booker = Booker::create([
                 'company_id' => $user->company_id,
@@ -785,7 +796,25 @@ class BookingsController extends Controller
             return $booking;
         });
 
-        //-------------
+        if($currentDate == $postData['arrivel_date']){
+            $bookingDetails = Booking::where('bookings.booker_id',$userInfo->booker->id)->first(); 
+        
+            if($bookingDetails){
+                $roomNames = [];
+                foreach($bookingDetails->rooms as $room){
+                    $roomNames[] = $room->name;
+                }
+                if(count($roomNames) > 0){
+                    $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
+                }
+            }
+            // $wel = new WelcomeMessage();
+            // $wel->send($booking);
+            // $this->whatsApp->sendMessage('whatsapp:'.$postData['phone_number'], "Hi ".$postData['user_name']." ".$postData['user_sarname'].", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel [BOOKING LINK]");
+            // $this->sms->sendSmsMessage($postData['phone_number'], "Hi ".$postData['user_name']." ".$postData['user_sarname'].", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel [BOOKING LINK]");
+             
+        }
+        
 
         return response()->json(['booking' => $booking]);
     }

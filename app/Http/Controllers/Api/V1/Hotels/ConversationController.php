@@ -197,37 +197,72 @@ class ConversationController extends Controller
 
         // $offset  = $page * $limit;
         // $offset  = ($page * $limit) - 10;
+        if($postData["mode"] != "all"){
+            Conversation::where(function ($query) use ($postData, $loggedInUser) {
+                $userId = $postData['user_id'];                    
+                $query->where('conversations.from_user_id', '=', $userId)
+                    ->where('conversations.to_user_id', '=', $loggedInUser->id);
+            })->where('conversations.type',$postData['mode'])->update(['is_viewed' => 1]);
 
-        Conversation::where(function ($query) use ($postData, $loggedInUser) {
-                        $userId = $postData['user_id'];                    
-                        $query->where('conversations.from_user_id', '=', $userId)
-                            ->where('conversations.to_user_id', '=', $loggedInUser->id);
-                    })->where('conversations.type',$postData['mode'])->update(['is_viewed' => 1]);
+            $conversation = Conversation::leftjoin('contact_details', 'conversations.contact_detail_id','=','contact_details.id')
+                                        ->leftjoin('users','conversations.from_user_id','=','users.id')
+                                        ->leftjoin('users as u2','conversations.to_user_id','=','u2.id')
+                                        ->where(function ($query) use ($postData) {
+                                            $userId = $postData['user_id'];
+                                            $query->where('conversations.from_user_id', '=', $userId)
+                                                ->orWhere('conversations.to_user_id', '=', $userId);
+                                        })
+                                        ->where('conversations.type',$postData['mode'])
+                                        // ->offset($offset)->limit($limit)
+                                        ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
 
-        $conversation = Conversation::leftjoin('contact_details', 'conversations.contact_detail_id','=','contact_details.id')
-                                    ->leftjoin('users','conversations.from_user_id','=','users.id')
-                                    ->leftjoin('users as u2','conversations.to_user_id','=','u2.id')
-                                    ->where(function ($query) use ($postData) {
-                                        $userId = $postData['user_id'];
-                                        $query->where('conversations.from_user_id', '=', $userId)
-                                            ->orWhere('conversations.to_user_id', '=', $userId);
-                                    })
-                                    ->where('conversations.type',$postData['mode'])
-                                    // ->offset($offset)->limit($limit)
-                                    ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
 
-        
-        foreach($conversation as $conver){
-            $conver->time = date("h:i A",strtotime($conver->created_at));
-            $day = date("D",strtotime($conver->created_at));
-            $date = date("d M Y",strtotime($conver->created_at));
-            if($this->checkDate != $date && $this->checkDay != $day){
-                $conver->date = $date;
-                $this->checkDate = $conver->date;
-                $conver->day = $day;
-                $this->checkDay = $conver->day;
+            foreach($conversation as $conver){
+                $conver->time = date("h:i A",strtotime($conver->created_at));
+                $day = date("D",strtotime($conver->created_at));
+                $date = date("d M Y",strtotime($conver->created_at));
+                if($this->checkDate != $date && $this->checkDay != $day){
+                    $conver->date = $date;
+                    $this->checkDate = $conver->date;
+                    $conver->day = $day;
+                    $this->checkDay = $conver->day;
+                }
             }
         }
+
+        if($postData["mode"] == "all"){
+            Conversation::where(function ($query) use ($postData, $loggedInUser) {
+                $userId = $postData['user_id'];                    
+                $query->where('conversations.from_user_id', '=', $userId)
+                    ->where('conversations.to_user_id', '=', $loggedInUser->id);
+            })->update(['is_viewed' => 1]);
+
+            $conversation = Conversation::leftjoin('contact_details', 'conversations.contact_detail_id','=','contact_details.id')
+                                        ->leftjoin('users','conversations.from_user_id','=','users.id')
+                                        ->leftjoin('users as u2','conversations.to_user_id','=','u2.id')
+                                        ->where(function ($query) use ($postData) {
+                                            $userId = $postData['user_id'];
+                                            $query->where('conversations.from_user_id', '=', $userId)
+                                                ->orWhere('conversations.to_user_id', '=', $userId);
+                                        })
+                                        // ->where('conversations.type',$postData['mode'])
+                                        // ->offset($offset)->limit($limit)
+                                        ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
+
+
+            foreach($conversation as $conver){
+                $conver->time = date("h:i A",strtotime($conver->created_at));
+                $day = date("D",strtotime($conver->created_at));
+                $date = date("d M Y",strtotime($conver->created_at));
+                if($this->checkDate != $date && $this->checkDay != $day){
+                    $conver->date = $date;
+                    $this->checkDate = $conver->date;
+                    $conver->day = $day;
+                    $this->checkDay = $conver->day;
+                }
+            }
+        }
+        
 
         $userInfo = User::leftjoin('languages', 'users.language_id','=','languages.id')
                         ->leftjoin('countries','users.country_id','=','countries.id')
