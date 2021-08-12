@@ -237,7 +237,7 @@ class ConversationController extends Controller
 
         $user = User::find($postData['user_id']);
 
-        if(!$user){
+        if(!$user || !$user->booker){
             return response()->json([
                 'conversation' => $conversation,
                 'user_info' => $userInfo,
@@ -247,6 +247,7 @@ class ConversationController extends Controller
         }
       
         $bookingDetails = Booking::where('bookings.booker_id',$user->booker->id)->first(); 
+        // return $bookingDetails->rooms;
         
         if($bookingDetails){
             $roomNames = [];
@@ -264,7 +265,9 @@ class ConversationController extends Controller
             $booking = new \stdClass();
             $booking->booking = $bookingDetails->id;        
             $booking->hotel = $hotelName;
+            $booking->hotel_id = $bookingDetails->rooms[0]->roomType->hotel->id;
             $booking->room = $rooms;
+            $booking->room_id = $room->id;
             $booking->adult_count = $bookingDetails->adult_count;
             $booking->children_count = $bookingDetails->children_count;
             $booking->nights = $bookingDetails->numberOfDays;

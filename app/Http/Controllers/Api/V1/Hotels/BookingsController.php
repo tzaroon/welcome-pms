@@ -785,6 +785,8 @@ class BookingsController extends Controller
             return $booking;
         });
 
+        //-------------
+
         return response()->json(['booking' => $booking]);
     }
 
