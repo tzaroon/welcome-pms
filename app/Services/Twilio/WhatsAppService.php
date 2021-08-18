@@ -33,7 +33,6 @@ class WhatsAppService implements Service
 		$this->client = $client;
 		$this->verification_sid = $verification_sid ?: config('app.twilio.verification_sid');
 	}
-
 	public function sendMessage($to , $body)
 	{
 		$message = $this->client->messages 
