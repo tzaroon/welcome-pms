@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\WhatsApp;
+namespace App\Twilio\WhatsApp;
 
 
 interface Service

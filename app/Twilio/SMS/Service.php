@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\SMS;
+namespace App\Twilio\SMS;
 
 
 interface Service

@@ -49,7 +49,7 @@ class WelcomeText extends Command
      */
     public function handle()
     {
-        $welcomeMessage = new WelcomeMessage($this->whatsappService,$this->smsService);
+        $welcomeMessage = new WelcomeMessage($this->whatsappService,$this->smsService, 1);
         $bookings = \DB::table('bookings')->get(["id","booker_id","created_at"]);
         echo Carbon::now();
 
@@ -62,35 +62,15 @@ class WelcomeText extends Command
             $endTime01 = strtotime(Carbon::now());
 
             $totalSecondsDiff = abs($startTime01-$endTime01);
-            $totalMinutesDiff = round($totalSecondsDiff/60);
+            $totalMinutesDiff = round($totalSecondsDiff/60);            
 
-            $user = Booker::leftjoin("users","bookers.user_id","=","users.id")
-                                     ->where("bookers.id",$booking->booker_id)
-                                     ->select('users.id','users.first_name','users.last_name','users.phone_number')
-                                     ->first();
-
-            $userInfo = User::find($user->id);
-        
-            $bookingDetails = Booking::where('bookings.booker_id',$userInfo->booker->id)->first();
-            $roomNames = [];
-            foreach($bookingDetails->rooms as $room){
-                $roomNames[] = $room->name;
-            }
-            if(count($roomNames) > 0){
-                $rooms = implode(',',$roomNames);
-                $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
-            }            
-
-            if($totalMinutesDiff <= 10){
-                echo "\r\n---------------------------------\r\n";
-                echo "Hotel: ".$hotelName;
-                echo "\r\nName:".$user->first_name." ".$user->last_name;
-                echo "\r\nPhone Number:".$user->phone_number;      
+            if($totalMinutesDiff >= 10 && $totalMinutesDiff <= 20){
+                echo "\r\n---------------------------------\r\n";    
                 echo("\r\ncreated at: ".$startTime."   \r\ncurrent time: ".$endTime);
                 echo "\r\nTotal minutes:".$totalMinutesDiff;
                 echo "\r\n---------------------------------";
                 echo "\r\n\r\n";
-                $welcomeMessage->send($user, $hotelName);
+                $welcomeMessage->send($booking);
             }
         }       
     }

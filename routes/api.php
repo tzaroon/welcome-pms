@@ -109,7 +109,6 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::resource('booking/{booking}/booking-payments', 'PaymentsController');
                 Route::post('booking/{booking}/generate-payment-link', 'PaymentsController@generateLink');
                 Route::post('booking/{booking}/send-payment-link', 'PaymentsController@sendPaymentLink');
-                Route::post('booking/get-all-users-conversation', 'ConversationController@getAllUsersConversation');
                 Route::post('booking/get-all-users-conversation-list', 'ConversationController@getAllUsersConversationList');
                 Route::post('booking/get-all-conversation', 'ConversationController@getAllConversation');
                 Route::post('booking/send-message', 'ConversationController@sendMessage');

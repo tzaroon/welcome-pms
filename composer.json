@@ -30,7 +30,8 @@
         "spatie/data-transfer-object": "^2.8",
         "twilio/sdk": "^6.17",
         "tymon/jwt-auth": "^1.0",
-        "wubook/wired": "@dev"
+        "wubook/wired": "@dev",
+        "sendgrid/sendgrid": "~7"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.4",

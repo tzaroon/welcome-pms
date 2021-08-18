@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Validator;
 use DB;
+use Mail;
 use App\Models\Booker;
 use App\Models\Language;
 use ttlock\TTLock;
@@ -30,6 +31,10 @@ use App\Models\Lock;
 
 use App\Services\Twilio\WhatsAppService;
 use App\Services\Twilio\SmsService;
+use App\Mail\SendWelcomeEmail; 
+
+use App\Notifications\WelcomeMessage;
+
 
 class BookingsController extends Controller
 {
@@ -48,11 +53,13 @@ class BookingsController extends Controller
      */
     protected $whatsApp;
     protected $sms;
+    protected $email;
 
     public function __construct(WhatsAppService $whatsApp, SmsService $sms)
     {
         $this->whatsApp = $whatsApp;
         $this->sms = $sms;
+        $this->email = 1;
 
     }
 
@@ -645,14 +652,10 @@ class BookingsController extends Controller
     {
 
         $user = auth()->user();
-        // return response()->json($user);
         $postData = $request->getContent();
         $postData = json_decode($postData, true);
-        // return response()->json($postData);
 
         $currentDate = date("Y-m-d",strtotime(Carbon::now()));
-        // return response()->json($currentDate);
-
 
         $validator = Validator::make($postData, [
             'arrivel_date' => 'required',
@@ -797,22 +800,9 @@ class BookingsController extends Controller
         });
 
         if($currentDate == $postData['arrivel_date']){
-            $bookingDetails = Booking::where('bookings.booker_id',$userInfo->booker->id)->first(); 
-        
-            if($bookingDetails){
-                $roomNames = [];
-                foreach($bookingDetails->rooms as $room){
-                    $roomNames[] = $room->name;
-                }
-                if(count($roomNames) > 0){
-                    $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
-                }
-            }
-            // $wel = new WelcomeMessage();
-            // $wel->send($booking);
-            // $this->whatsApp->sendMessage('whatsapp:'.$postData['phone_number'], "Hi ".$postData['user_name']." ".$postData['user_sarname'].", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel [BOOKING LINK]");
-            // $this->sms->sendSmsMessage($postData['phone_number'], "Hi ".$postData['user_name']." ".$postData['user_sarname'].", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel [BOOKING LINK]");
-             
+            $welcomeMessage = new WelcomeMessage($this->whatsApp, $this->sms, $this->email);
+            $welcomeMessage->send($booking);
+
         }
         
 

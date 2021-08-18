@@ -5,7 +5,7 @@ namespace App\Services\Twilio;
 
 
 //use App\Verify\Result;
-use App\WhatsApp\Service;
+use App\Twilio\WhatsApp\Service;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
@@ -26,7 +26,7 @@ class WhatsAppService implements Service
 	{
 		
 		if ($client === null) {
-			$sid = getenv("TWILIO_ACCOUNT_SID"); 
+			$sid = getenv('TWILIO_ACCOUNT_SID');
 			$token = getenv("TWILIO_AUTH_TOKEN");
 			$client = new Client($sid, $token);
 		}

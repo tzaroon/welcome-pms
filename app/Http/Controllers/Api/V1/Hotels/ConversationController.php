@@ -18,6 +18,7 @@ use Validator;
 use Illuminate\Support\Facades\Storage;
 use App\Services\Twilio\WhatsAppService;
 use App\Services\Twilio\SmsService;
+use App\Mail\SendMessage; 
 
 class ConversationController extends Controller
 {
@@ -31,55 +32,7 @@ class ConversationController extends Controller
     {
         $this->whatsApp = $whatsApp;
         $this->sms = $sms;
-
     }
-
-
-    public function getAllUsersConversation(Request $request){
-        $admin = auth()->user();
-        
-        $postData = $request->getContent();  
-        $postData = json_decode($postData, true);
-
-        $validator = Validator::make($postData, [
-            'mode' => 'required',
-        ], [], [
-            'mode' => 'mode of conversation',
-        ]);
-
-        if (!$validator->passes()) {
-            return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
-        }
-
-        $conversation = Conversation::where(function ($query) {
-                                        $admin = auth()->user();
-                                        $query->where('from_user_id', '=', $admin->id)
-                                            ->orWhere('to_user_id', '=', $admin->id);
-                                    })
-                                    ->where('type',$postData['mode'])
-                                    ->get();
-
-        $ids = [];
-        foreach($conversation as $temp){
-            $ids[] = $temp['contact_detail_id'];
-        }
-        $ids = array_unique($ids);
-        
-        $chat = [];
-        foreach($ids as $id){
-            $chat[] = Conversation::leftjoin('contact_details', 'conversations.contact_detail_id','=','contact_details.id')
-                                ->leftjoin('users','conversations.from_user_id','=','users.id')
-                                ->leftjoin('users as u2','conversations.to_user_id','=','u2.id')
-                                ->where('conversations.contact_detail_id',$id)
-                                ->where('conversations.type',$postData['mode'])
-                                ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type"]);
-        }
-        
-        return response()->json([
-            'conversation' => $chat
-        ]);
-    }
-
 
     public function getAllUsersConversationList(Request $request){
         $loggedInUser = auth()->user();
@@ -329,67 +282,66 @@ class ConversationController extends Controller
 
         $postData = $request->getContent();  
         $postData = json_decode($postData, true);
-         
 
-        $userPhoneNumber = User::where('id',$postData['user_id'])->value('phone_number');
-
-        $contactInfo = ContactDetail::where('type',$postData['mode'])
-                                ->where('user_id',$postData['user_id'])
-                                ->where('contact',$userPhoneNumber)
-                                ->first(['id','contact']);
         if($postData['mode'] == 'whatsapp'){
-            if($contactInfo && $userPhoneNumber == $contactInfo->contact){
-                $contactDetail = ContactDetail::find($contactInfo->id);
-            } else {
-                $contactDetail = new ContactDetail;
-                $contactDetail->user_id = $postData['user_id'];
-                $contactDetail->contact = $userPhoneNumber;
-                $contactDetail->type = $postData['mode'];
-                $contactDetail->save();
-            }
-
-            $conversation = new Conversation;
-            $conversation->contact_detail_id = $contactDetail->id;
-            $conversation->from_user_id = $loggedInUser->id;
-            $conversation->to_user_id = $postData['user_id'];
-            $conversation->message = $postData['message'];
-            $conversation->type = $postData['mode'];
-            $conversation->save();
-
-            // $this->whatsApp->sendMessage('whatsapp:'.$userPhoneNumber, $postData['message']);
+            $user = $this->saveConversation($loggedInUser, $postData);            
+            $this->whatsApp->sendMessage('whatsapp:'.$user->phone_number, $postData['message']);
 
             return response()->json([
                 'message' => 'Whatsapp message sent',
             ]);
         }
 
+        if($postData['mode'] == 'email'){
+            $user = $this->saveConversation($loggedInUser, $postData);
+            $data = ['message' => $postData['message'], 'admin' => $loggedInUser];
+            \Mail::to($user->email)->send(new SendMessage($data));
+
+            return response()->json([
+                'message' => 'Email message sent',
+            ]);
+        }  
+
         if($postData['mode'] == 'sms'){
-            if($contactInfo && $userPhoneNumber == $contactInfo->contact){
-                $contactDetail = ContactDetail::find($contactInfo->id);
-            } else {
-                $contactDetail = new ContactDetail;
-                $contactDetail->user_id = $postData['user_id'];
-                $contactDetail->contact = $userPhoneNumber;
-                $contactDetail->type = $postData['mode'];
-                $contactDetail->save();
-            }
-
-            $conversation = new Conversation;
-            $conversation->contact_detail_id = $contactDetail->id;
-            $conversation->from_user_id = $loggedInUser->id;
-            $conversation->to_user_id = $postData['user_id'];
-            $conversation->message = $postData['message'];
-            $conversation->type = $postData['mode'];
-            $conversation->save();
-
-            // $this->sms->sendSmsMessage($userPhoneNumber, $postData['message']);
+            $user = $this->saveConversation($loggedInUser, $postData);            
+            $this->sms->sendSmsMessage($user->phone_number, $postData['message']);
 
             return response()->json([
                 'message' => 'SMS message sent',
             ]);
+        }       
+        
+    }
+
+
+    public function saveConversation($loggedInUser, $postData){
+
+        $user = User::where('id',$postData['user_id'])->first(['email','phone_number']);
+        
+        $contactInfo = ContactDetail::where('type',$postData['mode'])
+                                ->where('user_id',$postData['user_id'])
+                                ->first(['id','contact']);
+
+        if($contactInfo){
+            $contactDetail = ContactDetail::find($contactInfo->id);
+        } else {
+            $contactDetail = new ContactDetail;
+            $contactDetail->user_id = $postData['user_id'];
+            $contactDetail->contact = $postData['mode'] == 'email' ? $user->email : $user->phone_number;
+            $contactDetail->type = $postData['mode'];
+            $contactDetail->save();
         }
-        
-        
+
+        $conversation = new Conversation;
+        $conversation->contact_detail_id = $contactDetail->id;
+        $conversation->from_user_id = $loggedInUser->id;
+        $conversation->to_user_id = $postData['user_id'];
+        $conversation->message = $postData['message'];
+        $conversation->type = $postData['mode'];
+        $conversation->save();
+
+        return $user;
+
     }
 
 

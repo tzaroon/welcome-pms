@@ -5,7 +5,7 @@ namespace App\Services\Twilio;
 
 
 //use App\Verify\Result;
-use App\SMS\Service;
+use App\Twilio\SMS\Service;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
@@ -36,17 +36,10 @@ class SmsService implements Service
 
 	public function sendSmsMessage($to , $body)
 	{
-		// $message = $this->client->messages 
-		// ->create($to, 
-		// 		 array( 
-		// 			 "from" => "whatsapp:+14155238886",	
-		// 			 "body" => $body
-		// 		 ) 
-		// );
-        $message = $this->client->messages 
+		$message = $this->client->messages 
                    ->create($to, // to 
                            array(  
-                               "messagingServiceSid" => "MG29b503ed339e53fde2f4577126614b0e",      
+                               "messagingServiceSid" => getenv("TWILIO_MESSAGE_SID"),      
                                "body" => $body 
                             ) 
         );
