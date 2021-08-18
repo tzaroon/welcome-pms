@@ -20,7 +20,7 @@ class SendWelcomeEmail extends Mailable
 
     public function build()
     {
-        $address = "sajid.sajad.khan23@gmail.com";
+        $address = "info@chicstays.com";
         $subject = $this->data['subject'];
         $name = "Chicstays Mail";
 

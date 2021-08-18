@@ -20,7 +20,7 @@ class SendPaymentInfo extends Mailable
 
     public function build()
     {
-        $address = "sajid.sajad.khan23@gmail.com";
+        $address = "info@chicstays.com";
         $subject = "Payment Link";
         $name = "Chicstays Mail";
 

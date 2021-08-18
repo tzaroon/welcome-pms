@@ -20,7 +20,7 @@ class SendMessage extends Mailable
 
     public function build()
     {
-        $address = "sajid.sajad.khan23@gmail.com";
+        $address = "info@chicstays.com";
         $subject = "New Message";
         $name = "Chicstays Mail";
 
