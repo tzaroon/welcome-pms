@@ -74,7 +74,7 @@ class WelcomeMessage extends Message {
         } else {
             $contactDetail = new ContactDetail;
             $contactDetail->user_id = $user->id;
-            $contactDetail->contact = $user->phone_number;
+            $contactDetail->contact = $mode == 'email' ? $user->email : $user->phone_number;
             $contactDetail->type = $mode;
             $contactDetail->save();
         }
