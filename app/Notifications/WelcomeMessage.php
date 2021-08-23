@@ -57,7 +57,9 @@ class WelcomeMessage extends Message {
                      'email' => $user->email,
                      'hotelName' => $hotelName,
                      'message' => $message,
-                     'link' => 'http://127.0.0.1:8000/web-check-in/'.$booking->booking_unique_code,
+                    //  'link' => 'http://127.0.0.1:8000/web-check-in/'.$booking->booking_unique_code,
+                     'link' => 'https://staging.revroo.io/web-check-in/'.$booking->booking_unique_code,
+                     
                      'subject' => 'Booking Confirmation'];
             \Mail::to($user->email)->send(new SendWelcomeEmail($data));
         }
