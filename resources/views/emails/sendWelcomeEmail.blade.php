@@ -146,8 +146,10 @@
                                             <tr>
                                                 <td align="center" style="border-radius: 5px;">
                                                     <a style="background-color: #0bb7af; font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid; display: inline-block;">
-                                                        {{$data['message']}}<br>
-                                                    </a>
+                                                     Hi {{$data['first_name']}} {{$data['last_name']}} thanks to book at {{$data['hotelName']}}. Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel.<br>
+                                                    </a><br><br><br>
+                                                    <a style="background-color: #0bb7af;color: white;padding: 1em 1.5em;text-decoration: none;" href='{{$data["link"]}}' target="_blank">Click here to complete the check-in</a>
+
                                                 </td>
                                             </tr>
                                         </table>

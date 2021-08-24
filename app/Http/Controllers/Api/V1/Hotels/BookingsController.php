@@ -659,16 +659,20 @@ class BookingsController extends Controller
 
         $validator = Validator::make($postData, [
             'arrivel_date' => 'required',
-            'departure_date' => 'required'
+            'departure_date' => 'required',
+            'phone_number' => 'required|regex:/\+[0-9]{12}/|min:13|max:15'
         ], [], [
             'arrivel_date' => 'Reservation from',
-            'departure_date' => 'Reservation to'
+            'departure_date' => 'Reservation to',
+            'phone_number' => 'Phone Number'
         ]);
 
         if (!$validator->passes()) {
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
+        // return response()->json(['postData' => $postData['phone_number']]);
+
 
         $booking = DB::transaction(function () use ($user, $postData, &$userInfo) {
             $booking = Booking::create([
@@ -718,6 +722,8 @@ class BookingsController extends Controller
                 'customer_notes' =>  array_key_exists('customer_notes', $postData) ? $postData['customer_notes'] : null,
             ]);
 
+            $code = $booking->created_at.$userInfo->email;
+            $booking->booking_unique_code = md5($code);
             $booking->booker_id = $booker->id;
             $booking->save();
             $roomId = array_key_exists('default_room_id', $postData) ? $postData['default_room_id'] : null;
@@ -802,7 +808,6 @@ class BookingsController extends Controller
         if($currentDate == $postData['arrivel_date']){
             $welcomeMessage = new WelcomeMessage($this->whatsApp, $this->sms, $this->email);
             $welcomeMessage->send($booking);
-
         }
         
 
