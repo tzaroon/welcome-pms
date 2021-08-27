@@ -11,10 +11,11 @@ class Conversation extends Model
     // protected $dates = ['deleted_at'];
 
     protected $fillable = [
-        'phone_number_id',
+        'contact_detail_id',
         'from_user_id',
         'to_user_id',
         'message',
         'type',
+        'is_viewed'
     ];
 }

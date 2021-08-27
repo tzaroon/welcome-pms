@@ -27,6 +27,7 @@
         "laravel/tinker": "^2.3",
         "laravel/ui": "^2.0",
         "maatwebsite/excel": "^3.1",
+        "php-imap/php-imap": "^4.1",
         "sendgrid/sendgrid": "~7",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/data-transfer-object": "^2.8",
