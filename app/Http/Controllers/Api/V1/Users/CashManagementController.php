@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\PaymentAssignment;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Validator;
 
 class CashManagementController extends Controller
@@ -23,10 +24,8 @@ class CashManagementController extends Controller
         $postData = $request->getContent();
         $postData = json_decode($postData, true);
 
-        $payments = Payment::where('user_id', $user->id)->get();
+        $payments = Payment::where('user_id', $user->id);
         
-       
-
         $assignments = new PaymentAssignment();
 
         $assignments = $assignments->whereNested(function($query) use ($user){
@@ -37,8 +36,14 @@ class CashManagementController extends Controller
         if(array_key_exists('type', $postData)) {
             $assignments = $assignments->where('type', $postData['type']);
         }
+       
+        if(array_key_exists('start_date', $postData) && array_key_exists('end_date', $postData)) {
+            $payments = $payments
+                ->where('payment_date', '>=', $postData['start_date'])
+                ->where('payment_date', '<=',$postData['end_date']);
+        }
 
-        
+        $payments = $payments->get();
         $assignments = $assignments->with(['assignedBy', 'assignedTo'])->get();
 
         return response()->json(['payments' => $payments, 'assignments' => $assignments]);
@@ -79,7 +84,10 @@ class CashManagementController extends Controller
 
         if('user' == $postData['type'] && array_key_exists('user_id', $postData)) {
             $assignedUser = User::find($postData['user_id']);
-            if(!$user->transaction_password || !$assignedUser->transaction_password || $user->transaction_password != $postData['giving_password'] || $postData['receiving_password'] != $assignedUser->transaction_password) {
+            $givingPassword = Hash::make($postData['giving_password']);
+            $receivingPassword = Hash::make($postData['receiving_password']);
+
+            if(!$user->password || !$assignedUser->password || $user->password != $givingPassword || $receivingPassword != $assignedUser->password) {
                 return response()->json(['error' => 'Password do not match.'], 401);
             }
         }
