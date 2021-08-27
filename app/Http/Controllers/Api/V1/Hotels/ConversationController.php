@@ -54,6 +54,7 @@ class ConversationController extends Controller
             $chatUserIds = array_unique($chatUserIds);
             $chatUserIds = array_values($chatUserIds);
             $chat = [];
+            // return $chatUserIds;
             for($i = 0; $i < count($chatUserIds); $i++){
                 $chatUserId = $chatUserIds[$i];
                 $chat[$i] = Conversation::where(function ($query) use ($chatUserId){
@@ -68,8 +69,8 @@ class ConversationController extends Controller
 
                 $chat[$i]['chat_with_user_id'] = $chatUserId;
                 $user = User::find($chatUserId);
-                $chat[$i]['first_name'] = $user->first_name;
-                $chat[$i]['last_name'] = $user->last_name;
+                $chat[$i]['first_name'] = $user ? $user->first_name : null;
+                $chat[$i]['last_name'] = $user ? $user->last_name : null;
                 $chat[$i]['unread_messages'] = Conversation::where('from_user_id',$chatUserId)
                                                             ->where('to_user_id',$loggedInUser->id)
                                                             ->where('type',$postData['mode'])
@@ -111,8 +112,8 @@ class ConversationController extends Controller
 
                 $chat[$i]['chat_with_user_id'] = $chatUserId;
                 $user = User::find($chatUserId);
-                $chat[$i]['first_name'] = $user->first_name;
-                $chat[$i]['last_name'] = $user->last_name;
+                $chat[$i]['first_name'] = $user ? $user->first_name : null;
+                $chat[$i]['last_name'] = $user ? $user->last_name : null;
                 $chat[$i]['unread_messages'] = Conversation::where('from_user_id',$chatUserId)
                                                             ->where('to_user_id',$loggedInUser->id)
                                                             ->where('is_viewed',0)
@@ -167,7 +168,7 @@ class ConversationController extends Controller
                                         })
                                         ->where('conversations.type',$postData['mode'])
                                         // ->offset($offset)->limit($limit)
-                                        ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
+                                        ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.id as messageId","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
 
 
             foreach($conversation as $conver){
@@ -200,7 +201,7 @@ class ConversationController extends Controller
                                         })
                                         // ->where('conversations.type',$postData['mode'])
                                         // ->offset($offset)->limit($limit)
-                                        ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
+                                        ->get(["contact_details.contact as contactVia","users.first_name as sender","u2.first_name as receiver","conversations.id as messageId","conversations.from_user_id as senderId","conversations.to_user_id as receiverId","conversations.message","conversations.type","conversations.created_at"]);
 
 
             foreach($conversation as $conver){
