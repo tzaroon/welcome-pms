@@ -1,5 +1,5 @@
 FROM ubuntu:latest
-
+ARG sasToken
 WORKDIR /var/www/html
 RUN apt-get update && \
     apt-get install -y ant && \
@@ -36,11 +36,12 @@ RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
 # clone API Welcome Repo
 RUN git clone https://github.com/DeveloperMujtaba/welcome-pms.git
-
+# download .env file from storage account
+RUN curl https://chicstays.blob.core.windows.net/chicstays/.env.txt?${sasToken} -o .env && ls -la
+# make directory in html folder
 RUN mkdir /var/www/html/chicstays-backend
-
+# copy files to linux filesystem
 COPY . chicstays-backend/
- 
 # Permissions configurations for API
   #chown the root directory:
 RUN chown -R www-data:www-data /var/www/html/chicstays-backend
