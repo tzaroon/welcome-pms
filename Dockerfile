@@ -41,7 +41,7 @@ RUN mkdir /var/www/html/chicstays-backend
 # copy files to linux filesystem
 COPY . chicstays-backend/
 # download .env file from storage account
-RUN echo $sasurl && curl -o .env "$sasurl" && ls -la && cat .env && cp .env chicstays-backend/
+RUN echo $sasurl && curl -o .env "$sasurl"
 # Permissions configurations for API
   #chown the root directory:
 RUN chown -R www-data:www-data /var/www/html/chicstays-backend
