@@ -1,0 +1,136 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- milestone5
+- master
+- develop
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '51018b83-8b9c-421f-862a-77ab381977f4'
+  imageRepositoryProd: 'chicstays-prod'
+  imageRepositoryStaging: 'chicstays-staging'
+  imageRepositoryDev: 'chicstays-dev'
+  containerRegistry: 'chicstayscr.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: 'latest'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Prod
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+  displayName: Build and push image to prod
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'chicstayscr'
+        command: 'login'
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepositoryProd)'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+        arguments: '--build-arg sasToken=$(SASUrlProd)'
+    
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepositoryProd)'
+        command: 'push'
+        tags: '$(tag)'
+  
+    - task: CmdLine@2
+      inputs:
+        script: |
+          curl -o app.logs $(CallBackUrlProd)
+
+# ------------------ Staging Stage ----------------------------------------
+- stage: Staging
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+  displayName: Build and push image to staging
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'chicstayscr'
+        command: 'login'
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepositoryStaging)'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+        arguments: '--build-arg SASUrl=$(SASUrlStaging)'
+    
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepositoryStaging)'
+        command: 'push'
+        tags: '$(tag)'
+  
+    - task: CmdLine@2
+      inputs:
+        script: |
+          curl -o app.logs $(CallBackUrlStaging)
+
+#----------------- Dev Stage ---------------------------------------
+
+- stage: Dev
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/milestone5')
+  displayName: Build and push image to dev
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'chicstayscr'
+        command: 'login'
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepositoryDev)'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+        arguments: '--build-arg SASUrl=$(SASUrlDev)'
+    
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepositoryDev)'
+        command: 'push'
+        tags: '$(tag)'
+  
+    - task: CmdLine@2
+      inputs:
+        script: |
+          curl -o app.logs $(CallBackUrlDev)
