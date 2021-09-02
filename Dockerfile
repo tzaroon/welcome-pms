@@ -41,7 +41,7 @@ RUN mkdir /var/www/html/chicstays-backend
 # copy files to linux filesystem
 COPY . chicstays-backend/
 # download .env file from storage account
-RUN echo $sasurl && curl -o .env "$sasurl"
+RUN curl -o .env "$sasurl" && cp .env chicstays-backend/
 # Permissions configurations for API
   #chown the root directory:
 RUN chown -R www-data:www-data /var/www/html/chicstays-backend
@@ -72,4 +72,4 @@ RUN composer install
 EXPOSE 2222 80
 #run entry script
 #ENTRYPOINT ["/home/pms/init.sh"]
-CMD /etc/init.d/php7.4-fpm start && nginx -g "daemon off;" && /etc/init.d/ssh start
+CMD /etc/init.d/ssh start && /etc/init.d/php7.4-fpm start && nginx -g "daemon off;"
