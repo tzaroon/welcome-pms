@@ -3,9 +3,9 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- milestone5
+- dev
+- staging
 - master
-- develop
 
 resources:
 - repo: self
@@ -46,7 +46,7 @@ stages:
         command: 'build'
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
-        arguments: '--build-arg sasToken=$(SASUrlProd)'
+        arguments: '--build-arg sasurl=$(SASUrlProd)'
     
     - task: Docker@2
       inputs:
@@ -62,7 +62,7 @@ stages:
 
 # ------------------ Staging Stage ----------------------------------------
 - stage: Staging
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/staging')
   displayName: Build and push image to staging
   jobs:
   - job: Build
@@ -83,7 +83,7 @@ stages:
         command: 'build'
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
-        arguments: '--build-arg SASUrl=$(SASUrlStaging)'
+        arguments: '--build-arg sasurl=$(SASUrlStaging)'
     
     - task: Docker@2
       inputs:
@@ -100,7 +100,7 @@ stages:
 #----------------- Dev Stage ---------------------------------------
 
 - stage: Dev
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/milestone5')
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/dev')
   displayName: Build and push image to dev
   jobs:
   - job: Build
@@ -121,7 +121,7 @@ stages:
         command: 'build'
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
-        arguments: '--build-arg SASUrl=$(SASUrlDev)'
+        arguments: '--build-arg sasurl=$(SASUrlDev)'
     
     - task: Docker@2
       inputs:
