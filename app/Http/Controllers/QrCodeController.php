@@ -11,6 +11,13 @@ class QrCodeController extends Controller
     public function webCheckIn(Request $request, $bookingCode)
     {
       $bookingDetails = Booking::where('booking_unique_code',$bookingCode)->first();
+      $dailyPricesList = $bookingDetails->price['price_breakdown']['daily_prices'];
+      $dailyPrices = [];
+      for($i=0; $i<count($dailyPricesList); $i++){
+          $dailyPrices[$i]['date'] = date("d M Y", strtotime($dailyPricesList[$i]['date']));
+          $dailyPrices[$i]['value'] = $dailyPricesList[$i]['value'];
+      }
+      
       $roomNames = [];
       foreach($bookingDetails->rooms as $room){
           $roomNames[] = $room->name;
@@ -19,7 +26,7 @@ class QrCodeController extends Controller
           $rooms = implode(',',$roomNames);
           $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
       }
-      // dd($bookingDetails->bookingRooms[0]->room->name);
+      // dd($bookingDetails->bookingRooms);
 
       $bookingRooms = [];
       foreach($bookingDetails->bookingRooms as $bookingRoom){
@@ -32,15 +39,28 @@ class QrCodeController extends Controller
       $hotelTerms = $bookingDetails->rooms[0]->roomType->hotel->terms;
       
       $data = [
+        'booker'  => $bookingDetails->booker->user,
         'booking'  => $bookingDetails,
+        'checkIn' => date("d M Y", strtotime($bookingDetails->reservation_from)),
+        'checkOut' => date("d M Y", strtotime($bookingDetails->reservation_to)),
         'bookingRooms'  => $bookingRooms,
         'roomName'  => $bookingDetails->bookingRooms[0]->room->name,
         'hotelName'   => $hotelName,
         'guests'  => $bookingDetails->adult_count + $bookingDetails->children_count,
         'hotelImage'   => $hotelImage,
         'hotelTerms'   => $hotelTerms,
+        'dailyPrices'   => $dailyPrices,
         'bookingCode'   => $bookingCode,
       ];
       return view('qrcode')->with('data',$data);
     }
+
+
+    public function termsAndConditions(Request $request, $bookingCode){
+      $data = [
+        'bookingCode'   => $bookingCode,
+      ];
+      return view('terms')->with('data',$data);
+    }
+
 }

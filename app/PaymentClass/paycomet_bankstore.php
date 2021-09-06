@@ -609,7 +609,7 @@ class Paycomet_Bankstore
 	* @version 2.0.3 2019-08-30 se añaden parametros PSD2
 	*/
 
-	public function ExecutePurchaseUrl($transreference, $amount, $currency, $lang = "ES", $description = false, $secure3d = false, $scoring = null, $urlOk = null, $urlKo = null, $merchant_data = null, $merchant_description = null, $sca_exception = null, $trx_type = null, $scrow_targets = null)
+	public function ExecutePurchaseUrl($transreference, $amount, $currency, $lang = "ES", $description = false, $secure3d = true, $scoring = null, $urlOk = null, $urlKo = null, $merchant_data = null, $merchant_description = null, $sca_exception = null, $trx_type = null, $scrow_targets = null)
 	{
 		$pretest = array();
 
