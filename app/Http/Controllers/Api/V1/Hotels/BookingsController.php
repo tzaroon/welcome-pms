@@ -1508,15 +1508,15 @@ class BookingsController extends Controller
         if (array_key_exists('booking_room_id', $postData)) {
 
             $bookingRoom = BookingHasRoom::where('id', $postData['booking_room_id'])->first();
-            $ttlock = new \ttlock\TTLock('384e4f2af4204245b9b81188c2ff5412', 'cc7fd08994b9f233241308d6a7cb82c6');
-            $token = $ttlock->oauth2->token('+34615967283', 'h1251664', '');
-            $ttlock->passcode->setAccessToken($token['access_token']);
+            $ttlockApi = new \ttlock\TTLock('384e4f2af4204245b9b81188c2ff5412', 'cc7fd08994b9f233241308d6a7cb82c6');
+            $token = $ttlockApi->oauth2->token('+34615967283', 'Rp210FZD1F', '');
+            $ttlockApi->passcode->setAccessToken($token['access_token']);
             $bookerUser = $bookingRoom->booking->booker->user;
             $hotel = $bookingRoom->rateType->roomType->hotel;
             if ($bookingRoom->room->lock_id) {
                 $ttLock = Lock::find($bookingRoom->room->lock_id);
                 $code = rand(1000, 9999);
-                $ttlock->passcode->add($ttLock->lock_id, $code, strtotime($postData['reservation_from_dt']) . '000', strtotime($postData['reservation_to_dt']) . '000', 1, time() . '000');
+                $ttlockApi->passcode->add($ttLock->lock_id, $code, strtotime($postData['reservation_from_dt']) . '000', strtotime($postData['reservation_to_dt']) . '000', 1, time() . '000');
                 $bookingRoom->ttlock_pin = $code;
                 $bookingRoom->save();
 
