@@ -16,8 +16,8 @@ use App\Models\Conversation;
 use DB;
 use Validator;
 use Illuminate\Support\Facades\Storage;
-use App\Services\Twilio\WhatsAppService;
-use App\Services\Twilio\SmsService;
+use App\Services\MessageBird\WhatsappService;
+use App\Services\MessageBird\SmsService;
 use App\Mail\SendMessage; 
 
 class ConversationController extends Controller
@@ -28,7 +28,7 @@ class ConversationController extends Controller
     protected $checkDate = "000";
     protected $checkDay = "XXX";
 
-    public function __construct(WhatsAppService $whatsApp,SmsService $sms)
+    public function __construct(WhatsappService $whatsApp,SmsService $sms)
     {
         $this->whatsApp = $whatsApp;
         $this->sms = $sms;
@@ -285,8 +285,9 @@ class ConversationController extends Controller
         $postData = json_decode($postData, true);
 
         if($postData['mode'] == 'whatsapp'){
-            $user = $this->saveConversation($loggedInUser, $postData);            
-            $this->whatsApp->sendMessage('whatsapp:'.$user->phone_number, $postData['message']);
+            $user = $this->saveConversation($loggedInUser, $postData);
+            $userPhoneNumber = str_replace("+","",$user->phone_number);          
+            $this->whatsApp->sendMessage($userPhoneNumber, $postData['message']);
 
             return response()->json([
                 'message' => 'Whatsapp message sent',

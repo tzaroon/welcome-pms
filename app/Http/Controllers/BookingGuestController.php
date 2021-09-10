@@ -18,6 +18,9 @@ use File;
 use DB;
 use Image;
 
+use App\PaymentClass\paycomet_bankstore;
+
+
 
 class BookingGuestController extends Controller
 {
@@ -51,8 +54,6 @@ class BookingGuestController extends Controller
         'totalGuests'  => $bookingDetails->adult_count + $bookingDetails->children_count,
         'bookingCode'   => $bookingCode,
       ];
-      // dd($bookingDetails->guests->toArray());
-      // dd($data);
       return view('guests')->with('data',$data);
     }
 
@@ -394,7 +395,7 @@ class BookingGuestController extends Controller
 
     //*------------------------------------------------------------------------
 
-    public function makePayment(Request $request, $bookingCode){
+    public function paymentDetails(Request $request, $bookingCode){
 
       $bookingDetails = Booking::where('booking_unique_code',$bookingCode)->first();
       $dailyPricesList = $bookingDetails->price['price_breakdown']['daily_prices'];
@@ -411,6 +412,33 @@ class BookingGuestController extends Controller
         'dailyPrices' => $dailyPrices,
       ];
       return view('payment')->with('data',$data);
+    }
+
+
+    public function makePayment(Request $request, $bookingCode){
+      // return $request;
+      $bookingDetails = Booking::where('booking_unique_code',$bookingCode)->first();
+      // dd($bookingDetails);
+
+      $merchantCode	= "h893x7h4";
+      $password		= "y56mk9r2hxwjn7zhtdwu";
+      $terminal		= "31999";
+      $jetid			= NULL; // Optional
+
+      $paycomet = new Paycomet_Bankstore($merchantCode, $terminal, $password, $jetid);
+      $amount = $bookingDetails->price['calendar_price']['total'];
+      $description = "totalAdults: ".$bookingDetails->totalAdults.", totalChildrens: ".$bookingDetails->totalChildrens;
+
+      // get payment link
+      $response = $paycomet->ExecutePurchaseUrl($bookingDetails->id, $amount, "EUR", "EN", $description, true);
+      return response()->json($response);
+
+      if ($response->RESULT == "OK") {
+          return response()->json(['paymentLink' => $response->URL_REDIRECT]);
+      } else {
+          return response()->json(['errors' => ['paymentLink' => ['Payment link is not generated!']]]);
+      }
+
     }
 
 }

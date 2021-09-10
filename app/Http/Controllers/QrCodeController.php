@@ -52,13 +52,17 @@ class QrCodeController extends Controller
         'dailyPrices'   => $dailyPrices,
         'bookingCode'   => $bookingCode,
       ];
+      // dd($data);
       return view('qrcode')->with('data',$data);
     }
 
 
     public function termsAndConditions(Request $request, $bookingCode){
+      $bookingDetails = Booking::where('booking_unique_code',$bookingCode)->first();
       $data = [
-        'bookingCode'   => $bookingCode,
+        'bookingCode' => $bookingCode,
+        'hotelTerms' => htmlentities($bookingDetails->rooms[0]->roomType->hotel->terms),
+
       ];
       return view('terms')->with('data',$data);
     }

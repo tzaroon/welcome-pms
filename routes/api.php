@@ -25,10 +25,34 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::get('user-permissions', 'SessionsController@userPermissions')->name('user-permissions');
         });
 
+        Route::namespace('WebCheckIn')->name('web-check-in.')->prefix('web-check-in')->group(function () {
+            Route::get('{bookingCode}', 'WebCheckInController@webCheckIn');
+            Route::get('{bookingCode}/terms-and-conditions', 'WebCheckInController@termsAndConditions');
+
+            Route::get('{bookingCode}/guest-list', 'WebCheckInController@guestList');
+            Route::get('{bookingCode}/get-booker/{userId}', 'WebCheckInController@getBookerDetails');
+            Route::get('{bookingCode}/get-guest/{guestId}', 'WebCheckInController@getGuestDetails');
+
+            Route::post('{bookingCode}/edit-guest-details', 'WebCheckInController@editGuestDetails');
+            Route::post('{bookingCode}/edit-booker-details', 'WebCheckInController@editBookerDetails');
+
+            Route::get('{bookingCode}/payment-details', 'WebCheckInController@paymentDetails');
+            Route::get('{bookingCode}/payment', 'WebCheckInController@makePayment');
+
+            Route::get('countries/list', 'WebCheckInController@countryList');
+            Route::get('state-list/{countryId}', 'WebCheckInController@stateList');
+            Route::get('{bookingCode}/rooms-list', 'WebCheckInController@roomList');
+        });
+
 
         Route::namespace('WuBook')->name('wubook.')->prefix('wubook')->group(function () {
             Route::post('push-notification', 'PushNotificationController@index')->name('push-notification');
             Route::post('receive-message', 'PushNotificationController@ReceiveMessage');
+        });
+
+        Route::namespace('Webhooks')->name('webhooks.')->prefix('webhooks')->group(function () {
+            Route::post('receive-sms-message', 'ReceiveMessageController@receiveSmsMessage');            
+            Route::post('receive-whatsapp-message', 'ReceiveMessageController@receiveWhatsappMessage');            
         });
 
         Route::middleware('auth:api')->group(function () {

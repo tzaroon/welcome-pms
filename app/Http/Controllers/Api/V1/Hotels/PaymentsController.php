@@ -364,8 +364,8 @@ class PaymentsController extends Controller
                        ", totalRooms: ".$totalRooms.", roomNames ".$roomNames;
         
         // get payment link
-        $response = $paycomet->ExecutePurchaseUrl($booking->id, $amount, "EUR", "EN", $description);
-        // return response()->json($response);
+        $response = $paycomet->ExecutePurchaseUrl($booking->id, $amount, "EUR", "EN", $description, true);
+        return response()->json($response);
 
         if ($response->RESULT == "OK") {
             return response()->json(['paymentLink' => $response->URL_REDIRECT]);

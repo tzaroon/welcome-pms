@@ -130,7 +130,7 @@
 				<div class="col-md-12">
                     @if($data["bookingDetails"]["payment_status"] == 'not-paid')
                     <p>Payment Status: {{$data["bookingDetails"]["payment_status"]}}</p>
-                    <a style="color:white;" href='/web-check-in/{{$data["bookingCode"]}}/payment' class="btn btn-success btn-lg" tabindex="-1" role="button" aria-disabled="true">Make Payment</a>
+                    <a style="color:white;" href='/web-check-in/{{$data["bookingCode"]}}/payment-details' class="btn btn-success btn-lg" tabindex="-1" role="button" aria-disabled="true">Make Payment</a>
                     @else
                     <p>Payment Status: {{$data["bookingDetails"]["payment_status"]}}</p>
                     <a href='/web-check-in/{{$data["bookingCode"]}}' class="btn btn-success btn-lg disabled" tabindex="-1" role="button" aria-disabled="true">Already Paid</a>

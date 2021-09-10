@@ -248,7 +248,7 @@
 		
 		<div class="card card-1">
 			<div class="card-body">
-				<h5 class="card-title">Bienvenido, {{$data['booker']['first_name']}} {{$data['booker']['lasst_name']}}</h5>
+				<h5 class="card-title">Bienvenido, {{$data['booker']['first_name']}} {{$data['booker']['last_name']}}</h5>
 				<p class="card-text">Aquí podrás ver información importante de tu reserva, hacer el check-in online y más.</p>
 				<hr>
 				<h5 class="card-title">Doble con baño</h5>
