@@ -29,8 +29,10 @@ use App\Models\Language;
 use ttlock\TTLock;
 use App\Models\Lock;
 
-use App\Services\Twilio\WhatsAppService;
-use App\Services\Twilio\SmsService;
+// use App\Services\Twilio\WhatsAppService;
+// use App\Services\Twilio\SmsService;
+use App\Services\MessageBird\WhatsappService;
+use App\Services\MessageBird\SmsService;
 use App\Mail\SendWelcomeEmail; 
 
 use App\Notifications\WelcomeMessage;
@@ -55,7 +57,7 @@ class BookingsController extends Controller
     protected $sms;
     protected $email;
 
-    public function __construct(WhatsAppService $whatsApp, SmsService $sms)
+    public function __construct(WhatsappService $whatsApp, SmsService $sms)
     {
         $this->whatsApp = $whatsApp;
         $this->sms = $sms;

@@ -7,8 +7,11 @@ use App\Models\Booker;
 use App\Models\Booking;
 use App\Models\ContactDetail;
 use App\Models\Conversation;
-use App\Services\Twilio\WhatsAppService;
-use App\Services\Twilio\SmsService;
+// use App\Services\Twilio\WhatsAppService;
+// use App\Services\Twilio\SmsService;
+
+use App\Services\MessageBird\WhatsappService;
+use App\Services\MessageBird\SmsService;
 use App\Mail\SendWelcomeEmail; 
 use App\Notifications\Message;
 
@@ -41,7 +44,9 @@ class WelcomeMessage extends Message {
         //* WHATSAPP:-
         if($this->WHATSAPP != null){            
             $this->saveConversation($user, $mode = 'whatsapp', $loggedInUser,$message);           
-            $this->WHATSAPP->sendMessage('whatsapp:'.$user->phone_number, $message);
+            // $this->WHATSAPP->sendMessage('whatsapp:'.$user->phone_number, $message);
+            $userPhoneNumber = str_replace("+","",$user->phone_number);          
+            $this->WHATSAPP->sendMessage($userPhoneNumber, $message);
         }
 
         //* SMS:-
