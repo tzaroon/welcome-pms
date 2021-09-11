@@ -34,7 +34,7 @@ class WhatsappService implements Service
 
         try {
             $conversation = $this->client->conversations->start($message);
-            print_r($conversation);
+            // print_r($conversation);
         } catch (\Exception $e) {
             echo sprintf("%s: %s", get_class($e), $e->getMessage());
         }

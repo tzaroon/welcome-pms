@@ -29,7 +29,7 @@ class SmsService implements Service
         $message->body = $body;
         try {
             $response = $this->client->messages->create($message);
-            print_r($response);
+            // print_r($response);
         } catch (\Exception $e) {
             echo sprintf("%s: %s", get_class($e), $e->getMessage());
         }        

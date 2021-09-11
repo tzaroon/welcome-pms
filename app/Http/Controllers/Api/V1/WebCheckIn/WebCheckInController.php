@@ -60,9 +60,9 @@ class WebCheckInController extends Controller
       $terms = $bookingDetails->rooms[0]->roomType->hotel->terms;
       $terms = json_decode($terms);
       $data = [
-        'description' => $terms->description,
-        'information' => $terms->information,
-        'tnc' => $terms->tnc,
+        'description' => isset($terms->description) ? $terms->description : null,
+        'information' => isset($terms->information) ? $terms->information : null,
+        'tnc' => isset($terms->tnc) ? $terms->tnc : null,
         'bookingCode'   => $bookingCode,
       ];
       return response()->json(['data' => $data]);
