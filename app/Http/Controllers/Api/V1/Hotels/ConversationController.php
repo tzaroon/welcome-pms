@@ -347,4 +347,18 @@ class ConversationController extends Controller
     }
 
 
+    public function deleteMessage($messageId){
+        // return $messageId;
+        $message = Conversation::where('id',$messageId)->first();
+
+        if(!$message){
+            return response()->json(['message' => 'Message not found!']);
+        }
+
+        $message->delete();
+        return response()->json(['message' => 'Message has been deleted successfully!']);
+        
+    }
+
+
 }
