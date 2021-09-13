@@ -30,4 +30,6 @@ Route::get('/web-check-in/{bookingCode}/add-guest', [BookingGuestController::cla
 Route::post('/web-check-in/{bookingCode}/add-guest-details', [BookingGuestController::class, 'addGuestDetails']);
 Route::post('/web-check-in/{bookingCode}/add-booker-details', [BookingGuestController::class, 'addBookerDetails']);
 
+Route::get('/web-check-in/{bookingCode}/payment-details', [BookingGuestController::class, 'paymentDetails']);
 Route::get('/web-check-in/{bookingCode}/payment', [BookingGuestController::class, 'makePayment']);
+

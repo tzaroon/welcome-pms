@@ -29,8 +29,10 @@ use App\Models\Language;
 use ttlock\TTLock;
 use App\Models\Lock;
 
-use App\Services\Twilio\WhatsAppService;
-use App\Services\Twilio\SmsService;
+// use App\Services\Twilio\WhatsAppService;
+// use App\Services\Twilio\SmsService;
+use App\Services\MessageBird\WhatsappService;
+use App\Services\MessageBird\SmsService;
 use App\Mail\SendWelcomeEmail; 
 
 use App\Notifications\WelcomeMessage;
@@ -55,7 +57,7 @@ class BookingsController extends Controller
     protected $sms;
     protected $email;
 
-    public function __construct(WhatsAppService $whatsApp, SmsService $sms)
+    public function __construct(WhatsappService $whatsApp, SmsService $sms)
     {
         $this->whatsApp = $whatsApp;
         $this->sms = $sms;
@@ -660,7 +662,7 @@ class BookingsController extends Controller
         $validator = Validator::make($postData, [
             'arrivel_date' => 'required',
             'departure_date' => 'required',
-            'phone_number' => 'required|regex:/\+[0-9]{12}/|min:2|max:15'
+            'phone_number' => 'required'
         ], [], [
             'arrivel_date' => 'Reservation from',
             'departure_date' => 'Reservation to',
@@ -1524,7 +1526,7 @@ class BookingsController extends Controller
 
                 if (array_key_exists('send_key_via_whatsApp', $postData)) {
 
-                    $this->whatsApp->sendMessage('whatsapp:+917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
+                    $this->whatsApp->sendMessage('917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
                 }
                 if (array_key_exists('send_key_via_sms', $postData)) {
 

@@ -96,7 +96,8 @@
 				
 				<div class="row mt-5">	
 					<div class="col-md-12 col-12">
-						<button class="btn btn-info pay_btn" style="width:100%" type="button">Pay</button>
+						<!-- <button class="btn btn-info pay_btn" style="width:100%" type="button">Pay</button> -->
+						<a class="btn btn-info" href='/web-check-in/{{$data["bookingCode"]}}/payment' style="width:100%" role="button">Pay</a>
 					</div>
 				</div>
 			</div>
