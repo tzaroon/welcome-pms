@@ -353,9 +353,14 @@ class PaymentsController extends Controller
         $number = number_format($postData['amount'], 2, '.', '');
         $amount = $number * 100;
 
-        $merchantCode	= "h893x7h4";
+       /*  $merchantCode	= "h893x7h4";
         $password		= "y56mk9r2hxwjn7zhtdwu";
         $terminal		= "31999";
+        $jetid			= NULL; // Optional */
+
+        $merchantCode	= "sqaqk9yv";
+        $password		= "smmpb5e5jts96kk2zzum";
+        $terminal		= "29978";
         $jetid			= NULL; // Optional
 
         $paycomet = new Paycomet_Bankstore($merchantCode, $terminal, $password, $jetid);

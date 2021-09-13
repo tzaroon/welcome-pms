@@ -660,7 +660,7 @@ class BookingsController extends Controller
         $validator = Validator::make($postData, [
             'arrivel_date' => 'required',
             'departure_date' => 'required',
-            'phone_number' => 'required|regex:/\+[0-9]{12}/|min:13|max:15'
+            'phone_number' => 'required|regex:/\+[0-9]{12}/|min:2|max:15'
         ], [], [
             'arrivel_date' => 'Reservation from',
             'departure_date' => 'Reservation to',
