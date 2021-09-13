@@ -38,8 +38,8 @@ class WelcomeMessage extends Message {
             $hotelName = $bookingDetails->rooms[0]->roomType->hotel->property;
         }
 
-        // $message = "Hi ".$user->first_name." ".$user->last_name.", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel - https://chicstays-b-dev.azurewebsites.net/api/v1/web-check-in/".$booking->booking_unique_code;
-            $message = "Hi ".$user->first_name." ".$user->last_name.", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel - http://127.0.0.1:8000/api/v1/web-check-in/".$booking->booking_unique_code;
+        $message = "Hi ".$user->first_name." ".$user->last_name.", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel - https://chicstays-b-dev.azurewebsites.net/api/v1/web-check-in/".$booking->booking_unique_code;
+            // $message = "Hi ".$user->first_name." ".$user->last_name.", thanks to book at ".$hotelName.". Please, fill in the form with the details of the guests in order to complete the check-in online and receive your code to access the hotel - http://127.0.0.1:8000/api/v1/web-check-in/".$booking->booking_unique_code;
 
         //* WHATSAPP:-
         if($this->WHATSAPP != null){            
@@ -62,8 +62,8 @@ class WelcomeMessage extends Message {
                      'email' => $user->email,
                      'hotelName' => $hotelName,
                      'message' => $message,
-                     'link' => 'http://127.0.0.1:8000/api/v1/web-check-in/'.$booking->booking_unique_code,
-                    //  'link' => 'https://chicstays-b-dev.azurewebsites.net/api/v1/web-check-in/'.$booking->booking_unique_code,
+                    //  'link' => 'http://127.0.0.1:8000/api/v1/web-check-in/'.$booking->booking_unique_code,
+                     'link' => 'https://chicstays-b-dev.azurewebsites.net/api/v1/web-check-in/'.$booking->booking_unique_code,
                      
                      'subject' => 'Booking Confirmation'];
             \Mail::to($user->email)->send(new SendWelcomeEmail($data));
