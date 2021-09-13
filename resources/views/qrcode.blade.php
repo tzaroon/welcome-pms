@@ -237,7 +237,7 @@
 </style>
 
 <div class="container" style="padding-top: 20px;margin: 0;width: 100%;max-width: 100% !important;">
-	<h4>Casa Boutique Barcelona</h4>
+	<h4>{{$data['hotelName']}} Barcelona</h4>
 	<div class="row">
 		<div class="owl-carousel owl-theme">
 			<div> <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTF8fGhvdGVsJTIwcm9vbXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80" class="slide_image"> </div>

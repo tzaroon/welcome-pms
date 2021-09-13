@@ -15,14 +15,16 @@ class WhatsappService implements Service
 	public function __construct($client = null)
 	{		
 		if ($client === null) {
-            $client = new \MessageBird\Client('egKa6rlwNfAyHis6Qv2NVfWec', null, [\MessageBird\Client::ENABLE_CONVERSATIONSAPI_WHATSAPP_SANDBOX]);
+            // $client = new \MessageBird\Client('egKa6rlwNfAyHis6Qv2NVfWec', null, [\MessageBird\Client::ENABLE_CONVERSATIONSAPI_WHATSAPP_SANDBOX]);
+            $client = new \MessageBird\Client('egKa6rlwNfAyHis6Qv2NVfWec');
 		}
 
 		$this->client = $client;
     }
 
 	public function sendMessage($to , $body)
-	{
+	{   
+        // return $to;
         $content = new \MessageBird\Objects\Conversation\Content();
         $content->text = $body;
 
@@ -34,9 +36,9 @@ class WhatsappService implements Service
 
         try {
             $conversation = $this->client->conversations->start($message);
-            // print_r($conversation);
+            // print_r ($conversation);
         } catch (\Exception $e) {
-            echo sprintf("%s: %s", get_class($e), $e->getMessage());
+            echo sprintf("%s: %s", "whatsapp exception: ".get_class($e), $e->getMessage());
         }
 	}
 }

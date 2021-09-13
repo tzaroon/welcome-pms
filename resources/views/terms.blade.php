@@ -21,7 +21,6 @@ h4{
 	padding: 30px 3%;
 }
 </style>
-{{$data['hotelTerms']}}
 <div class="container" style="max-width: 100% !important;">
 		<div class="row information_title">
 			<div class="col-md-12">
