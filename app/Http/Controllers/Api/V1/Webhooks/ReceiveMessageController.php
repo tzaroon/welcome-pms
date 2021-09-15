@@ -24,12 +24,13 @@ class ReceiveMessageController extends Controller
         $senderNumber = $request->originator;
         $receiverNumber = $request->recipient;
         $messageTime = $request->currentTime;
-        Storage::put('sms'.$senderNumber.$messageTime.'.txt', "sender: ".$senderNumber."\nreceiver: ".$receiverNumber."\nmessageTime: ".$messageTime."\nbody: ".$body."\nincoming message: ".$incomingMessage."\npayload: ".$payload);
+        // Storage::put('sms'.$senderNumber.$messageTime.'.txt', "sender: ".$senderNumber."\nreceiver: ".$receiverNumber."\nmessageTime: ".$messageTime."\nbody: ".$body."\nincoming message: ".$incomingMessage."\npayload: ".$payload);
 
         $messageFrom = substr($senderNumber,5); //9450196
         $contactDetail =  ContactDetail::query()
                                     ->where('contact', 'LIKE', "%{$messageFrom}") 
-                                    ->Where('type','sms') 
+                                    ->Where('type','sms')
+                                    ->orderBy('id', 'DESC')
                                     ->first();
 
         $conversation = new Conversation;
@@ -61,10 +62,11 @@ class ReceiveMessageController extends Controller
                                         ->where(function ($query) use($messageFrom, $contactMSISDN) {
                                             $query->where('contact',$messageFrom)
                                                 ->orWhere('contact',$contactMSISDN);}) 
-                                        ->Where('type','whatsapp') 
+                                        ->Where('type','whatsapp')
+                                        ->orderBy('id', 'DESC')
                                         ->first();
             // return $contactDetail;
-            Storage::put('whatsapp'.$messageCreated.'.txt',"\nmessageMSISDN: ".$contactMSISDN."\nmessageCreated: ".$messageCreated."\nmessagePlatform: ".$messagePlatform."\nmessageTo: ".$messageTo."\nmessageFrom: ".$messageFrom."\nmessageStatus: ".$messageStatus."\nmessage: ".$message."\n\n\nresponse: ".$response);
+            // Storage::put('whatsapp'.$messageCreated.'.txt',"\nmessageMSISDN: ".$contactMSISDN."\nmessageCreated: ".$messageCreated."\nmessagePlatform: ".$messagePlatform."\nmessageTo: ".$messageTo."\nmessageFrom: ".$messageFrom."\nmessageStatus: ".$messageStatus."\nmessage: ".$message."\n\n\nresponse: ".$response);
             
             $conversation = new Conversation;
             $conversation->contact_detail_id = $contactDetail->id;
