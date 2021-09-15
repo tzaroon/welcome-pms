@@ -74,13 +74,13 @@ class GenerateAndSendTtlockPin extends Command
 
                 $ttLock = Lock::find($bookingRoom->room->lock_id);
 
-                $code = rand(1000,9999);
+                $code = rand(10000000,99999999);
 
                 $ttlock->passcode->add($ttLock->lock_id, $code, strtotime($bookingRoom->booking->reservation_from), strtotime($bookingRoom->booking->reservation_to), 1, time().'000' );
                 $bookingRoom->ttlock_pin = $code;
                 $bookingRoom->save();
 
-                $this->whatsApp->sendMessage('whatsapp:+917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code '.$code.'. The address is '.$hotel->address.', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance '.$hotel->image_url.'. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
+                $this->whatsApp->sendMessage('917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code '.$code.'. The address is '.$hotel->address.', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance '.$hotel->image_url.'. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
             }
         }
         return 0;

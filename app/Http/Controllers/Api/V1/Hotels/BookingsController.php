@@ -29,11 +29,10 @@ use App\Models\Language;
 use ttlock\TTLock;
 use App\Models\Lock;
 
-// use App\Services\Twilio\WhatsAppService;
-// use App\Services\Twilio\SmsService;
 use App\Services\MessageBird\WhatsappService;
 use App\Services\MessageBird\SmsService;
-use App\Mail\SendWelcomeEmail; 
+use App\Mail\SendWelcomeEmail;
+use App\Mail\SendTTLock;
 
 use App\Notifications\WelcomeMessage;
 
@@ -1517,7 +1516,7 @@ class BookingsController extends Controller
             $hotel = $bookingRoom->rateType->roomType->hotel;
             if ($bookingRoom->room->lock_id) {
                 $ttLock = Lock::find($bookingRoom->room->lock_id);
-                $code = rand(1000, 9999);
+                $code = rand(10000000, 99999999);
                 $ttlockApi->passcode->add($ttLock->lock_id, $code, strtotime($postData['reservation_from_dt']) . '000', strtotime($postData['reservation_to_dt']) . '000', 1, time() . '000');
                 $bookingRoom->ttlock_pin = $code;
                 $bookingRoom->save();
@@ -1526,15 +1525,16 @@ class BookingsController extends Controller
 
                 if (array_key_exists('send_key_via_whatsApp', $postData)) {
 
-                    $this->whatsApp->sendMessage('917006867241', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
+                    $this->whatsApp->sendMessage('+917889450196', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
                 }
                 if (array_key_exists('send_key_via_sms', $postData)) {
 
-                    //
+                    $this->sms->sendSmsMessage('+917889450196', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
                 }
                 if (array_key_exists('send_key_via_email', $postData)) {
+                    $data = ['message' => 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta'];
 
-                    //
+                    \Mail::to('sajidsajadkhan416@gmail.com')->send(new SendTTLock($data));
                 }
             } else {
 

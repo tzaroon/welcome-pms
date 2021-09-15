@@ -15,8 +15,8 @@ use DB;
 
 
 use App\PaymentClass\paycomet_bankstore;
-use App\Services\Twilio\WhatsAppService;
-use App\Services\Twilio\SmsService;
+use App\Services\MessageBird\WhatsappService;
+use App\Services\MessageBird\SmsService;
 use App\Mail\SendPaymentInfo; 
 
 
@@ -25,7 +25,7 @@ class PaymentsController extends Controller
     protected $whatsApp;
     protected $sms;
 
-    public function __construct(WhatsAppService $whatsApp,SmsService $sms)
+    public function __construct(WhatsappService $whatsApp,SmsService $sms)
     {
         $this->whatsApp = $whatsApp;
         $this->sms = $sms;
@@ -370,7 +370,7 @@ class PaymentsController extends Controller
         
         // get payment link
         $response = $paycomet->ExecutePurchaseUrl($booking->id, $amount, "EUR", "EN", $description, true);
-        return response()->json($response);
+        // return response()->json($response);
 
         if ($response->RESULT == "OK") {
             return response()->json(['paymentLink' => $response->URL_REDIRECT]);
@@ -396,25 +396,12 @@ class PaymentsController extends Controller
         if (!$validator->passes()) {
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
-        
-        //----------------------------------------------------------------
-        $type = $postData['whatsapp'];
-        $type = array_keys($postData, $type);
-        $whatsapp = $type[0];
-
-        $type = $postData['email'];
-        $type = array_keys($postData, $type);
-        $email = $type[0];
-
-        $type = $postData['sms'];
-        $type = array_keys($postData, $type);
-        $type[0] == 'whatsapp' ? $sms = $type[1] : $sms = $type[0];
 
         $whatsappValue = ContactDetail::where("user_id",$booking->booker->user->id)->where("type","whatsapp")->first(["id","contact"]);
         $emailValue = ContactDetail::where("user_id",$booking->booker->user->id)->where("type","email")->first(["id","contact"]);
         $smsValue = ContactDetail::where("user_id",$booking->booker->user->id)->where("type","sms")->first(["id","contact"]);
-
-        DB::transaction(function () use ($booking, $postData, $admin, $whatsapp, $email, $sms, $whatsappValue, $emailValue, $smsValue, &$paymentLink) {
+        // return $smsValue;
+        DB::transaction(function () use ($booking, $postData, $admin, $whatsappValue, $emailValue, $smsValue, &$paymentLink) {
 
             if (gettype($postData['whatsapp']) != 'NULL'){
                 
@@ -425,7 +412,7 @@ class PaymentsController extends Controller
                     $contactDetail = new ContactDetail;
                     $contactDetail->user_id = $booking->booker->user->id;
                     $contactDetail->contact =  array_key_exists('whatsapp', $postData) ? $postData['whatsapp'] : null;
-                    $contactDetail->type = $whatsapp;
+                    $contactDetail->type = 'whatsapp';
                     $contactDetail->save();
                 }                
 
@@ -434,10 +421,10 @@ class PaymentsController extends Controller
                 $conversation->from_user_id = $admin->id;
                 $conversation->to_user_id = $booking->booker->user->id;
                 $conversation->message = array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null;
-                $conversation->type = $whatsapp;
+                $conversation->type = 'whatsapp';
                 $conversation->save();
 
-                $this->whatsApp->sendMessage('whatsapp:'.$contactDetail->contact, "Hi ".$booking->booker->user->first_name." ".$booking->booker->user->last_name."! Your Payment Link: ".$conversation->message);
+                $this->whatsApp->sendMessage($contactDetail->contact, "Hi ".$booking->booker->user->first_name." ".$booking->booker->user->last_name."! Your Payment Link: ".$conversation->message);
             }
 
             if (gettype($postData['email']) != 'NULL'){
@@ -448,7 +435,7 @@ class PaymentsController extends Controller
                     $contactDetail = new ContactDetail;
                     $contactDetail->user_id = $booking->booker->user->id;
                     $contactDetail->contact =  array_key_exists('email', $postData) ? $postData['email'] : null;
-                    $contactDetail->type = $email;
+                    $contactDetail->type = 'email';
                     $contactDetail->save();
                 }
 
@@ -457,7 +444,7 @@ class PaymentsController extends Controller
                 $conversation->from_user_id = $admin->id;
                 $conversation->to_user_id = $booking->booker->user->id;
                 $conversation->message = array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null;
-                $conversation->type = $email;
+                $conversation->type = 'email';
                 $conversation->save();
 
                 $data = ['first_name' => $booking->booker->user->first_name,
@@ -465,7 +452,7 @@ class PaymentsController extends Controller
                          'message' => $conversation->message,
                         ];
 
-                \Mail::to($booking->booker->user->email)->send(new SendPaymentInfo($data));
+                \Mail::to($contactDetail->contact)->send(new SendPaymentInfo($data));
             }
 
             if (gettype($postData['sms']) != 'NULL'){
@@ -476,7 +463,7 @@ class PaymentsController extends Controller
                     $contactDetail = new ContactDetail;
                     $contactDetail->user_id = $booking->booker->user->id;
                     $contactDetail->contact =  array_key_exists('sms', $postData) ? $postData['sms'] : null;
-                    $contactDetail->type = $sms;
+                    $contactDetail->type = 'sms';
                     $contactDetail->save();
                 }
 
@@ -485,10 +472,10 @@ class PaymentsController extends Controller
                 $conversation->from_user_id = $admin->id;
                 $conversation->to_user_id = $booking->booker->user->id;
                 $conversation->message = array_key_exists('payment_url', $postData) ? $postData['payment_url'] : null;
-                $conversation->type = $sms;
+                $conversation->type = 'sms';
                 $conversation->save();
 
-                $this->sms->sendSmsMessage($contactDetail->contact, "Hi ".$booking->booker->user->first_name." ".$booking->booker->user->last_name."! Your Payment Link: ".$conversation->message);
+                $this->sms->sendSmsMessage($contactDetail->contact, "Hi ".$booking->booker->user->first_name." ".$booking->booker->user->last_name."!\n Your Payment Link: ".$conversation->message);
             
             }
 

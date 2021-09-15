@@ -17,6 +17,7 @@ class SmsService implements Service
 		if ($client === null) {
             $client = new \MessageBird\Client('egKa6rlwNfAyHis6Qv2NVfWec');
             // $client = new \MessageBird\Client(getenv("MESSAGE_BIRD_API_KEY"));
+            // dd(getenv("MESSAGE_BIRD_API_KEY"));
 		}
 
 		$this->client = $client;
@@ -25,9 +26,11 @@ class SmsService implements Service
 	public function sendSmsMessage($to , $body)
 	{
         $message = new \MessageBird\Objects\Message;
+        $messageTo = str_replace("+","",$to);
+
         // $message->originator = getenv("MESSAGE_BIRD_NUMBER");
         $message->originator = '+34683785295';
-        $message->recipients = [ $to ];
+        $message->recipients = [ '+'.$messageTo ];
         $message->body = $body;
         try {
             $response = $this->client->messages->create($message);

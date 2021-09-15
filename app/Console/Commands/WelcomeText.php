@@ -8,8 +8,8 @@ use App\Models\Booker;
 use App\Models\Booking;
 use Illuminate\Console\Command;
 use App\Notifications\WelcomeMessage;
-use App\Services\Twilio\WhatsAppService;
-use App\Services\Twilio\SmsService;
+use App\Services\MessageBird\WhatsappService;
+use App\Services\MessageBird\SmsService;
 
 
 class WelcomeText extends Command

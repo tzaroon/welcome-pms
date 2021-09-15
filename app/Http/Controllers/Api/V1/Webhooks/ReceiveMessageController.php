@@ -18,26 +18,25 @@ class ReceiveMessageController extends Controller
 
     public function receiveSmsMessage(Request $request){
 
-        $response = $request;
         $body = $request->body;
         $incomingMessage = $request->incomingMessage;
         $payload = $request->payload;
         $senderNumber = $request->originator;
         $receiverNumber = $request->recipient;
         $messageTime = $request->currentTime;
-        Storage::put('sms'.$senderNumber.$messageTime.'.txt', "sender: ".$senderNumber."\nreceiver: ".$receiverNumber."\nmessageTime ".$messageTime."\nbody: ".$body."\nincoming message: ".$incomingMessage."\npayload: ".$payload."\n\n\nresponse: ".$response);
+        Storage::put('sms'.$senderNumber.$messageTime.'.txt', "sender: ".$senderNumber."\nreceiver: ".$receiverNumber."\nmessageTime: ".$messageTime."\nbody: ".$body."\nincoming message: ".$incomingMessage."\npayload: ".$payload);
 
-
-        return "done";
-        $contactDetail = ContactDetail::where('contact',$messageFrom)
-                                    ->where('type',$messageMedium)
-                                    ->first(['id','user_id']);
+        $messageFrom = substr($senderNumber,5); //9450196
+        $contactDetail =  ContactDetail::query()
+                                    ->where('contact', 'LIKE', "%{$messageFrom}") 
+                                    ->Where('type','sms') 
+                                    ->first();
 
         $conversation = new Conversation;
         $conversation->contact_detail_id = $contactDetail->id;
         $conversation->from_user_id = $contactDetail->user_id;
         $conversation->to_user_id = 1;
-        $conversation->message = $messageBody;
+        $conversation->message = $body;
         $conversation->type = 'sms';
         $conversation->save();
         
@@ -47,18 +46,34 @@ class ReceiveMessageController extends Controller
     public function receiveWhatsappMessage(Request $request){
 
         $response = $request;
-        $contactId = $request->contact['id'];
-        $contactMSISDN = $request->contact['msisdn'];
-        $messageCreated = $request->message['createdDatetime'];
-        $conversationStatus = $request->conversation['status'];
-        $messagePlatform = $request->message['platform'];
-        $messageTo = $request->message['to'];
-        $messageFrom = $request->message['from'];
-        $messageStatus = $request->message['status'];
-        $message = $request->message['content']['text'];
-        Storage::put('whatsapp'.$messageCreated.'.txt',"\nmessageMSISDN: ".$contactMSISDN."\nmessageCreated: ".$messageCreated."\nmessagePlatform: ".$messagePlatform."\nmessageTo: ".$messageTo."\nmessageFrom: ".$messageFrom."\nmessageStatus: ".$messageStatus."\nmessage: ".$message."\n\n\nresponse: ".$response);
-        // Storage::put('whatsapp-'.$messageFrom.'.txt',$message,);
-        dd($response);
+        if($request->message['status'] == 'received'){
+            $contactId = $request->contact['id'];
+            $contactMSISDN = $request->contact['msisdn'];
+            $messageCreated = $request->message['createdDatetime'];
+            $conversationStatus = $request->conversation['status'];
+            $messagePlatform = $request->message['platform'];
+            $messageTo = $request->message['to'];
+            $messageFrom = $request->message['from'];
+            $messageStatus = $request->message['status'];
+            $message = $request->message['content']['text'];
+
+            $contactDetail =  ContactDetail::query()
+                                        ->where(function ($query) use($messageFrom, $contactMSISDN) {
+                                            $query->where('contact',$messageFrom)
+                                                ->orWhere('contact',$contactMSISDN);}) 
+                                        ->Where('type','whatsapp') 
+                                        ->first();
+            // return $contactDetail;
+            Storage::put('whatsapp'.$messageCreated.'.txt',"\nmessageMSISDN: ".$contactMSISDN."\nmessageCreated: ".$messageCreated."\nmessagePlatform: ".$messagePlatform."\nmessageTo: ".$messageTo."\nmessageFrom: ".$messageFrom."\nmessageStatus: ".$messageStatus."\nmessage: ".$message."\n\n\nresponse: ".$response);
+            
+            $conversation = new Conversation;
+            $conversation->contact_detail_id = $contactDetail->id;
+            $conversation->from_user_id = $contactDetail->user_id;
+            $conversation->to_user_id = 1;
+            $conversation->message = $message;
+            $conversation->type = 'whatsapp';
+            $conversation->save();
+        }        
     }
 
 

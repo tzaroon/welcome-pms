@@ -44,9 +44,7 @@ class WelcomeMessage extends Message {
         //* WHATSAPP:-
         if($this->WHATSAPP != null){            
             $this->saveConversation($user, $mode = 'whatsapp', $loggedInUser,$message);           
-            // $this->WHATSAPP->sendMessage('whatsapp:'.$user->phone_number, $message);
-            $userPhoneNumber = str_replace("+","",$user->phone_number);          
-            $this->WHATSAPP->sendMessage($userPhoneNumber, $message);
+            $this->WHATSAPP->sendMessage($user->phone_number, $message);
         }
 
         //* SMS:-

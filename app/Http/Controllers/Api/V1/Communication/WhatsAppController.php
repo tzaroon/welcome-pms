@@ -22,6 +22,6 @@ class WhatsAppController extends Controller
 
 	public function sendMessage()
 	{
-		$this->whatsApp->sendMessage('whatsapp:+917889955696', 'Your appointment is coming up on July 21 at 3PM');
+		$this->whatsApp->sendMessage('917889955696', 'Your appointment is coming up on July 21 at 3PM');
 	}
 }

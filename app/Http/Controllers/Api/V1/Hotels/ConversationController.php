@@ -286,8 +286,7 @@ class ConversationController extends Controller
 
         if($postData['mode'] == 'whatsapp'){
             $user = $this->saveConversation($loggedInUser, $postData);
-            $userPhoneNumber = str_replace("+","",$user->phone_number);          
-            $this->whatsApp->sendMessage($userPhoneNumber, $postData['message']);
+            $this->whatsApp->sendMessage($user->phone_number, $postData['message']);
 
             return response()->json([
                 'message' => 'Whatsapp message sent',

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Booking Confirmation</title>
+    <title>Payment Link</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" /><style type="text/css">
@@ -128,9 +128,9 @@
             <td bgcolor="#0bb7af" align="center" style="padding: 0px 10px 40px 10px;">
                 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
                     <tr>
-                        <td bgcolor="#ffffff" align="left" style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
-                            <p style="margin: 0;">Hi {{$data['first_name']}} {{$data['last_name']}}, we are here to send you a payment link:- 
-                                <br><br>Your Payment Link:
+                        <td bgcolor="#ffffff" align="center" style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
+                            <p style="margin: 0;">Hi {{$data['first_name']}} {{$data['last_name']}}, <br>we are here to send you a payment link:- 
+                                <br><br>Your Payment Link:<br><br></p>
                                 <a style="background-color: #0bb7af;color: white;padding: 1em 1.5em;text-decoration: none;" href="{{$data['message']}}" target="_blank">Click here to pay</a>
                         </td>
                     </tr>
