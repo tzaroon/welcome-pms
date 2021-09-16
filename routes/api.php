@@ -52,7 +52,10 @@ Route::namespace('Api')->name('api.')->group(function () {
 
         Route::namespace('Webhooks')->name('webhooks.')->prefix('webhooks')->group(function () {
             Route::post('receive-sms-message', 'ReceiveMessageController@receiveSmsMessage');            
-            Route::post('receive-whatsapp-message', 'ReceiveMessageController@receiveWhatsappMessage');            
+            Route::post('receive-whatsapp-message', 'ReceiveMessageController@receiveWhatsappMessage');          
+            Route::get('payment-successful', 'ReceiveMessageController@receivePaymentSuccessful');          
+            Route::get('payment-unsuccessful', 'ReceiveMessageController@receivePaymentUnsuccessful');          
+            Route::post('payment-response', 'ReceiveMessageController@receivePaymentResponse');          
         });
 
         Route::middleware('auth:api')->group(function () {

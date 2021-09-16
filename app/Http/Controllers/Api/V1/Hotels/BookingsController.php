@@ -1525,16 +1525,16 @@ class BookingsController extends Controller
 
                 if (array_key_exists('send_key_via_whatsApp', $postData)) {
 
-                    $this->whatsApp->sendMessage('+917889450196', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
+                    $this->whatsApp->sendMessage($bookerUser->phone_number, 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
                 }
                 if (array_key_exists('send_key_via_sms', $postData)) {
 
-                    $this->sms->sendSmsMessage('+917889450196', 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
+                    $this->sms->sendSmsMessage($bookerUser->phone_number, 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta');
                 }
                 if (array_key_exists('send_key_via_email', $postData)) {
                     $data = ['message' => 'Hey ' . $bookerUser->first_name . ' ' . $bookerUser->last_name . '! Tomorrow you have a booking at my place! Remember, to enter the hotel and the room, please use this code ' . $code . '. The address is ' . $hotel->address . ', here is the map ' . $hotel->map_url . ' and this is the picture of the entrance ' . $hotel->image_url . '. If you have any problem, please ask me or write me here. Thanks a lot and have a good trip! Marta'];
 
-                    \Mail::to('sajidsajadkhan416@gmail.com')->send(new SendTTLock($data));
+                    \Mail::to($bookerUser->email)->send(new SendTTLock($data));
                 }
             } else {
 
