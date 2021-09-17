@@ -17,6 +17,9 @@ class WhatsappService implements Service
 		if ($client === null) {
             // $client = new \MessageBird\Client('egKa6rlwNfAyHis6Qv2NVfWec', null, [\MessageBird\Client::ENABLE_CONVERSATIONSAPI_WHATSAPP_SANDBOX]);
             $client = new \MessageBird\Client('egKa6rlwNfAyHis6Qv2NVfWec');
+            // $client = new \MessageBird\Client(getenv("MESSAGE_BIRD_API_KEY"));
+            // dd(getenv("MESSAGE_BIRD_API_KEY"));
+            
 		}
 
 		$this->client = $client;
@@ -31,6 +34,7 @@ class WhatsappService implements Service
 
         $message = new \MessageBird\Objects\Conversation\Message();
         $message->channelId = '215a5ed4ec1c4b2b99abb0386036d8e2';
+        // $message->channelId = getenv("MESSAGE_BIRD_CHANNEL_ID");
         $message->content = $content;
         $message->to = $messageTo;
         $message->type = 'text';

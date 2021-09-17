@@ -17,6 +17,11 @@ class Hotel extends Model
 
         return $this->hasMany(RoomType::class);
     }
+
+	public function images() {
+
+        return $this->hasMany(HotelImage::class);
+    }
     
     public function noRefIdRoomTypes() {
 

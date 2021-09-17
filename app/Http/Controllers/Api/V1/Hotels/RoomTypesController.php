@@ -6,10 +6,12 @@ use App\User;
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
 use App\Models\RoomType;
+use App\Models\RoomTypeImage;
 use App\Models\RoomTypeDetail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
+use DB;
 
 class RoomTypesController extends Controller
 {
@@ -52,6 +54,7 @@ class RoomTypesController extends Controller
     public function edit(RoomType $roomType) : JsonResponse
     {
         $roomType->roomTypeDetails;
+        $roomType->images;
         return response()->json($roomType);
     }
 
@@ -66,9 +69,9 @@ class RoomTypesController extends Controller
     {
         $user = auth()->user();
         
-        $postData = $request->getContent();
-        
+        $postData = $request->getContent();        
         $postData = json_decode($postData, true);
+        // return response()->json($postData);
 
         $validator = Validator::make($postData, [
             'category_id' => 'required',
@@ -85,28 +88,42 @@ class RoomTypesController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $roomType = new RoomType();
-        $roomType->category_id = $postData['category_id'];
-        $roomType->company_id = $user->company_id;
-        $roomType->hotel_id = $postData['hotel_id'];
-        $roomType->max_people = $postData['max_people'];
-        $roomType->save();
+        DB::transaction(function () use ($user, $postData) {
 
-        $details = $postData['room_type_details'];
+            $roomType = new RoomType();
+            $roomType->category_id = $postData['category_id'];
+            $roomType->company_id = $user->company_id;
+            $roomType->hotel_id = $postData['hotel_id'];
+            $roomType->max_people = $postData['max_people'];
+            $roomType->save();
 
-        foreach($details as $detail) {
-            
-            $roomTypeDetail = new RoomTypeDetail();
-            $roomTypeDetail->company_id = $user->company_id;
-            $roomTypeDetail->room_type_id = $roomType->id;
-            $roomTypeDetail->language_id = $detail['language_id'];
-            $roomTypeDetail->name = $detail['name'];
-            $roomTypeDetail->description = $detail['description'];
-            $roomTypeDetail->name_singular = $detail['name_singular'];
-            $roomTypeDetail->name_plural = $detail['name_plural'];
+            $details = $postData['room_type_details'];
 
-            $roomTypeDetail->save();
-        }
+            foreach($details as $detail) {
+                
+                $roomTypeDetail = new RoomTypeDetail();
+                $roomTypeDetail->company_id = $user->company_id;
+                $roomTypeDetail->room_type_id = $roomType->id;
+                $roomTypeDetail->language_id = $detail['language_id'];
+                $roomTypeDetail->name = $detail['name'];
+                $roomTypeDetail->description = $detail['description'];
+                $roomTypeDetail->name_singular = $detail['name_singular'];
+                $roomTypeDetail->name_plural = $detail['name_plural'];
+
+                $roomTypeDetail->save();
+            }
+
+
+            foreach($postData['images'] as $image){
+
+                $roomTypeImage = new RoomTypeImage;
+                $roomTypeImage->company_id = $roomType->company_id;
+                $roomTypeImage->room_type_id = $roomType->id;
+                $roomTypeImage->image = $image;
+
+                $roomTypeImage->save();
+            }
+        });        
 
         return response()->json(['success'=> true]);
     }
@@ -123,8 +140,7 @@ class RoomTypesController extends Controller
     {
         $user = auth()->user();
         
-        $postData = $request->getContent();
-        
+        $postData = $request->getContent();        
         $postData = json_decode($postData, true);
 
         $validator = Validator::make($postData, [
@@ -146,8 +162,12 @@ class RoomTypesController extends Controller
         $details = $postData['room_type_details'];
         unset($postData['room_type_details']);
 
-        $roomType->fill($postData);
-        $roomType->update();
+        $roomType = RoomType::find($postData['id']);
+        $roomType->category_id = $postData['category_id'];
+        $roomType->company_id = $user->company_id;
+        $roomType->hotel_id = $postData['hotel_id'];
+        $roomType->max_people = $postData['max_people'];
+        $roomType->save();
 
         foreach($details as $detail) {
             $roomTypeDetail = new RoomTypeDetail();
@@ -166,6 +186,18 @@ class RoomTypesController extends Controller
 
             $roomTypeDetail->save();
         }
+
+        if(array_key_exists('images', $postData) && $postData['images']){
+            foreach($postData['images'] as $image){
+                $roomTypeImage = new RoomTypeImage;
+                $roomTypeImage->company_id = $roomType->company_id;
+                $roomTypeImage->room_type_id = $roomType->id;
+                $roomTypeImage->image = $image;
+
+                $roomTypeImage->save();
+            }
+        }
+
         return response()->json(['success'=> true]);
     }
 
@@ -183,5 +215,18 @@ class RoomTypesController extends Controller
         $roomType->delete();
 
         return response()->json(array('message' => 'Room type deleted successfully'));
+    }
+
+
+    public function deleteRoomTypeImage($roomTypeImageId){
+        
+        $roomTypeImage = RoomTypeImage::find($roomTypeImageId);
+
+        if(!$roomTypeImage){
+            return response()->json(['message' => 'Room image not found!']);
+        }
+
+        $roomTypeImage->delete();
+        return response()->json(['message' => 'Room image has been deleted successfully!']);
     }
 }

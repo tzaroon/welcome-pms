@@ -6,11 +6,13 @@ use App\Dto\BookingQuery;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
+use App\Models\HotelImage;
 use App\Models\RateType;
 use App\Models\RoomType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
+use DB;
 
 class HotelsController extends Controller
 {
@@ -42,9 +44,10 @@ class HotelsController extends Controller
     public function store(Request $request) : JsonResponse
     {
         $user = auth()->user();
+        $postData = $request->getContent();        
+        $postData = json_decode($postData, true);
+        // return response()->json($postData);
         
-        $postData = $request->all();
-
         $validator = Validator::make($postData, [
             'name' => 'required|string|max:191',
             'property' => 'required|string|max:191',
@@ -55,8 +58,6 @@ class HotelsController extends Controller
             'phone' => 'required',
             'email' => 'required|email',
             'currency_id' => 'required',
-            'logo' => 'mimes:jpeg,png|max:4096',
-            'logo_email' => 'mimes:jpeg,png|max:4096'
         ], [], [
             'state_id' => 'State',
             'country_id' => 'Country',
@@ -68,27 +69,49 @@ class HotelsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $hotel = new Hotel();
-        $hotel->fill($postData);
-        $hotel->company_id = $user->company_id;
-
-        if ($request->hasFile('logo')) {
+        DB::transaction(function () use ($user, $postData, &$hotel, &$hotelImages) {
             
-            $logoPath = $request->file('logo')->hashName();
-            $request->file('logo')->store('public');
-            $hotel->logo = $logoPath;
-        }
-        
-        if ($request->hasFile('logo_email')) {
+            $hotel = new Hotel();
+            // $hotel->fill($postData);
+            $hotel->fill([
+                'company_id' => $user->company_id,
+                'country_id' => $postData['country_id'],
+                'state_id' => $postData['state_id'],
+                'name' => $postData['name'],
+                'property' => $postData['property'],
+                'address' => $postData['address'],
+                'zip' => $postData['zip'],
+                'phone' => $postData['phone'],
+                'email' => $postData['email'],
+                'vat_number' => $postData['vat_number'],
+                'taxes' => $postData['taxes'],
+                'additional_taxes' => $postData['additional_taxes'],
+                'currency_id' => $postData['currency_id'],
+                'max_booking_hour' => $postData['max_booking_hour'],
+                'round_price' => $postData['round_price'] ? : null,
+                'cleaning_days' => $postData['cleaning_days'] ? : null,
+                'logo_email' => $postData['logo_email'],
+                'logo' => $postData['logo'],
+                'description' => $postData['description'],
+            ]);
+
+            $hotel->save();
             
-            $emailLogoPath = $request->file('logo_email')->hashName();
-            $request->file('logo_email')->store('public');
-            $hotel->logo_email = $emailLogoPath;
-        }
+            $hotelImages = [];
+            foreach($postData['images'] as $image){
+                $hotelImage = new HotelImage;
+                $hotelImage->company_id = $hotel->company_id;
+                $hotelImage->hotel_id = $hotel->id;
+                $hotelImage->image = $image;
+                $hotelImages[] = $hotelImage;
+                $hotelImage->save();
+            }
+        });
 
-        $hotel->save();
-
-        return response()->json($hotel);
+        return response()->json([
+            'hotel' => $hotel,
+            'hotelImages' => $hotelImages
+        ]);
     }
 
     /**
@@ -101,6 +124,7 @@ class HotelsController extends Controller
      */
     public function edit(Request $request, Hotel $hotel) : JsonResponse
     {
+        $hotel->images;
         return response()->json($hotel);
     }
 
@@ -114,8 +138,9 @@ class HotelsController extends Controller
     public function update(Request $request, Hotel $hotel) : JsonResponse
     {
         $user = auth()->user();
-        
-        $postData = $request->all();
+        $postData = $request->getContent();        
+        $postData = json_decode($postData, true);
+        // return response()->json($hotel);
 
         $validator = Validator::make($postData, [
             'name' => 'required|string|max:191',
@@ -127,8 +152,6 @@ class HotelsController extends Controller
             'phone' => 'required',
             'email' => 'required|email',
             'currency_id' => 'required',
-            'logo' => 'mimes:jpeg,png,jpg|max:4096',
-            'logo_email' => 'mimes:jpeg,png,jpg|max:4096'
         ], [], [
             'state_id' => 'State',
             'country_id' => 'Country',
@@ -140,24 +163,50 @@ class HotelsController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
 
-        $hotel->fill($postData);
-        $hotel->company_id = $user->company_id;
-        if ($request->hasFile('logo')) {
+        DB::transaction(function () use ($user, $postData, &$hotel, &$hotelImages) {
             
-            $logoPath = $request->file('logo')->hashName();
-            $request->file('logo')->store('public');
-            $hotel->logo = $logoPath;
-        }
-        
-        if ($request->hasFile('logo_email')) {
-            
-            $emailLogoPath = $request->file('logo_email')->hashName();
-            $request->file('logo_email')->store('public');
-            $hotel->logo_email = $emailLogoPath;
-        }
+            $hotel->fill([
+                'company_id' => $user->company_id,
+                'country_id' => $postData['country_id'],
+                'state_id' => $postData['state_id'],
+                'name' => $postData['name'],
+                'property' => $postData['property'],
+                'address' => $postData['address'],
+                'zip' => $postData['zip'],
+                'phone' => $postData['phone'],
+                'email' => $postData['email'],
+                'vat_number' => $postData['vat_number'],
+                'taxes' => $postData['taxes'],
+                'additional_taxes' => $postData['additional_taxes'],
+                'currency_id' => $postData['currency_id'],
+                'max_booking_hour' => $postData['max_booking_hour'],
+                'round_price' => $postData['round_price'] ? : null,
+                'cleaning_days' => $postData['cleaning_days'] ? : null,
+                'logo_email' => $postData['logo_email'],
+                'logo' => $postData['logo'],
+                'description' => $postData['description'],
+            ]);
 
-        $hotel->update();
-        return response()->json($hotel);
+            $hotel->save();
+            
+            if(array_key_exists('images', $postData) && $postData['images']){
+                foreach($postData['images'] as $image){
+                    $hotelImage = new HotelImage;
+                    $hotelImage->company_id = $hotel->company_id;
+                    $hotelImage->hotel_id = $hotel->id;
+                    $hotelImage->image = $image;
+                    $hotelImage->save();
+                }
+            }
+            
+        });
+
+        $hotelImages = HotelImage::where('hotel_id',$hotel->id)->get();
+
+        return response()->json([
+            'hotel' => $hotel,
+            'hotelImages' => $hotelImages
+        ]);
     }
 
     /**
@@ -245,4 +294,19 @@ class HotelsController extends Controller
 
         return response()->json($roomTypes);
     }
+
+
+    public function deleteHotelImage($hotelImageId){
+        
+        $hotelImage = HotelImage::find($hotelImageId);
+
+        if(!$hotelImage){
+            return response()->json(['message' => 'Hotel image not found!']);
+        }
+
+        $hotelImage->delete();
+        return response()->json(['message' => 'Hotel image has been deleted successfully!']);
+    }
 }
+
+
