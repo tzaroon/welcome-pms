@@ -10,6 +10,7 @@ use App\Models\Booker;
 use App\Models\Booking;
 use App\Models\Country;
 use App\Models\Language;
+use App\Models\HotelImage;
 use Illuminate\Http\Request;
 use App\Models\BookingRoomGuest;
 use Illuminate\Support\Facades\Storage;
@@ -34,6 +35,12 @@ class WebCheckInController extends Controller
           $dailyPrices[$i]['date'] = date("d M Y", strtotime($dailyPricesList[$i]['date']));
           $dailyPrices[$i]['value'] = $dailyPricesList[$i]['value'];
       }
+      $hotelId = $bookingDetails->rooms[0]->roomType->hotel->id;
+      $hotelImagesList = HotelImage::where('hotel_id',$hotelId)
+                                   ->select('id as imageId','image')
+                                   ->get();
+
+
       
       $data = [
         'user'  => $bookingDetails->booker->user->first_name." ".$bookingDetails->booker->user->last_name,
@@ -43,7 +50,7 @@ class WebCheckInController extends Controller
         'arrivalTime' => $bookingDetails->time_start,
         'totalGuests'  => $bookingDetails->adult_count + $bookingDetails->children_count,
         'hotelName' => $bookingDetails->rooms[0]->roomType->hotel->property,
-        'hotelImage' => $bookingDetails->rooms[0]->roomType->hotel->image_url,
+        'hotelImages' => $hotelImagesList,
         'hotelMap' => $bookingDetails->rooms[0]->roomType->hotel->map_url,
         'priceDetails' => $bookingDetails->price['calendar_price'],
         'dailyPrices'   => $dailyPrices,
