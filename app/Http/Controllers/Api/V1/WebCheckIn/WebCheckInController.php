@@ -207,19 +207,19 @@ class WebCheckInController extends Controller
           'gender'	=> 'required',
           'date_of_birth'	=> 'required',
           'nationality'	=> 'required',
-          'language'	=> 'required',
-          'adult'	=> 'required',
-          'children'	=> 'required',
+          // 'language'	=> 'required',
+          // 'adult'	=> 'required',
+          // 'children'	=> 'required',
           'arrival_time'	=> 'required',
           'phone_number'	=> 'required',
-          'email'	=> 'required',
+          // 'email'	=> 'required',
           'countryId'	=> 'required',
           'stateId' => 'required',
           'zipcode'	=> 'required',
           'city'	=> 'required',
           'street'	=> 'required',
-          'source'	=> 'required',
-          'segment'	=> 'required',
+          // 'source'	=> 'required',
+          // 'segment'	=> 'required',
           'booker_selfie'	=> 'required',
           'booker_signature' => 'required'
         ], [], [
@@ -254,7 +254,7 @@ class WebCheckInController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
   
-        // return $postData;
+        return $postData;
         DB::transaction(function () use ($bookingDetails, $postData) {
   
           $bookingDetails->booker->user->first_name = $postData['first_name'];
