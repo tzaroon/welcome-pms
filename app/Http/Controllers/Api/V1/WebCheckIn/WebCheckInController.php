@@ -233,19 +233,19 @@ class WebCheckInController extends Controller
           'gender'	=> 'Gender',
           'date_of_birth'	=> 'Date of Birth',
           'nationality'	=> 'Nationality',
-          'language'	=> 'Language',
-          'adult'	=> 'Adult',
-          'children'	=> 'Children',
+          // 'language'	=> 'Language',
+          // 'adult'	=> 'Adult',
+          // 'children'	=> 'Children',
           'arrival_time'	=> 'Arrival Time',
           'phone_number'	=> 'Phone Number',
-          'email'	=> 'Email',
+          // 'email'	=> 'Email',
           'countryId'	=> 'Country',
           'stateId' => 'State',
           'zipcode'	=> 'Postal Code',
           'city'	=> 'City',
           'street'	=> 'Street Name',
-          'source'	=> 'Source',
-          'segment'	=> 'Segment',
+          // 'source'	=> 'Source',
+          // 'segment'	=> 'Segment',
           'booker_selfie'	=> 'Booker Selfie',
           'booker_signature' => 'Booker Signature'
         ]);
@@ -261,10 +261,10 @@ class WebCheckInController extends Controller
           $bookingDetails->booker->user->last_name = $postData['last_name'];
           $bookingDetails->booker->user->birth_date = $postData['date_of_birth'];
           $bookingDetails->booker->user->gender = $postData['gender'];
-          $bookingDetails->booker->user->language_id = Language::where('value',$postData['language'])->value('id');
+          // $bookingDetails->booker->user->language_id = Language::where('value',$postData['language'])->value('id');
           $bookingDetails->booker->user->phone_number = $postData['phone_number'];
           $bookingDetails->booker->user->postal_code = $postData['zipcode'];
-          $bookingDetails->booker->user->email = $postData['email'];
+          // $bookingDetails->booker->user->email = $postData['email'];
           $bookingDetails->booker->user->street = $postData['street'];
           $bookingDetails->booker->user->building_no = isset($postData['building_number'])? $postData['building_number'] : $bookingDetails->booker->user->building_no;
           $bookingDetails->booker->user->floor = isset($postData['floor'])? $postData['floor'] : $bookingDetails->booker->user->floor;
@@ -283,11 +283,11 @@ class WebCheckInController extends Controller
           $bookingDetails->booker->identification_date_of_expiry = $postData['date_of_expiry'];
           $bookingDetails->booker->save();
   
-          $bookingDetails->adult_count = (int)$postData['adult'];
-          $bookingDetails->children_count = (int)$postData['children'];
+          // $bookingDetails->adult_count = (int)$postData['adult'];
+          // $bookingDetails->children_count = (int)$postData['children'];
           $bookingDetails->time_start = $postData['arrival_time'];
-          $bookingDetails->source = $postData['source'];
-          $bookingDetails->segment = $postData['segment'];
+          // $bookingDetails->source = $postData['source'];
+          // $bookingDetails->segment = $postData['segment'];
           $bookingDetails->save();
         });
   
