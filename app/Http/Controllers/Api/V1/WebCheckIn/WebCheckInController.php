@@ -254,7 +254,7 @@ class WebCheckInController extends Controller
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
   
-        return $postData;
+        // return $postData;
         DB::transaction(function () use ($bookingDetails, $postData) {
   
           $bookingDetails->booker->user->first_name = $postData['first_name'];
