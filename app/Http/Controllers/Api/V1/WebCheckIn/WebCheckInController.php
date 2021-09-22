@@ -50,7 +50,7 @@ class WebCheckInController extends Controller
   }
   
   
-  public function webCheckIn(Request $request, $bookingCode){
+    public function webCheckIn(Request $request, $bookingCode){
 
       $bookingDetails = Booking::where('booking_unique_code',$bookingCode)->first();
       $dailyPricesList = $bookingDetails->price['price_breakdown']['daily_prices'];
@@ -411,10 +411,8 @@ class WebCheckInController extends Controller
           $user->state_id = $postData['stateId'];
           $user->save();
 
-          $bookingRoomGuests = BookingRoomGuest::where('guest_id',$guestId)->first();
-          $bookingRoomGuests->booking_id = (int)$bookingDetails->id;
-          $bookingRoomGuests->room_id = (int)$postData['roomId'];
-          $bookingRoomGuests->save();
+          $bookingRoomGuest = BookingRoomGuest::firstOrNew(['room_id' => $postData['roomId'], 'booking_id' => $bookingDetails->id, 'guest_id' => $guestId]);
+          $bookingRoomGuest->save();
         });
 
         return response()->json(["message" => "Guest details has been updated successfully!"]);
