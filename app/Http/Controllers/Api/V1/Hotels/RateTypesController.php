@@ -37,6 +37,8 @@ class RateTypesController extends Controller
         $postData = $request->getContent();
         
         $postData = json_decode($postData, true);
+        // return response()->json($postData);
+        
         $details = $postData['rate_type_details'];       
         $name = $details[0]['name'];
         $roomTypeId = $postData['room_type_id'];
@@ -98,6 +100,7 @@ class RateTypesController extends Controller
             $rateType->tax_2_amount = array_key_exists('tax_2_amount', $postData) ? $postData['tax_2_amount'] : 0;
             $rateType->tax_1_percentage = array_key_exists('tax_1_percentage', $postData) ? $postData['tax_1_percentage'] : 0;
             $rateType->tax_2_percentage = array_key_exists('tax_2_percentage', $postData) ? $postData['tax_2_percentage'] : 0;
+            $rateType->vat_percentage = array_key_exists('vat_percentage', $postData) ? $postData['vat_percentage'] : 0;
 
             $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
             $rateType->apply_rate_to = array_key_exists('apply_rate_to', $postData) ? $postData['apply_rate_to'] : null;
@@ -185,8 +188,14 @@ class RateTypesController extends Controller
                     $taxes[Tax::CHILDREN_CITY_TAX]['tax_id'] = Tax::CHILDREN_CITY_TAX;
                     $taxes[Tax::CHILDREN_CITY_TAX]['percentage'] = $postData['tax_2_percentage'];                    
                 }
+                if($postData['vat_percentage']) {
+                    $taxes[Tax::VAT]['tax_id'] = Tax::VAT;
+                    $taxes[Tax::VAT]['percentage'] = $postData['vat_percentage'];                    
+                }
 
-                $product->createPrice($rateTypePrice, $taxes);
+                $isVatIncluded = array_key_exists('is_vat_included', $postData) ? $postData['is_vat_included'] : 0;
+
+                $product->createPrice($rateTypePrice, $taxes, $isVatIncluded);
                 $date = $date->addDay();
             }
 
@@ -229,9 +238,8 @@ class RateTypesController extends Controller
     {
         $user = auth()->user();
         
-        $postData = $request->getContent();
-        
-        $postData = json_decode($postData, true);       
+        $postData = $request->getContent();        
+        $postData = json_decode($postData, true);
 
         $details = $postData['rate_type_details'];       
         $name = $details[0]['name'];
@@ -287,6 +295,7 @@ class RateTypesController extends Controller
             $rateType->tax_2_amount = array_key_exists('tax_2_amount', $postData) ? $postData['tax_2_amount'] : 0;
             $rateType->tax_1_percentage = array_key_exists('tax_1_percentage', $postData) ? $postData['tax_1_percentage'] : 0;
             $rateType->tax_2_percentage = array_key_exists('tax_2_percentage', $postData) ? $postData['tax_2_percentage'] : 0;
+            $rateType->vat_percentage = array_key_exists('vat_percentage', $postData) ? $postData['vat_percentage'] : 0;
             $rateType->amount_to_add = array_key_exists('amount_to_add', $postData) ? $postData['amount_to_add'] : 0;
             $rateType->percent_to_add = array_key_exists('percent_to_add', $postData) ? $postData['percent_to_add'] : 0;
             $rateType->apply_rate_from = array_key_exists('apply_rate_from', $postData) ? $postData['apply_rate_from'] : null;
@@ -359,8 +368,14 @@ class RateTypesController extends Controller
                     $taxes[Tax::CHILDREN_CITY_TAX]['tax_id'] = Tax::CHILDREN_CITY_TAX;
                     $taxes[Tax::CHILDREN_CITY_TAX]['percentage'] = $postData['tax_2_percentage'];                    
                 }
-                
-                $product->createPrice($rateTypePrice, $taxes);
+                if($postData['vat_percentage']) {
+                    $taxes[Tax::VAT]['tax_id'] = Tax::VAT;
+                    $taxes[Tax::VAT]['percentage'] = $postData['vat_percentage'];                    
+                }
+
+                $isVatIncluded = array_key_exists('is_vat_included', $postData) ? $postData['is_vat_included'] : 0;
+             
+                $product->createPrice($rateTypePrice, $taxes, $isVatIncluded);
 
                 $dailyPrice->company_id = $user->company_id;
                 $dailyPrice->rate_type_id = $rateType->id;

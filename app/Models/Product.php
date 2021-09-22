@@ -8,7 +8,7 @@ class Product extends Model
 {
     const TYPE_ROOM = 'room';
 
-    public function createPrice($price, $taxes = []) {
+    public function createPrice($price, $taxes = [], $isVatIncluded = 0) {
 
         $productPrice = ProductPrice::firstOrNew(['company_id' => $this->company_id, 'product_id' => $this->id, 'is_active' => 1, 'price' => $price]);
 
@@ -20,7 +20,7 @@ class Product extends Model
                 $oldTaxes[] = [
                     'tax_id' => $oldTax->tax_id,
                     'amount' => $oldTax->amount,
-                    'percentage' => $oldTax->percentage
+                    'percentage' => $oldTax->percentage,
                 ];
             }
         }
@@ -30,6 +30,7 @@ class Product extends Model
             ProductPrice::where('product_id', $this->id)->update(['is_active' => 0]);
         }
         
+        $productPrice->is_vat_included = $isVatIncluded;                
         $productPrice->save();
 
         if($taxes) {

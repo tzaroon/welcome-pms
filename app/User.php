@@ -57,7 +57,7 @@ class User extends Authenticatable implements JWTSubject
         ],
         [
             'value' => self::GENDER_NONE,
-            'name' => 'Not Spacified'
+            'name' => 'Not Specified'
         ]
     ];
 

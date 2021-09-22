@@ -16,6 +16,8 @@ use App\Models\BookingRoomGuest;
 use Illuminate\Support\Facades\Storage;
 use App\PaymentClass\paycomet_bankstore;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+
 
 
 use DB;
@@ -26,7 +28,29 @@ use Validator;
 
 class WebCheckInController extends Controller
 {
-    public function webCheckIn(Request $request, $bookingCode){
+    
+  public function documentTypes(Request $request) : JsonResponse{
+
+      return response()->json(Booker::$__document_types_array);
+  }
+  
+  public function genders(Request $request) : JsonResponse{
+
+      return response()->json(User::$__gender_array);
+  }
+
+  public function sources(Request $request) : JsonResponse{
+
+      return response()->json(Booking::$__sources);
+  }
+
+  public function segments(Request $request) : JsonResponse{
+
+      return response()->json(Booking::$__segments_array);
+  }
+  
+  
+  public function webCheckIn(Request $request, $bookingCode){
 
       $bookingDetails = Booking::where('booking_unique_code',$bookingCode)->first();
       $dailyPricesList = $bookingDetails->price['price_breakdown']['daily_prices'];

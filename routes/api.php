@@ -42,6 +42,10 @@ Route::namespace('Api')->name('api.')->group(function () {
             Route::get('countries/list', 'WebCheckInController@countryList');
             Route::get('state-list/{countryId}', 'WebCheckInController@stateList');
             Route::get('{bookingCode}/rooms-list', 'WebCheckInController@roomList');
+            Route::get('document/types', 'WebCheckInController@documentTypes');
+            Route::get('gender/list', 'WebCheckInController@genders');
+            Route::get('segments/list', 'WebCheckInController@segments');
+            Route::get('sources/list', 'WebCheckInController@sources');
         });
 
 
@@ -79,6 +83,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::get('booking-segments', 'EnumsController@segments')->name('booking-segments');
                 Route::get('booking-cancel-reasons', 'EnumsController@cancelReasons');
                 Route::get('shifts', 'EnumsController@shifts');
+                Route::get('vat-percents', 'EnumsController@vatPercents');
                 Route::post('upload-id-image', 'ImageController@uploadIdImage');
             });
             Route::namespace('Settings')->name('settings.')->prefix('settings')->group(function () {

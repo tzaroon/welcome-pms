@@ -10,6 +10,7 @@ use App\Models\Extra;
 use App\Models\Guest;
 use App\Models\Payment;
 use App\Models\Shift;
+use App\Models\Tax;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -84,5 +85,10 @@ class EnumsController extends Controller
     public function shifts(Request $request) : JsonResponse
     {
         return response()->json(Shift::$__shift_types_array);
+    }
+
+    public function vatPercents(Request $request) : JsonResponse
+    {
+        return response()->json(Tax::$__vat_percents_array);
     }
 }
