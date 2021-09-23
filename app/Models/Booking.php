@@ -437,7 +437,7 @@ class Booking extends Model
         $acuualTax = array_key_exists('tax', $prices) ? $prices['tax'] : 0;
         
         $prices['price'] = $acuualPrice*90/100;
-       // $prices['tax'] =  round($acuualTax*90/100, 2);
+        // $prices['tax'] =  round($acuualTax*90/100, 2);
         $tax = $this->getCityTax()+$this->getChildrenCityTax();
         $prices['tax'] = $tax; 
         $prices['vat'] = ($acuualPrice*10/100)+($acuualTax*10/100);
@@ -505,7 +505,17 @@ class Booking extends Model
         $totalPrice = 0;
         if($this->onlyAccomudationPrices) {
             foreach($this->onlyAccomudationPrices as $price) {
-                $totalPrice += 90/100*$price->price;
+
+                if($price->is_vat_included == 1){
+                    $vatValue = $price->vat->percentage;
+                    $totalPrice += (100-$vatValue)/100*$price->price;
+                } else {
+                    $vatValue = $price->vat ? $price->vat->percentage : 0;
+                    $totalPrice += ($vatValue/100*$price->price)+$price->price;
+                }
+                
+                // if($this->productPrice)
+                // $totalPrice += 90/100*$price->price;
             }
         }
 
@@ -592,7 +602,7 @@ class Booking extends Model
         $totalVat = 0;
         if($this->onlyAccomudationPrices) {
             foreach($this->onlyAccomudationPrices as $price) {
-                $totalVat += 10/100*$price->price;
+                $totalVat += $price->vat->percentage/100*$price->price;
             }
         }
 
