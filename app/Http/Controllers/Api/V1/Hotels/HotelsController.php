@@ -92,7 +92,8 @@ class HotelsController extends Controller
                 'cleaning_days' => $postData['cleaning_days'] ? : null,
                 'logo_email' => array_key_exists('logo_email',$postData) ? $postData['logo_email'] : null,
                 'logo' => $postData['logo'],
-                'description' => $postData['description'],
+                'description' => array_key_exists('description',$postData) ?  $postData['description'] : null,
+
             ]);
 
             $hotel->save();
@@ -184,7 +185,7 @@ class HotelsController extends Controller
                 'cleaning_days' => $postData['cleaning_days'] ? : null,
                 'logo_email' => array_key_exists('logo_email',$postData) ? $postData['logo_email'] : null,
                 'logo' => $postData['logo'],
-                'description' => $postData['description'],
+                'description' => array_key_exists('description',$postData) ?  $postData['description'] : null,
             ]);
 
             $hotel->save();
