@@ -672,7 +672,7 @@ class BookingsController extends Controller
 
             return response()->json(array('errors' => $validator->errors()->getMessages()), 422);
         }
-        // return response()->json(['postData' => $postData['phone_number']]);
+        // return response()->json(['postData' => $postData['total_amount']]);
 
 
         $booking = DB::transaction(function () use ($user, $postData, &$userInfo) {
@@ -822,6 +822,7 @@ class BookingsController extends Controller
         $responseArray['booker_id'] = $booking->booker->id;
         $responseArray['reservation_from'] = $booking->reservation_from;
         $responseArray['reservation_to'] = $booking->reservation_to;
+        $responseArray['booking_code'] = $booking->booking_unique_code;
         $responseArray['status'] = $booking->status;
         $responseArray['cleaning_status'] = $booking->cleaning_status;
         $responseArray['time_start'] = $booking->time_start;
@@ -897,14 +898,17 @@ class BookingsController extends Controller
             $i = 0;
             foreach ($booking->bookingRooms as $room) {
 
-                $rooms[$i]['room_id'] = $room->room_id;
+                $rooms[$i]['room_id'] = $room->room ? $room->room_id : null;
                 $rooms[$i]['booking_room_id'] = $room->id;
                 $rooms[$i]['rate_type_id'] = $room->rate_type_id;
+                $rooms[$i]['rate_type_name'] = $room->room ? $room->rateType->detail->name : null;
                 $prices = $room->productPriceByBookingId($booking->id);
                 $allPrices[] = $prices;
                 $rooms[$i]['prices'] = $prices;
                 //$rooms[$i]['rate_types'] = $room->room->roomType->rateTypes;
                 $rooms[$i]['guests'] = array_key_exists($room->id, $keyedGuests) ? $keyedGuests[$room->id] : [];
+                $rooms[$i]['guests_count'] = array_key_exists($room->id, $keyedGuests) ? count($keyedGuests[$room->id]) : 0;
+                $rooms[$i]['room_type_name'] = $room->room ? $room->rateType->roomType->roomTypeDetail->name : null;
                 $rooms[$i]['room_name'] = $room->room ? $room->room->name : null;
                 $rooms[$i]['room_number'] = $room->room ? $room->room->room_number : null;
                 $rooms[$i]['lock_pin'] = $room->ttlock_pin;
@@ -937,7 +941,7 @@ class BookingsController extends Controller
             }
         }
 
-         $finalBreakDown = [];
+        $finalBreakDown = [];
         $totalPrice = 0;
         if ($priceBreakDown) {
             foreach ($priceBreakDown as $date => $breakDown) {

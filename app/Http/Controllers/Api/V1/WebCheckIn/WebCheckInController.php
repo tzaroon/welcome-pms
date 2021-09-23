@@ -74,6 +74,7 @@ class WebCheckInController extends Controller
         'arrivalTime' => $bookingDetails->time_start,
         'totalGuests'  => $bookingDetails->adult_count + $bookingDetails->children_count,
         'hotelName' => $bookingDetails->rooms[0]->roomType->hotel->property,
+        'hotelAddress' => $bookingDetails->rooms[0]->roomType->hotel->address,
         'hotelImages' => $hotelImagesList,
         'hotelMap' => $bookingDetails->rooms[0]->roomType->hotel->map_url,
         'priceDetails' => $bookingDetails->price['calendar_price'],
