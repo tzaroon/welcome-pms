@@ -507,7 +507,7 @@ class Booking extends Model
             foreach($this->onlyAccomudationPrices as $price) {
 
                 if($price->is_vat_included == 1){
-                    $vatValue = $price->vat->percentage;
+                    $vatValue = $price->vat ? $price->vat->percentage : 0;
                     $totalPrice += (100-$vatValue)/100*$price->price;
                 } else {
                     $vatValue = $price->vat ? $price->vat->percentage : 0;
@@ -602,7 +602,8 @@ class Booking extends Model
         $totalVat = 0;
         if($this->onlyAccomudationPrices) {
             foreach($this->onlyAccomudationPrices as $price) {
-                $totalVat += $price->vat->percentage/100*$price->price;
+                $vatValue = $price->vat ? $price->vat->percentage : 0;
+                $totalVat += $vatValue/100*$price->price;
             }
         }
 
