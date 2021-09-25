@@ -58,7 +58,7 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          curl -o app.logs $(CallBackUrlProd)
+          curl $(CallBackUrlProd) -H "" -d ""
 
 # ------------------ Staging Stage ----------------------------------------
 - stage: Staging
@@ -95,7 +95,7 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          curl -o app.logs $(CallBackUrlStaging)
+          curl $(CallBackUrlStaging) -H "" -d ""
 
 #----------------- Dev Stage ---------------------------------------
 
@@ -133,4 +133,4 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          curl -o app.logs $(CallBackUrlDev)
+          curl $(CallBackUrlDev) -H "" -d ""
