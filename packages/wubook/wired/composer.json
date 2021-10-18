@@ -1,0 +1,28 @@
+{
+    "name": "wubook/wired",
+    "description": "WuBook wired API package",
+    "license": "MTI",
+    "authors": [
+        {
+            "name": "Abrar Haq",
+            "email": "abrar.ul.haq87@gmail.com"
+        }
+    ],
+    "require": {
+        "lstrojny/fxmlrpc": "~0.13.0|~0.14.0",
+        "php-http/guzzle6-adapter": "^1.1",
+        "php-http/message": "^1.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wubook\\Wired\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Wubook\\Wired\\WubookWiredServiceProvider"
+            ]
+        }
+    }
+}
